@@ -6,11 +6,11 @@ using UnityEngine.XR.Interaction.Toolkit.Interactables;
 public class PlayerBread : MonoBehaviour
 {
     [SerializeField] private XRGrabInteractable grabInteractable;
-    [SerializeField] private float pullThresholdDistance = 0.4f;
+    [SerializeField] private float pullThresholdDistance = 0.3f; // World-space metres
     [SerializeField] private int playerIndex;
     [SerializeField] private Transform ovenParent; // Drag oven transform here for relative pos
 
-    private Vector3 initialLocalPosition;
+    private Vector3 initialWorldPosition;
     private bool isGrabbed;
     private bool hasPulled;
     private KhobzManager manager;
@@ -20,7 +20,8 @@ public class PlayerBread : MonoBehaviour
         manager = FindObjectOfType<KhobzManager>();
         if (grabInteractable == null) grabInteractable = GetComponent<XRGrabInteractable>();
         if (ovenParent == null) ovenParent = transform.parent;
-        initialLocalPosition = transform.localPosition;
+        // Use world position for reliable cross-scale detection
+        initialWorldPosition = transform.position;
     }
 
     void OnEnable()
@@ -38,7 +39,23 @@ public class PlayerBread : MonoBehaviour
     void OnSelectEntered(SelectEnterEventArgs args)
     {
         isGrabbed = true;
-        hasPulled = false; // Reset per grab if needed
+        hasPulled = false;
+    }
+
+    void Update()
+    {
+        // Check distance in world space while grabbed so detection happens in real-time
+        if (isGrabbed && !hasPulled)
+        {
+            float distancePulled = Vector3.Distance(transform.position, initialWorldPosition);
+            if (distancePulled >= pullThresholdDistance)
+            {
+                hasPulled = true;
+                if (manager != null)
+                    manager.RegisterPull(playerIndex, manager.GetCurrentGameTime());
+                Debug.Log($"[PlayerBread {playerIndex}] Pulled at world distance {distancePulled:F2}m");
+            }
+        }
     }
 
     void OnSelectExited(SelectExitEventArgs args)
@@ -48,20 +65,8 @@ public class PlayerBread : MonoBehaviour
             isGrabbed = false;
             if (!hasPulled)
             {
-                Vector3 currentLocal = transform.localPosition;
-                float distancePulled = Vector3.Distance(currentLocal, initialLocalPosition);
-                if (distancePulled >= pullThresholdDistance)
-                {
-                    hasPulled = true;
-                    manager.RegisterPull(playerIndex, manager.GetCurrentGameTime());
-                    // Visual feedback: e.g., play particle, change color
-                    // Optional: Snap bread out fully
-                }
-                else
-                {
-                    // Snap back
-                    StartCoroutine(SnapBack());
-                }
+                // Snap back to original world position
+                StartCoroutine(SnapBack());
             }
         }
     }
@@ -69,21 +74,21 @@ public class PlayerBread : MonoBehaviour
     IEnumerator SnapBack()
     {
         float duration = 0.5f;
-        Vector3 startPos = transform.localPosition;
+        Vector3 startPos = transform.position;
         float elapsed = 0f;
         while (elapsed < duration)
         {
             elapsed += Time.deltaTime;
-            transform.localPosition = Vector3.Lerp(startPos, initialLocalPosition, elapsed / duration);
+            transform.position = Vector3.Lerp(startPos, initialWorldPosition, elapsed / duration);
             yield return null;
         }
-        transform.localPosition = initialLocalPosition;
+        transform.position = initialWorldPosition;
     }
 
     public void ResetPull()
     {
         hasPulled = false;
-        transform.localPosition = initialLocalPosition;
+        transform.position = initialWorldPosition;
         isGrabbed = false;
     }
 }
