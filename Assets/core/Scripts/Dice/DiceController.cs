@@ -15,8 +15,8 @@ public class DiceControllerV2 : MonoBehaviour
     [SerializeField] private int diceNumber = 1;
     [SerializeField] private float throwForceMultiplier = 300f;
     [SerializeField] private float torqueMultiplier = 100f;
-    [SerializeField] private float settleTime = 3f;
-    [SerializeField] private float velocityThreshold = 5f;
+    [SerializeField] private float settleTime = 1f;
+    [SerializeField] private float velocityThreshold = 0.05f;
 
     [Header("Face Detection Method")]
     [Tooltip("Auto: Use raycast (recommended). Manual: Use face center transforms")]
@@ -224,11 +224,8 @@ public class DiceControllerV2 : MonoBehaviour
     {
         if (rb == null) return;
 
-        Vector3 throwVelocity = rb.linearVelocity * throwForceMultiplier;
-        Vector3 angularVelocity = Random.insideUnitSphere * torqueMultiplier;
-
-        rb.linearVelocity = throwVelocity;
-        rb.angularVelocity = angularVelocity;
+        // Don't multiply existing velocity — just add a small random spin for variety
+        rb.AddTorque(Random.insideUnitSphere * torqueMultiplier, ForceMode.Impulse);
 
         isRolling = true;
         hasResult = false;
@@ -243,6 +240,14 @@ public class DiceControllerV2 : MonoBehaviour
         yield return new WaitForSeconds(0.3f);
 
         if (hasResult) yield break;
+
+        // Confirm still stopped — bounce may have restarted movement
+        if (rb.linearVelocity.magnitude  > velocityThreshold ||
+            rb.angularVelocity.magnitude > velocityThreshold)
+        {
+            // Not settled yet — keep waiting
+            yield break;
+        }
 
         // Determine top face
         if (detectionMode == FaceDetectionMode.Auto)

@@ -361,18 +361,27 @@ public class BoardManager : MonoBehaviour
     /// </summary>
     public GameObject SpawnHouse(int tileIndex, int houseNumber)
     {
-        if (housePrefab == null || tileIndex < 0 || tileIndex >= 40) return null;
-        
+        if (housePrefab == null)
+        {
+            Debug.LogWarning("[BoardManager] housePrefab is not assigned! Assign it in the Inspector.");
+            return null;
+        }
+        if (tileIndex < 0 || tileIndex >= 40) return null;
+
         TileData tile = allTiles[tileIndex];
         if (tile == null) return null;
-        
-        // Offset each house slightly so they don't overlap
-        Vector3 offset = Vector3.right * (houseNumber * 3f);
-        Vector3 spawnPos = tile.worldPosition + offset + Vector3.up * 0.5f;
-        
+
+        // Use the TileMarker spawn point if available, otherwise fall back
+        Vector3 spawnPos;
+        TileMarker marker = GetTileMarker(tileIndex);
+        if (marker != null)
+          spawnPos = marker.GetHouseSpawnPosition(houseNumber - 1); // houseNumber is 1-based
+        else
+     spawnPos = tile.worldPosition + Vector3.right * ((houseNumber - 1) * 3f) + Vector3.up * 0.5f;
+
         GameObject house = Instantiate(housePrefab, spawnPos, Quaternion.identity);
         house.name = $"House_{tile.tileName}_{houseNumber}";
-        
+        Debug.Log($"[BoardManager] Spawned house #{houseNumber} on {tile.tileName} at {spawnPos}");
         return house;
     }
     
@@ -381,16 +390,27 @@ public class BoardManager : MonoBehaviour
     /// </summary>
     public GameObject SpawnHotel(int tileIndex)
     {
-        if (hotelPrefab == null || tileIndex < 0 || tileIndex >= 40) return null;
-        
+        if (hotelPrefab == null)
+        {
+            Debug.LogWarning("[BoardManager] hotelPrefab is not assigned! Assign it in the Inspector.");
+            return null;
+        }
+        if (tileIndex < 0 || tileIndex >= 40) return null;
+
         TileData tile = allTiles[tileIndex];
         if (tile == null) return null;
-        
-        Vector3 spawnPos = tile.worldPosition + Vector3.up * 0.5f;
-        
-        GameObject hotel = Instantiate(hotelPrefab, spawnPos, Quaternion.identity);
+
+        // Use the TileMarker spawn point if available, otherwise fall back
+      Vector3 spawnPos;
+        TileMarker marker = GetTileMarker(tileIndex);
+        if (marker != null)
+   spawnPos = marker.GetHotelSpawnPosition();
+        else
+   spawnPos = tile.worldPosition + Vector3.up * 0.5f;
+
+ GameObject hotel = Instantiate(hotelPrefab, spawnPos, Quaternion.identity);
         hotel.name = $"Hotel_{tile.tileName}";
-        
+        Debug.Log($"[BoardManager] Spawned hotel on {tile.tileName} at {spawnPos}");
         return hotel;
     }
     

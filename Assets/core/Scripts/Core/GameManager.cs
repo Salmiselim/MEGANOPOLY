@@ -46,6 +46,15 @@ public class CompleteGameManager : MonoBehaviour
         "Player 4"
     };
 
+    [Header("DEBUG — disable in final build")]
+    [SerializeField] private bool enableDebugCheats = true;
+    [SerializeField] private KeyCode cheatKey_GiveMonopoly    = KeyCode.F1;
+    [SerializeField] private KeyCode cheatKey_OpenBuildMenu   = KeyCode.F2;
+    [SerializeField] private KeyCode cheatKey_GiveMoney       = KeyCode.F3;
+    [SerializeField] private KeyCode cheatKey_TestRent        = KeyCode.F4;
+    [SerializeField] private KeyCode cheatKey_BuyAll          = KeyCode.F5;
+    [SerializeField] private KeyCode cheatKey_TestTrain        = KeyCode.F6;
+
     // Game State
     private GameState currentGameState = GameState.Setup;
     private PlayerData[] players;
@@ -444,6 +453,10 @@ public class CompleteGameManager : MonoBehaviour
                 HandleProperty(player, landedTile);
                 break;
 
+            case TileType.Railroad:
+                HandleRailroad(player, landedTile);
+                break;
+
             case TileType.Tax:
                 int tax = landedTile.baseRent;
                 player.RemoveMoney(tax);
@@ -463,6 +476,109 @@ public class CompleteGameManager : MonoBehaviour
                 EndTurn();
                 break;
         }
+    }
+
+    // ── Railroad / Train routes ───────────────────────────────────────────────
+
+    // Bidirectional routes: key = from tile index, value = to tile index
+    private static readonly Dictionary<int, int> s_TrainRoutes = new Dictionary<int, int>
+    {
+        { 5,  25 }, { 25, 5  },
+        { 15, 35 }, { 35, 15 },
+    };
+
+    private static int GetTrainDestination(int fromIndex)
+    {
+        return s_TrainRoutes.TryGetValue(fromIndex, out int dest) ? dest : -1;
+    }
+
+    private static int CalculateTrainFare(TileData station, PlayerData rider, PlayerData[] allPlayers)
+    {
+        if (!station.IsOwned()) return 50;
+        if (station.ownerId == rider.playerId) return 0;
+
+        PlayerData owner = null;
+        foreach (PlayerData p in allPlayers)
+            if (p != null && p.playerId == station.ownerId) { owner = p; break; }
+
+        if (owner == null) return 50;
+
+        int stationCount = 0;
+        foreach (TileData t in owner.ownedProperties)
+            if (t.tileType == TileType.Railroad) stationCount++;
+
+        int[] fareTable = { 0, 25, 50, 100, 200 };
+        return fareTable[Mathf.Clamp(stationCount, 0, 4)];
+    }
+
+    private void HandleRailroad(PlayerData player, TileData station)
+    {
+        int destIndex = GetTrainDestination(station.tileIndex);
+        if (destIndex < 0) { EndTurn(); return; }
+
+        TileData destTile = boardManager.GetTile(destIndex);
+  if (destTile == null) { EndTurn(); return; }
+
+        // Unowned — offer to buy first, then show train menu
+        if (!station.IsOwned())
+        {
+            TileMarker marker = boardManager.GetTileMarker(station.tileIndex);
+  if (PropertyCardUI.Instance != null && marker != null && marker.propertyCard != null)
+       {
+         PropertyCardUI.Instance.OnPurchaseDecision.RemoveAllListeners();
+                PropertyCardUI.Instance.OnPurchaseDecision.AddListener((didBuy) =>
+        {
+          if (didBuy) PropertyManager.Instance?.TryBuyProperty(player, station);
+        ShowTrainChoice(player, station, destTile);
+      });
+       PropertyCardUI.Instance.ShowPropertyCard(player, station, marker);
+          return;
+         }
+        }
+
+      ShowTrainChoice(player, station, destTile);
+    }
+
+    private void ShowTrainChoice(PlayerData player, TileData station, TileData destTile)
+    {
+        if (TrainMenuUI.Instance == null)
+        {
+ Debug.LogWarning("[Railroad] TrainMenuUI.Instance is null — add a TrainMenuUI canvas to the scene.");
+      EndTurn();
+    return;
+ }
+
+        int fare = CalculateTrainFare(station, player, players);
+
+        Vector3 playerPos = player.avatarTransform != null
+          ? player.avatarTransform.position
+ : (Camera.main != null ? Camera.main.transform.position : Vector3.zero);
+
+ TrainMenuUI.Instance.OnDecision.RemoveAllListeners();
+   TrainMenuUI.Instance.OnDecision.AddListener((tookTrain) =>
+      {
+          if (tookTrain)
+ {
+       if (fare > 0)
+         {
+         if (station.IsOwned() && station.ownerId != player.playerId
+  && station.ownerId >= 0 && station.ownerId < players.Length)
+          {
+          players[station.ownerId].AddMoney(fare);
+        Debug.Log($"[Railroad] {fare} DT fare → {players[station.ownerId].playerName}");
+ }
+       player.RemoveMoney(fare);
+   }
+ player.currentTileIndex = destTile.tileIndex;
+                player.movementController?.TeleportToTile(destTile.tileIndex, boardManager.allTiles);
+        Debug.Log($"[Railroad] {player.playerName} → {destTile.tileName}");
+    }
+        EndTurn();
+        });
+
+      TrainMenuUI.Instance.ShowTrainMenu(
+          station.tileName, destTile.tileName,
+      fare, player.money, playerPos);
     }
 
     private void HandleProperty(PlayerData player, TileData property)
@@ -495,22 +611,59 @@ public class CompleteGameManager : MonoBehaviour
                 Debug.Log($"💰 Your Balance: {player.money} DT");
 
                 if (player.CanAfford(property.purchasePrice))
-                {
                     Debug.LogWarning("⚠️ PropertyCardUI not set up - auto-passing");
-                }
             }
         }
         else if (property.ownerId == player.playerId)
         {
-            Debug.Log($"🏠 You own {property.tileName}! ({PropertyManager.Instance?.GetBuildingStatus(property)})");
+            // Player landed on their OWN property — open the building menu
+            if (BuildingMenuUI.Instance != null)
+            {
+                Debug.Log($"[GameManager] Opening BuildingMenuUI for {property.tileName}");
+                BuildingMenuUI.Instance.OnMenuClosed.RemoveAllListeners();
+                BuildingMenuUI.Instance.OnMenuClosed.AddListener(EndTurn);
+                BuildingMenuUI.Instance.ShowBuildingMenu(player, property);
+                return; // Wait for player to close the menu
+            }
+            else
+            {
+                Debug.LogWarning("[GameManager] BuildingMenuUI.Instance is null — make sure the Canvas has the BuildingMenuUI script attached!");
+            }
         }
         else if (property.ownerId >= 0 && property.ownerId < players.Length)
         {
             int rent = property.GetCurrentRent();
-            if (player.RemoveMoney(rent))
+            PlayerData owner = players[property.ownerId];
+
+            if (RentMenuUI.Instance != null)
             {
-                players[property.ownerId].AddMoney(rent);
-                Debug.Log($"💸 Paid {rent} DT rent to {players[property.ownerId].playerName}");
+                // Show rent payment UI — wait for player to click Pay
+                RentMenuUI.Instance.OnRentPaid.RemoveAllListeners();
+                RentMenuUI.Instance.OnRentPaid.AddListener((paidAmount) =>
+                {
+                    if (player.RemoveMoney(paidAmount))
+                    {
+                        owner.AddMoney(paidAmount);
+                        Debug.Log($"💸 {player.playerName} paid {paidAmount} DT rent to {owner.playerName}");
+                    }
+                    else
+                    {
+                        Debug.LogWarning($"⚠️ {player.playerName} can't afford {paidAmount} DT rent!");
+                    }
+                    EndTurn();
+                });
+
+                RentMenuUI.Instance.ShowRentMenu(player, property, owner);
+                return; // Wait for player to click Pay
+            }
+            else
+            {
+                // Fallback: silent pay if no UI
+                if (player.RemoveMoney(rent))
+                {
+                    owner.AddMoney(rent);
+                    Debug.Log($"💸 Paid {rent} DT rent to {owner.playerName}");
+                }
             }
         }
 
@@ -565,5 +718,198 @@ public class CompleteGameManager : MonoBehaviour
         if (players != null && currentPlayerIndex >= 0 && currentPlayerIndex < players.Length)
             return players[currentPlayerIndex];
         return null;
+    }
+
+    // ── DEBUG CHEATS ─────────────────────────────────────────────────────────
+
+    private void Update()
+    {
+        if (!enableDebugCheats) return;
+        if (players == null || currentGameState != GameState.Playing) return;
+        if (currentPlayerIndex < 0 || currentPlayerIndex >= players.Length) return;
+
+        if (Input.GetKeyDown(cheatKey_GiveMonopoly))  Cheat_GiveMonopoly();
+        if (Input.GetKeyDown(cheatKey_OpenBuildMenu)) Cheat_OpenBuildingMenu();
+        if (Input.GetKeyDown(cheatKey_GiveMoney))     Cheat_GiveMoney();
+        if (Input.GetKeyDown(cheatKey_TestRent))      Cheat_TestRent();
+        if (Input.GetKeyDown(cheatKey_BuyAll))        Cheat_BuyAllProperties();
+        if (Input.GetKeyDown(cheatKey_TestTrain))     Cheat_TestTrain_Station();
+    }
+
+    /// <summary>
+    /// F1 — Gives the current player the first fully-free color group found on the board.
+    /// After pressing, press F2 to immediately open the building menu on the first owned property.
+    /// </summary>
+    private void Cheat_GiveMonopoly()
+    {
+        PlayerData player = players[currentPlayerIndex];
+
+        foreach (PropertyColor color in System.Enum.GetValues(typeof(PropertyColor)))
+        {
+            if (color == PropertyColor.None) continue;
+
+            List<TileData> group = boardManager.GetTilesByColor(color);
+            if (group == null || group.Count == 0) continue;
+
+            // Skip groups where another player already owns something
+            bool blocked = false;
+            foreach (TileData t in group)
+            {
+                if (t.ownerId >= 0 && t.ownerId != player.playerId)
+                { blocked = true; break; }
+            }
+            if (blocked) continue;
+
+            // Give every tile in the group to this player
+            foreach (TileData t in group)
+            {
+                if (!player.ownedPropertyIndices.Contains(t.tileIndex))
+                    player.AddProperty(t);
+            }
+
+            Debug.Log($"[CHEAT F1] {player.playerName} got MONOPOLY on {color}! Press F2 to open building menu.");
+            return;
+        }
+
+        Debug.LogWarning("[CHEAT F1] No free color group found — all groups have mixed ownership.");
+    }
+
+    /// <summary>
+    /// F2 — Teleports the current player to their first owned property
+    /// and immediately opens the BuildingMenuUI so you can test buying houses.
+    /// </summary>
+    private void Cheat_OpenBuildingMenu()
+    {
+        PlayerData player = players[currentPlayerIndex];
+
+        if (player.ownedProperties.Count == 0)
+        {
+            Debug.LogWarning("[CHEAT F2] Player owns no properties. Press F1 first to get a monopoly.");
+            return;
+        }
+
+        // Stop any waiting dice roll
+        waitingForDiceRoll = false;
+        StopAllCoroutines();
+
+        TileData target = player.ownedProperties[0];
+        player.currentTileIndex = target.tileIndex;
+        player.movementController?.TeleportToTile(target.tileIndex, boardManager.allTiles);
+
+        Debug.Log($"[CHEAT F2] Teleported {player.playerName} to {target.tileName} — opening BuildingMenuUI");
+
+        if (BuildingMenuUI.Instance != null)
+        {
+            BuildingMenuUI.Instance.OnMenuClosed.RemoveAllListeners();
+            BuildingMenuUI.Instance.OnMenuClosed.AddListener(EndTurn);
+            BuildingMenuUI.Instance.ShowBuildingMenu(player, target);
+        }
+        else
+        {
+            Debug.LogError("[CHEAT F2] BuildingMenuUI.Instance is null! Make sure the canvas has the BuildingMenuUI script.");
+        }
+    }
+
+    /// <summary>
+    /// F3 — Gives the current player 5000 DT so they can afford buildings.
+    /// </summary>
+    private void Cheat_GiveMoney()
+    {
+        PlayerData player = players[currentPlayerIndex];
+        player.AddMoney(5000);
+        Debug.Log($"[CHEAT F3] Gave {player.playerName} 5000 DT. New balance: {player.money} DT");
+    }
+
+    /// <summary>
+    /// F4 — Gives ALL property tiles to Player 2, then teleports Player 1
+    /// onto the first one so the RentMenuUI pops up immediately.
+    /// </summary>
+    private void Cheat_TestRent()
+    {
+        PlayerData player = players[currentPlayerIndex];
+        int otherIndex = (currentPlayerIndex + 1) % numberOfPlayers;
+    PlayerData otherPlayer = players[otherIndex];
+
+        // Give every property tile to the other player
+        int given = 0;
+        TileData firstTile = null;
+        foreach (TileData tile in boardManager.allTiles)
+        {
+     if (tile.tileType != TileType.Property) continue;
+
+  // Skip tiles already owned by current player
+            if (tile.ownerId == player.playerId) continue;
+
+   // Assign to other player
+      if (!otherPlayer.ownedPropertyIndices.Contains(tile.tileIndex))
+            {
+      otherPlayer.AddProperty(tile);
+         given++;
+  }
+
+            if (firstTile == null) firstTile = tile;
+   }
+
+        if (firstTile == null)
+  {
+      Debug.LogWarning("[CHEAT F4] No property tiles found on the board.");
+            return;
+        }
+
+    Debug.Log($"[CHEAT F4] Gave {given} properties to {otherPlayer.playerName}.");
+
+     // Stop any active coroutines/dice
+        waitingForDiceRoll = false;
+   StopAllCoroutines();
+
+        // Teleport current player onto the first property
+  player.currentTileIndex = firstTile.tileIndex;
+        player.movementController?.TeleportToTile(firstTile.tileIndex, boardManager.allTiles);
+
+ Debug.Log($"[CHEAT F4] Teleporting {player.playerName} to '{firstTile.tileName}' — RentMenuUI should open.");
+
+        HandleProperty(player, firstTile);
+    }
+
+    /// <summary>
+    /// F5 — Gives the current player ALL unowned property tiles for free
+    /// and fills their wallet so they can afford buildings immediately.
+    /// Also callable from the in-game CheatMenuUI button.
+    /// </summary>
+    private void Cheat_BuyAllProperties()
+    {
+        if (players == null || currentPlayerIndex < 0 || currentPlayerIndex >= players.Length) return;
+
+    PlayerData player = players[currentPlayerIndex];
+  int bought = 0;
+
+    foreach (TileData tile in boardManager.allTiles)
+      {
+         if (tile.tileType != TileType.Property) continue;
+   if (tile.IsOwned()) continue;
+            player.AddProperty(tile);
+     bought++;
+        }
+
+    player.AddMoney(99999);
+        Debug.Log($"[CHEAT F5] {player.playerName} bought all {bought} free properties and received 99999 DT.");
+    }
+
+    /// <summary>F6 — Teleport to Bizerte Station (tile 5) and open TrainMenuUI immediately.</summary>
+    private void Cheat_TestTrain_Station()
+    {
+     PlayerData player = players[currentPlayerIndex];
+        waitingForDiceRoll = false;
+        StopAllCoroutines();
+
+        int stationIndex = 5;
+        player.currentTileIndex = stationIndex;
+        player.movementController?.TeleportToTile(stationIndex, boardManager.allTiles);
+
+        TileData station = boardManager.GetTile(stationIndex);
+     if (station == null) { Debug.LogError("[CHEAT F6] Tile 5 not found."); return; }
+
+        Debug.Log($"[CHEAT F6] {player.playerName} → {station.tileName} — TrainMenuUI opening");
+        HandleRailroad(player, station);
     }
 }

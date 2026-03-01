@@ -56,13 +56,13 @@ public class SimpleDiceController : MonoBehaviour
             RollDice();
         }
         
-        // Check if stopped
-        if (rolling && myRigidbody != null)
+        // Only check settlement when rolling and not already processing a result
+        if (rolling && !determining && myRigidbody != null)
         {
-            if (myRigidbody.linearVelocity.magnitude < 0.5f && myRigidbody.angularVelocity.magnitude < 0.5f)
-            {
+            bool velocityStopped = myRigidbody.linearVelocity.magnitude  < 0.05f
+                && myRigidbody.angularVelocity.magnitude < 0.05f;
+            if (velocityStopped)
                 StartCoroutine(DetermineResult());
-            }
         }
     }
     
@@ -96,8 +96,18 @@ public class SimpleDiceController : MonoBehaviour
     {
         determining = true;
         rolling = false;
-        
-        yield return new WaitForSeconds(0.5f);
+
+        // Wait for physics to fully settle before reading orientation
+        yield return new WaitForSeconds(0.3f);
+
+        // Confirm still stopped — if it moved again, abort and let Update retry
+        if (myRigidbody.linearVelocity.magnitude  > 0.05f ||
+            myRigidbody.angularVelocity.magnitude > 0.05f)
+        {
+            rolling = true;
+            determining = false;
+            yield break;
+        }
         
         // Simple detection: which local axis points up most?
         Vector3[] axes = new Vector3[]
