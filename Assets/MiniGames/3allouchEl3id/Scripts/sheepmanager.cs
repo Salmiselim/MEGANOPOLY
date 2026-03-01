@@ -13,6 +13,11 @@ public class SheepManager : MonoBehaviour
     public TextMeshProUGUI introTimerText;
     public TextMeshProUGUI winnerText;
     public GameObject resultsPanel;
+    
+    [Header("Audio")]
+    public AudioSource bgmSource;
+    public AudioClip bgmClip;
+    public AudioClip whistleClip;
 
     [Header("Game")]
     public Sheep[] allSheep; // Drag 24 inactive sheep here
@@ -37,6 +42,14 @@ public class SheepManager : MonoBehaviour
         introTimerText.gameObject.SetActive(true);
         resultsPanel.SetActive(false);
         ResetGame();
+        
+        if (bgmSource != null && bgmClip != null)
+        {
+            bgmSource.clip = bgmClip;
+            bgmSource.loop = true;
+            bgmSource.Play();
+        }
+        
         introCoroutine = StartCoroutine(IntroCountdown());
     }
 
@@ -51,6 +64,11 @@ public class SheepManager : MonoBehaviour
         // Stop specific coroutines instead of all
         if (introCoroutine != null) StopCoroutine(introCoroutine);
         if (gameCoroutine != null) StopCoroutine(gameCoroutine);
+
+        if (bgmSource != null)
+        {
+            bgmSource.Stop();
+        }
     }
 
     string ColorToName(int idx)
@@ -107,6 +125,11 @@ public class SheepManager : MonoBehaviour
             sheep.rb.linearVelocity = Vector3.zero;
             sheep.rb.angularVelocity = Vector3.zero;
         }
+
+        if (bgmSource != null && whistleClip != null)
+        {
+            bgmSource.PlayOneShot(whistleClip);
+        }
     }
 
     public void ResetGame()
@@ -121,6 +144,11 @@ public class SheepManager : MonoBehaviour
         introTimerText.gameObject.SetActive(false);
         resultsPanel.SetActive(false);
         foreach (var sheep in allSheep) sheep.gameObject.SetActive(false);
+
+        if (bgmSource != null)
+        {
+            bgmSource.Stop();
+        }
     }
 
     // For Monopoly: public int GetWinner() => winnerIndex;

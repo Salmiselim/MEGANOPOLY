@@ -14,6 +14,10 @@ public class BentWaladManager : MonoBehaviour
     public TextMeshProUGUI winnerText;
     public GameObject resultsPanel;
 
+    [Header("Audio")]
+    public AudioSource bgmSource;
+    public AudioClip bgmClip;
+
     [Header("Players")]
     public PlayerInputBoard[] playerBoards = new PlayerInputBoard[4]; // Drag 4
 
@@ -36,6 +40,14 @@ public class BentWaladManager : MonoBehaviour
         introTimerText.gameObject.SetActive(true);
         resultsPanel.SetActive(false);
         foreach (var board in playerBoards) board.Init();
+
+        if (bgmSource != null && bgmClip != null)
+        {
+            bgmSource.clip = bgmClip;
+            bgmSource.loop = true;
+            bgmSource.Play();
+        }
+
         StartCoroutine(IntroCountdown());
     }
 
@@ -182,6 +194,11 @@ public class BentWaladManager : MonoBehaviour
         
         winnerText.text = $"Winner: Player {winnerIndex + 1}!\nScore: {scores[winnerIndex]}/5";
         resultsPanel.SetActive(true);
+
+        if (bgmSource != null)
+        {
+            bgmSource.Stop();
+        }
     }
 
     public void ResetGame()
@@ -192,6 +209,12 @@ public class BentWaladManager : MonoBehaviour
         foreach (var board in playerBoards) board.Reset();
         introTimerText.gameObject.SetActive(false);
         resultsPanel.SetActive(false);
+        
+        if (bgmSource != null)
+        {
+            bgmSource.Stop();
+        }
+
         PickLetter();
         StartCoroutine(IntroCountdown());
     }

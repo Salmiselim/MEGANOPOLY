@@ -16,6 +16,11 @@ public class Sheep : MonoBehaviour
     [SerializeField] private float wanderForce = 5f;
     [SerializeField] private float wanderChangeDist = 3f;
 
+    [Header("Audio")]
+    [SerializeField] private AudioSource sfxSource;
+    [SerializeField] private AudioClip pickupSfx;
+    [SerializeField] private AudioClip randomBaaSfx;
+
     public int ownerIndex = -1;
     public Rigidbody rb { get; private set; }
     private SheepManager manager;
@@ -28,6 +33,8 @@ public class Sheep : MonoBehaviour
         rb = GetComponent<Rigidbody>();
         if (grabInteractable == null) grabInteractable = GetComponent<XRGrabInteractable>();
         wanderTarget = transform.position;
+
+        StartCoroutine(RandomBaaRoutine());
     }
 
     void OnEnable()
@@ -71,6 +78,11 @@ public class Sheep : MonoBehaviour
         if (autoDropCoroutine != null) StopCoroutine(autoDropCoroutine);
         autoDropCoroutine = StartCoroutine(AutoDrop());
 
+        if (sfxSource != null && pickupSfx != null)
+        {
+            sfxSource.PlayOneShot(pickupSfx);
+        }
+
         // Pause wander (kinematic handled by XR)
     }
 
@@ -112,5 +124,23 @@ public class Sheep : MonoBehaviour
         }
         Vector3 dir = (wanderTarget - transform.position).normalized;
         rb.AddForce(dir * wanderForce);
+    }
+
+    IEnumerator RandomBaaRoutine()
+    {
+        while (true)
+        {
+            // Randomly wait 3 to 7 seconds
+            float waitTime = Random.Range(3f, 7f);
+            yield return new WaitForSeconds(waitTime);
+
+            if (gameObject.activeInHierarchy && !grabInteractable.isSelected)
+            {
+                if (sfxSource != null && randomBaaSfx != null)
+                {
+                    sfxSource.PlayOneShot(randomBaaSfx);
+                }
+            }
+        }
     }
 }

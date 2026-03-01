@@ -14,6 +14,10 @@ public class KhobzManager : MonoBehaviour
     public TextMeshProUGUI[] playerTimeTexts = new TextMeshProUGUI[4]; // Shows each player's pull time after they pull
     public GameObject resultsPanel;           // Parent of winnerText, set inactive initially
 
+    [Header("Audio")]
+    public AudioSource bgmSource;
+    public AudioClip bgmClip;
+
     [Header("Game")]
     public PlayerBread[] playerBreads = new PlayerBread[4];
     public float minGoalTime = 5f;
@@ -46,6 +50,14 @@ public class KhobzManager : MonoBehaviour
 
         resultsPanel.SetActive(false);
         introTimerText.gameObject.SetActive(true);
+
+        if (bgmSource != null && bgmClip != null)
+        {
+            bgmSource.clip = bgmClip;
+            bgmSource.loop = true;
+            bgmSource.Play();
+        }
+
         introCoroutine = StartCoroutine(IntroCountdown());
     }
 
@@ -158,12 +170,22 @@ public class KhobzManager : MonoBehaviour
 
         winnerText.text = $"Player {winnerIndex + 1} Wins!\nYour time: {pullTimes[winnerIndex]:F2}s\nGoal: {goalTime:F2}s\nDiff: {bestDiff:F2}s";
         resultsPanel.SetActive(true);
+
+        if (bgmSource != null)
+        {
+            bgmSource.Stop();
+        }
     }
 
     void ShowEveryoneLoses()
     {
         winnerText.text = "Everyone Loses!";
         resultsPanel.SetActive(true);
+
+        if (bgmSource != null)
+        {
+            bgmSource.Stop();
+        }
     }
 
     public void ResetGame()

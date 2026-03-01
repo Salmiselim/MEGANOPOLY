@@ -26,6 +26,10 @@ public class PlayerInputBoard : MonoBehaviour
     [SerializeField] private Transform keyboardParent; // Optional: Only if using my KeyboardButton script
     [SerializeField] private int playerIndex;
 
+    [Header("Audio")]
+    [SerializeField] private AudioSource sfxSource;
+    [SerializeField] private AudioClip buttonSfx;
+
     public int PlayerIndex => playerIndex;
 
     private BentWaladManager manager;
@@ -123,6 +127,12 @@ public class PlayerInputBoard : MonoBehaviour
 
         // Collect current text from fields
         string[] currentWords = new string[5];
+
+        if (sfxSource != null && buttonSfx != null)
+        {
+            sfxSource.PlayOneShot(buttonSfx);
+        }
+
         for (int i = 0; i < 5; i++)
         {
             currentWords[i] = GetTextFromField(fieldTexts[i]);

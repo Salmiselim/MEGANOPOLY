@@ -10,6 +10,10 @@ public class PlayerBread : MonoBehaviour
     [SerializeField] private int playerIndex;
     [SerializeField] private Transform ovenParent; // Drag oven transform here for relative pos
 
+    [Header("Audio")]
+    [SerializeField] private AudioSource sfxSource;
+    [SerializeField] private AudioClip pullSfx;
+
     private Vector3 initialWorldPosition;
     private bool isGrabbed;
     private bool hasPulled;
@@ -53,6 +57,12 @@ public class PlayerBread : MonoBehaviour
                 hasPulled = true;
                 if (manager != null)
                     manager.RegisterPull(playerIndex, manager.GetCurrentGameTime());
+
+                if (sfxSource != null && pullSfx != null)
+                {
+                    sfxSource.PlayOneShot(pullSfx);
+                }
+
                 Debug.Log($"[PlayerBread {playerIndex}] Pulled at world distance {distancePulled:F2}m");
             }
         }
