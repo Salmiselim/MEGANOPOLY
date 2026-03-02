@@ -9,6 +9,7 @@ TagManager:
   - Anchor
   - PlayerHand
   - Destroyer
+  - BISSMarble
   layers:
   - Default
   - TransparentFX
