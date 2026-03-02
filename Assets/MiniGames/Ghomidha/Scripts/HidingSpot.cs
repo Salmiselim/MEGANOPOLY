@@ -30,9 +30,6 @@ namespace Ghomidha
         [SerializeField] private Transform hidePosition;
 
         [Header("Button Appearance")]
-        [Tooltip("How far in front of the object (toward the player) the button floats")]
-        [SerializeField] private Vector3 buttonOffset = new Vector3(0f, 1.5f, 0.8f);
-
         [Tooltip("Button background color (semi-transparent)")]
         [SerializeField] private Color buttonColor = new Color(0f, 0f, 0f, 0.55f);
 
@@ -41,6 +38,9 @@ namespace Ghomidha
 
         [Tooltip("How fast the button fades in/out")]
         [SerializeField] private float fadeDuration = 0.25f;
+
+        [Tooltip("Fixed height (Y-axis) for the button so it's comfortable to click")]
+        [SerializeField] private float buttonHeight = 1.3f;
 
         [Header("Proximity")]
         [Tooltip("Trigger collider radius — player must be within this range to see the button")]
@@ -81,9 +81,28 @@ namespace Ghomidha
         // ── Trigger Detection ────────────────────────────────────────────
         private void OnTriggerEnter(Collider other)
         {
-            if (!IsPlayerCollider(other)) return;
+            if (!IsPlayerCollider(other) || playerInRange) return;
+            
             playerInRange = true;
             targetAlpha = 1f;
+
+            // Optional: get camera position directly if available
+            Vector3 playerPos = Camera.main != null ? Camera.main.transform.position : other.transform.position;
+            
+            // Calculate a point EXACTLY halfway between the player and the hiding object
+            Vector3 halfwayPoint = Vector3.Lerp(transform.position, playerPos, 0.5f);
+            
+            // Override the Y height so it's always at a comfortable clicking height
+            halfwayPoint.y = transform.position.y + buttonHeight;
+
+            // Unparent the canvas while active so it stays frozen in world space
+            if (buttonCanvas != null)
+            {
+                buttonCanvas.transform.SetParent(null);
+                buttonCanvas.transform.position = halfwayPoint;
+                // Force world scale back — tree's large scale would otherwise inflate the button
+                buttonCanvas.transform.localScale = Vector3.one * 0.004f;
+            }
         }
 
         private void OnTriggerExit(Collider other)
@@ -91,6 +110,12 @@ namespace Ghomidha
             if (!IsPlayerCollider(other)) return;
             playerInRange = false;
             targetAlpha = 0f;
+
+            // Re-parent to keep the hierarchy clean when hidden
+            if (buttonCanvas != null)
+            {
+                buttonCanvas.transform.SetParent(transform);
+            }
         }
 
         // ── Hide Action ──────────────────────────────────────────────────
@@ -127,7 +152,8 @@ namespace Ghomidha
             // Create the World Space Canvas
             GameObject canvasGO = new GameObject($"HideButton_Canvas_{gameObject.name}");
             canvasGO.transform.SetParent(transform);
-            canvasGO.transform.localPosition = buttonOffset;
+            // Default position, will be overridden on trigger enter
+            canvasGO.transform.localPosition = new Vector3(0f, buttonHeight, 0f);
             canvasGO.transform.localScale = Vector3.one * 0.004f;
 
             buttonCanvas = canvasGO.AddComponent<Canvas>();
