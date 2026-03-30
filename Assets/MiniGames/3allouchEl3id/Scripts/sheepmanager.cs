@@ -13,6 +13,11 @@ public class SheepManager : MonoBehaviour
     public TextMeshProUGUI introTimerText;
     public TextMeshProUGUI winnerText;
     public GameObject resultsPanel;
+    
+    [Header("Audio")]
+    public AudioSource bgmSource;
+    public AudioClip bgmClip;
+    public AudioClip whistleClip;
 
     [Header("Game")]
     public Sheep[] allSheep; // Drag 24 inactive sheep here
@@ -30,6 +35,7 @@ public class SheepManager : MonoBehaviour
     private int winnerIndex = -1;
     private Coroutine introCoroutine;
     private Coroutine gameCoroutine;
+    private int[] playerColors = new int[4] { 0, 1, 2, 3 };
 
     void Start()
     {
@@ -37,6 +43,14 @@ public class SheepManager : MonoBehaviour
         introTimerText.gameObject.SetActive(true);
         resultsPanel.SetActive(false);
         ResetGame();
+        
+        if (bgmSource != null && bgmClip != null)
+        {
+            bgmSource.clip = bgmClip;
+            bgmSource.loop = true;
+            bgmSource.Play();
+        }
+        
         introCoroutine = StartCoroutine(IntroCountdown());
     }
 
@@ -51,11 +65,18 @@ public class SheepManager : MonoBehaviour
         // Stop specific coroutines instead of all
         if (introCoroutine != null) StopCoroutine(introCoroutine);
         if (gameCoroutine != null) StopCoroutine(gameCoroutine);
+
+        if (bgmSource != null)
+        {
+            bgmSource.Stop();
+        }
     }
 
     string ColorToName(int idx)
     {
-        return idx switch { 0 => "Red", 1 => "Green", 2 => "Blue", 3 => "Yellow", _ => "???" };
+        if (idx < 0 || idx >= 4) return "???";
+        int colorIdx = playerColors[idx];
+        return colorIdx switch { 0 => "Red", 1 => "Green", 2 => "Blue", 3 => "Purple", _ => "???" };
     }
 
     IEnumerator IntroCountdown()
@@ -95,7 +116,7 @@ public class SheepManager : MonoBehaviour
             var sheep = allSheep[i];
             sheep.gameObject.SetActive(true);
             // Pass null material for neutral sheep (owner index -1)
-            Material mat = owners[i] >= 0 ? playerSheepMaterials[owners[i]] : null;
+            Material mat = owners[i] >= 0 ? playerSheepMaterials[playerColors[owners[i]]] : null;
             sheep.SetOwner(owners[i], mat);
             Vector3 randPos = spawnCenter + Random.insideUnitSphere * spawnRadius;
             randPos.y = 100f; // High for raycast
@@ -107,12 +128,22 @@ public class SheepManager : MonoBehaviour
             sheep.rb.linearVelocity = Vector3.zero;
             sheep.rb.angularVelocity = Vector3.zero;
         }
+
+        if (bgmSource != null && whistleClip != null)
+        {
+            bgmSource.PlayOneShot(whistleClip);
+        }
     }
 
     public void ResetGame()
     {
         gameEnded = false;
         winnerIndex = -1;
+        
+        // Randomize player colors
+        List<int> colors = new List<int> { 0, 1, 2, 3 };
+        colors = colors.OrderBy(x => Random.value).ToList();
+        for (int i = 0; i < 4; i++) playerColors[i] = colors[i];
         
         // Stop specific coroutines with null checks
         if (introCoroutine != null) StopCoroutine(introCoroutine);
@@ -121,6 +152,11 @@ public class SheepManager : MonoBehaviour
         introTimerText.gameObject.SetActive(false);
         resultsPanel.SetActive(false);
         foreach (var sheep in allSheep) sheep.gameObject.SetActive(false);
+
+        if (bgmSource != null)
+        {
+            bgmSource.Stop();
+        }
     }
 
     // For Monopoly: public int GetWinner() => winnerIndex;
