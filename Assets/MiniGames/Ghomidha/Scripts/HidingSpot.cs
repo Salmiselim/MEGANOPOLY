@@ -128,17 +128,22 @@ namespace Ghomidha
                 return;
             }
 
-            // Teleport the XR Origin to the hide position (same Y as hide point)
-            xrOriginTransform.position = new Vector3(
-                hidePosition.position.x,
-                xrOriginTransform.position.y,   // preserve player height
-                hidePosition.position.z);
+            // Account for the horizontal gap between the Camera and the XR Origin root.
+            // Without this, the XR Origin moves to hidePosition but the camera (head) is still
+            // offset by however far the player has drifted in the play space — causing 1-2m error.
+            Vector3 camOffset = Vector3.zero;
+            if (Camera.main != null)
+            {
+                camOffset.x = Camera.main.transform.position.x - xrOriginTransform.position.x;
+                camOffset.z = Camera.main.transform.position.z - xrOriginTransform.position.z;
+            }
 
-            // Face toward the hiding object (so the player looks at what they're hiding behind)
-            Vector3 lookDir = transform.position - hidePosition.position;
-            lookDir.y = 0f;
-            if (lookDir.sqrMagnitude > 0.001f)
-                xrOriginTransform.rotation = Quaternion.LookRotation(lookDir);
+            // Move XR Origin so the CAMERA lands exactly at hidePosition X/Z
+            xrOriginTransform.position = new Vector3(
+                hidePosition.position.x - camOffset.x,
+                xrOriginTransform.position.y,           // Y frozen — player keeps own height
+                hidePosition.position.z - camOffset.z);
+            xrOriginTransform.rotation = hidePosition.rotation;
 
             // Hide the button after teleporting
             targetAlpha = 0f;
