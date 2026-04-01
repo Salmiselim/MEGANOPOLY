@@ -135,7 +135,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!4 &34956558
 Transform:
   m_ObjectHideFlags: 0
@@ -265,7 +265,7 @@ PrefabInstance:
     - target: {fileID: 2218496723442559053, guid: d6878e1999eb4b44a9f5a263af86c185,
         type: 3}
       propertyPath: m_LocalPosition.x
-      value: -10.3
+      value: 11.58
       objectReference: {fileID: 0}
     - target: {fileID: 2218496723442559053, guid: d6878e1999eb4b44a9f5a263af86c185,
         type: 3}
@@ -275,7 +275,7 @@ PrefabInstance:
     - target: {fileID: 2218496723442559053, guid: d6878e1999eb4b44a9f5a263af86c185,
         type: 3}
       propertyPath: m_LocalPosition.z
-      value: -1.1
+      value: 1.27
       objectReference: {fileID: 0}
     - target: {fileID: 2218496723442559053, guid: d6878e1999eb4b44a9f5a263af86c185,
         type: 3}
@@ -669,7 +669,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!4 &426704805
 Transform:
   m_ObjectHideFlags: 0
@@ -701,7 +701,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!4 &457167769
 Transform:
   m_ObjectHideFlags: 0
@@ -884,7 +884,7 @@ Transform:
   m_GameObject: {fileID: 944512981}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: -1.613, y: 36.914993, z: -3.618}
+  m_LocalPosition: {x: -1.71, y: 36.914993, z: -3.88}
   m_LocalScale: {x: 14.485737, y: 14.485737, z: 14.485737}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -1654,7 +1654,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!4 &1995622285
 Transform:
   m_ObjectHideFlags: 0
@@ -61017,7 +61017,6 @@ GameObject:
   - component: {fileID: 2920812442031818036}
   - component: {fileID: 745533171400307800}
   - component: {fileID: 9222803575815607820}
-  - component: {fileID: 9222803575815607821}
   m_Layer: 0
   m_Name: tree2
   m_TagString: Untagged
@@ -73521,7 +73520,7 @@ MonoBehaviour:
   buttonText: "\U0001F441  HIDE"
   fadeDuration: 0.25
   buttonHeight: 1.3
-  proximityRadius: 2.5
+  proximityRadius: 5
 --- !u!64 &9148505123700289014
 MeshCollider:
   m_ObjectHideFlags: 0
@@ -74081,24 +74080,6 @@ MeshRenderer:
   m_SortingOrder: 0
   m_MaskInteraction: 0
   m_AdditionalVertexStreams: {fileID: 0}
---- !u!114 &9222803575815607821
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 7853328835373470322}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: bf9f36d0188c7b84eb2d66df89c35854, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::Ghomidha.HidingSpot
-  hidePosition: {fileID: 0}
-  buttonColor: {r: 0, g: 0, b: 0, a: 0.55}
-  buttonText: "\U0001F441  HIDE"
-  fadeDuration: 0.25
-  buttonHeight: 1.3
-  proximityRadius: 2.5
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0

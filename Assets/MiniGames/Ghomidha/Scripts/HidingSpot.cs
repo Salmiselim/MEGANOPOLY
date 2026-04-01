@@ -86,21 +86,22 @@ namespace Ghomidha
             playerInRange = true;
             targetAlpha = 1f;
 
-            // Optional: get camera position directly if available
+            // Use hidePosition as the anchor (avoids FBX pivot being far from the mesh)
+            Vector3 spotPos = hidePosition != null ? hidePosition.position : transform.position;
             Vector3 playerPos = Camera.main != null ? Camera.main.transform.position : other.transform.position;
             
-            // Calculate a point EXACTLY halfway between the player and the hiding object
-            Vector3 halfwayPoint = Vector3.Lerp(transform.position, playerPos, 0.5f);
+            // Place button halfway between the player and the hiding spot
+            Vector3 halfwayPoint = Vector3.Lerp(spotPos, playerPos, 0.5f);
             
-            // Override the Y height so it's always at a comfortable clicking height
-            halfwayPoint.y = transform.position.y + buttonHeight;
+            // Override Y so the button is at a comfortable clicking height
+            halfwayPoint.y = spotPos.y + buttonHeight;
 
             // Unparent the canvas while active so it stays frozen in world space
             if (buttonCanvas != null)
             {
                 buttonCanvas.transform.SetParent(null);
                 buttonCanvas.transform.position = halfwayPoint;
-                // Force world scale back — tree's large scale would otherwise inflate the button
+                // Force world scale back — object's large scale would otherwise inflate the button
                 buttonCanvas.transform.localScale = Vector3.one * 0.004f;
             }
         }
@@ -152,8 +153,9 @@ namespace Ghomidha
             // Create the World Space Canvas
             GameObject canvasGO = new GameObject($"HideButton_Canvas_{gameObject.name}");
             canvasGO.transform.SetParent(transform);
-            // Default position, will be overridden on trigger enter
-            canvasGO.transform.localPosition = new Vector3(0f, buttonHeight, 0f);
+            // Position near hidePosition (not the pivot which may be far from the mesh)
+            Vector3 initPos = hidePosition != null ? hidePosition.position + Vector3.up * buttonHeight : transform.position + Vector3.up * buttonHeight;
+            canvasGO.transform.position = initPos;
             canvasGO.transform.localScale = Vector3.one * 0.004f;
 
             buttonCanvas = canvasGO.AddComponent<Canvas>();
@@ -216,8 +218,16 @@ namespace Ghomidha
             {
                 SphereCollider sc = gameObject.AddComponent<SphereCollider>();
                 sc.isTrigger = true;
-                sc.radius = proximityRadius;
-                Debug.Log("[HidingSpot] Auto-added SphereCollider trigger.");
+                // Scale radius to world space (object may have large FBX scale)
+                float worldScale = Mathf.Max(transform.lossyScale.x, 0.001f);
+                sc.radius = proximityRadius / worldScale;
+
+                // Center the trigger on the hidePosition so the proximity zone
+                // is exactly where the player needs to stand
+                if (hidePosition != null)
+                    sc.center = transform.InverseTransformPoint(hidePosition.position);
+
+                Debug.Log("[HidingSpot] Auto-added SphereCollider trigger centered on hidePosition.");
             }
         }
 
@@ -248,14 +258,16 @@ namespace Ghomidha
 
         private void OnDrawGizmosSelected()
         {
+            // Green sphere = proximity trigger — centered on hidePosition
+            Vector3 gizmoCenter = hidePosition != null ? hidePosition.position : transform.position;
             Gizmos.color = new Color(0f, 1f, 0f, 0.2f);
-            Gizmos.DrawSphere(transform.position, proximityRadius);
+            Gizmos.DrawSphere(gizmoCenter, proximityRadius);
 
             if (hidePosition != null)
             {
+                // Cyan dot = exact teleport landing point
                 Gizmos.color = Color.cyan;
                 Gizmos.DrawSphere(hidePosition.position, 0.15f);
-                Gizmos.DrawLine(transform.position, hidePosition.position);
             }
         }
     }
