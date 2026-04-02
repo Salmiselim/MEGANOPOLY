@@ -74,8 +74,9 @@ namespace Ghomidha
             if (locked && s_activeSpot == this && Camera.main != null && xrOriginTf != null)
             {
                 float errX = hidePosition.position.x - Camera.main.transform.position.x;
+                float errY = hidePosition.position.y - Camera.main.transform.position.y;
                 float errZ = hidePosition.position.z - Camera.main.transform.position.z;
-                xrOriginTf.position += new Vector3(errX, 0f, errZ);
+                xrOriginTf.position += new Vector3(errX, errY, errZ);
             }
 
             // Button facing
