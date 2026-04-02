@@ -37,6 +37,9 @@ namespace Ghomidha
         public static bool IsHiding { get; private set; } = false;
         private static HidingSpot s_activeSpot = null;
 
+        /// <summary>True while a player is actively hiding at this spot. Used by the seeker.</summary>
+        public bool OccupiedByPlayer { get; private set; } = false;
+
         // ── Private refs ──────────────────────────────────────────────────
         private Transform playerRoot;           // topmost ancestor of XROrigin
         private Transform xrOriginTf;           // the XROrigin transform itself
@@ -171,9 +174,10 @@ namespace Ghomidha
                 xrOriginTf.rotation = Quaternion.Euler(0f, yaw, 0f);
 
             // Activate per-frame lock
-            locked       = true;
-            IsHiding     = true;
-            s_activeSpot = this;
+            locked             = true;
+            IsHiding           = true;
+            OccupiedByPlayer   = true;
+            s_activeSpot       = this;
 
             // Swap buttons
             hideAlpha     = 0f;
@@ -190,9 +194,10 @@ namespace Ghomidha
         {
             if (!IsHiding || s_activeSpot != this) return;
 
-            locked       = false;
-            IsHiding     = false;
-            s_activeSpot = null;
+            locked             = false;
+            IsHiding           = false;
+            OccupiedByPlayer   = false;
+            s_activeSpot       = null;
 
             // Restore to pre-hide state
             if (playerRoot != null)
@@ -207,6 +212,18 @@ namespace Ghomidha
             if (exitCvs != null) exitCvs.transform.SetParent(transform);
 
             Debug.Log($"[HidingSpot v3] Exited '{gameObject.name}'. Restored pre-hide position.");
+        }
+
+        // ── Seeker API ─────────────────────────────────────────────────────
+        /// <summary>
+        /// Called by SeekerController when this spot is tagged.
+        /// Forces the hider back to their pre-hide position and clears the spot.
+        /// </summary>
+        public void Reveal()
+        {
+            if (!OccupiedByPlayer) return;
+            Debug.Log($"[HidingSpot] Spot '{gameObject.name}' revealed by seeker!");
+            OnExitClicked();   // reuse exact same restore logic
         }
 
         // ── Exit button placement ──────────────────────────────────────────
