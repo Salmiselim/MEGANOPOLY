@@ -54,6 +54,7 @@ namespace Ghomidha
         // Buttons
         private Canvas hideCvs; private CanvasGroup hideCvg; private float hideAlpha;
         private Canvas exitCvs; private CanvasGroup exitCvg; private float exitAlpha;
+        private float  hideBtnCooldown = 0f;  // delay before HIDE button is clickable
 
         // ── Lifecycle ──────────────────────────────────────────────────────
         private void Start()
@@ -67,6 +68,7 @@ namespace Ghomidha
         {
             FadeCvg(hideCvg, hideAlpha);
             FadeCvg(exitCvg, exitAlpha);
+            if (hideBtnCooldown > 0f) hideBtnCooldown -= Time.deltaTime;
 
             // ── Per-frame position lock ──────────────────────────────────
             // We correct xrOriginTf every frame so Camera.main X/Z stays at hidePosition X/Z.
@@ -99,7 +101,9 @@ namespace Ghomidha
 
         private void LateUpdate()
         {
-            SetInteractable(hideCvg, hideCvg != null && hideCvg.alpha > 0.5f);
+            // HIDE button only becomes interactable after the cooldown (prevents auto-fire on walk-in)
+            bool hideReady = hideCvg != null && hideCvg.alpha > 0.5f && hideBtnCooldown <= 0f;
+            SetInteractable(hideCvg, hideReady);
             SetInteractable(exitCvg, exitCvg != null && exitCvg.alpha > 0.5f);
         }
 
@@ -109,6 +113,7 @@ namespace Ghomidha
             if (!IsPlayer(other) || playerInRange || IsHiding) return;
             playerInRange = true;
             hideAlpha = 1f;
+            hideBtnCooldown = 1.5f;   // player must be in range 1.5s before button is clickable
 
             Vector3 spot = hidePosition != null ? hidePosition.position : transform.position;
             Vector3 cam  = Camera.main  != null ? Camera.main.transform.position : other.transform.position;
@@ -117,9 +122,17 @@ namespace Ghomidha
 
             if (hideCvs != null)
             {
+                // Place 0.5m in front of camera at eye level — close and easy to click
+                Vector3 camFwd = Camera.main != null ? Camera.main.transform.forward : Vector3.forward;
+                Vector3 camPos = Camera.main != null ? Camera.main.transform.position : other.transform.position;
+                camFwd.y = 0f;
+                if (camFwd.sqrMagnitude < 0.001f) camFwd = Vector3.forward;
+                Vector3 btnPos = camPos + camFwd.normalized * 0.5f;
+                btnPos.y = camPos.y;  // eye level
+
                 hideCvs.transform.SetParent(null);
-                hideCvs.transform.position   = mid;
-                hideCvs.transform.localScale = Vector3.one * 0.004f;
+                hideCvs.transform.position   = btnPos;
+                hideCvs.transform.localScale = Vector3.one * 0.002f;
             }
         }
 
