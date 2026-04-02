@@ -87,6 +87,11 @@ namespace Ghomidha
             }
             if (locked && s_activeSpot == this && exitCvs != null && Camera.main != null)
             {
+                // Keep exit button glued very close to player every frame
+                Vector3 camFwd = Camera.main.transform.forward;
+                Vector3 btnPos = Camera.main.transform.position + camFwd * 0.5f;
+                exitCvs.transform.position = btnPos;
+                exitCvs.transform.localScale = Vector3.one * 0.002f;
                 exitCvs.transform.LookAt(Camera.main.transform);
                 exitCvs.transform.Rotate(0f, 180f, 0f);
             }
@@ -297,7 +302,9 @@ namespace Ghomidha
             var p = new GameObject("Panel");
             p.transform.SetParent(cvs.transform, false);
             var rt = p.AddComponent<RectTransform>();
-            rt.sizeDelta = new Vector2(220f, 70f);
+            // Exit button is smaller so it fits in tight hiding spaces
+            bool isExit = lbl == "[ EXIT ]";
+            rt.sizeDelta = isExit ? new Vector2(140f, 50f) : new Vector2(220f, 70f);
             p.AddComponent<Image>().color = col;
 
             var btn = p.AddComponent<Button>();
