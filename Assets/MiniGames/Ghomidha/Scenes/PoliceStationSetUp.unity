@@ -1517,11 +1517,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Ghomidha.HidingSpot
   hidePosition: {fileID: 600036614}
-  buttonColor: {r: 0, g: 0, b: 0, a: 0.55}
-  buttonText: "\U0001F441  HIDE (table)"
-  fadeDuration: 0.25
-  buttonHeight: 1.3
   proximityRadius: 1.45
+  buttonHeight: 1.3
+  fadeDuration: 0.25
 --- !u!1 &1216123339
 GameObject:
   m_ObjectHideFlags: 0
@@ -1547,7 +1545,7 @@ Transform:
   m_GameObject: {fileID: 1216123339}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 4.47, z: 0}
+  m_LocalPosition: {x: 0, y: 3.09, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -1696,11 +1694,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Ghomidha.HidingSpot
   hidePosition: {fileID: 649433163}
-  buttonColor: {r: 0, g: 0, b: 0, a: 0.55}
-  buttonText: "\U0001F441  HIDE (board2)"
-  fadeDuration: 0.25
-  buttonHeight: 1.3
   proximityRadius: 2.14
+  buttonHeight: 1.3
+  fadeDuration: 0.25
 --- !u!1 &1498943864
 GameObject:
   m_ObjectHideFlags: 0
@@ -2151,11 +2147,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Ghomidha.HidingSpot
   hidePosition: {fileID: 1061778476}
-  buttonColor: {r: 0, g: 0, b: 0, a: 0.55}
-  buttonText: "\U0001F441  HIDE (closet2 )"
-  fadeDuration: 0.25
-  buttonHeight: 1.3
   proximityRadius: 2.1
+  buttonHeight: 1.3
+  fadeDuration: 0.25
 --- !u!1 &1945616284
 GameObject:
   m_ObjectHideFlags: 0
@@ -15077,11 +15071,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Ghomidha.HidingSpot
   hidePosition: {fileID: 1216123340}
-  buttonColor: {r: 0, g: 0, b: 0, a: 0.55}
-  buttonText: "\U0001F441  HIDE (closet)"
-  fadeDuration: 0.25
-  buttonHeight: 1.3
   proximityRadius: 2.1
+  buttonHeight: 1.3
+  fadeDuration: 0.25
 --- !u!33 &921639103920790325
 MeshFilter:
   m_ObjectHideFlags: 0
@@ -58063,11 +58055,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Ghomidha.HidingSpot
   hidePosition: {fileID: 798650242}
-  buttonColor: {r: 0, g: 0, b: 0, a: 0.55}
-  buttonText: "\U0001F441  HIDE (board)"
-  fadeDuration: 0.25
-  buttonHeight: 1.3
   proximityRadius: 2.54
+  buttonHeight: 1.3
+  fadeDuration: 0.25
 --- !u!1 &4022557618864734458
 GameObject:
   m_ObjectHideFlags: 0
@@ -90943,11 +90933,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Ghomidha.HidingSpot
   hidePosition: {fileID: 82833498}
-  buttonColor: {r: 0, g: 0, b: 0, a: 0.55}
-  buttonText: "\U0001F441  HIDE (meeting table)"
-  fadeDuration: 0.25
-  buttonHeight: 1.3
   proximityRadius: 2.5
+  buttonHeight: 1.3
+  fadeDuration: 0.25
 --- !u!1 &6267976699610342897
 GameObject:
   m_ObjectHideFlags: 0

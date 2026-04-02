@@ -193,12 +193,17 @@ namespace Ghomidha
         // ── Exit button placement ──────────────────────────────────────────
         private void PlaceExitButton()
         {
-            if (exitCvs == null || Camera.main == null) return;
-            Vector3 fwd = Camera.main.transform.forward;
+            if (exitCvs == null || hidePosition == null) return;
+
+            // Place in front of hidePosition at eye level — camera may not have settled yet
+            // so we use hidePosition as the anchor, not Camera.main
+            Vector3 fwd = hidePosition.forward;
             fwd.y = 0f;
             if (fwd.sqrMagnitude < 0.001f) fwd = Vector3.forward;
-            Vector3 pos = Camera.main.transform.position + fwd.normalized * 0.6f;
-            pos.y = Camera.main.transform.position.y - 0.1f;
+
+            Vector3 pos = hidePosition.position + fwd.normalized * 0.6f;
+            // Use camera Y for eye-level placement (hidePosition.y may be at floor level)
+            pos.y = Camera.main != null ? Camera.main.transform.position.y : hidePosition.position.y + 1.5f;
 
             exitCvs.transform.SetParent(null);
             exitCvs.transform.position   = pos;
