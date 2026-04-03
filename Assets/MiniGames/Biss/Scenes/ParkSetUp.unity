@@ -264,6 +264,21 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 1048369769649328670, guid: ea470f69cf6e47f469599ab37ade9bfb,
+        type: 3}
+      propertyPath: m_Mass
+      value: 2.82
+      objectReference: {fileID: 0}
+    - target: {fileID: 1048369769649328670, guid: ea470f69cf6e47f469599ab37ade9bfb,
+        type: 3}
+      propertyPath: m_LinearDamping
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1048369769649328670, guid: ea470f69cf6e47f469599ab37ade9bfb,
+        type: 3}
+      propertyPath: m_AngularDamping
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 2248920054021148323, guid: ea470f69cf6e47f469599ab37ade9bfb,
         type: 3}
       propertyPath: m_LocalPosition.x
