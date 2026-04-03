@@ -12,6 +12,7 @@ public class RentMenuUI : MonoBehaviour
 
     [Header("Buttons")]
     [SerializeField] private Button payButton;
+    [SerializeField] private Button playMinigameButton;   // NEW
 
     [Header("Info Texts")]
     [SerializeField] private Text propertyNameText;
@@ -25,13 +26,14 @@ public class RentMenuUI : MonoBehaviour
     [SerializeField] private float canvasWorldScale = 0.002f;
 
     private PlayerData currentPlayer;
-    private TileData currentProperty;
+    private TileData currentProperty;           
     private string ownerName;
     private int rentAmount;
     private bool isShowing = false;
     private Canvas canvas;
 
     public UnityEvent<int> OnRentPaid = new UnityEvent<int>();
+    public UnityEvent OnPlayMinigame = new UnityEvent();  // NEW
 
     private void Awake()
     {
@@ -51,7 +53,10 @@ public class RentMenuUI : MonoBehaviour
         if (menuPanel != null) menuPanel.SetActive(false);
         if (payButton != null) payButton.onClick.AddListener(OnPayClicked);
 
+        if (playMinigameButton != null)                    // NEW
+            playMinigameButton.onClick.AddListener(OnPlayMinigameClicked);
         EnsureImageOnButton(payButton);
+        EnsureImageOnButton(playMinigameButton);   // NEW
     }
 
     private void Start() => TryAssignCamera();
@@ -165,5 +170,17 @@ public class RentMenuUI : MonoBehaviour
 
         Debug.Log($"[RentMenuUI] {currentPlayer.playerName} pays {rentAmount} DT rent for {currentProperty.tileName}");
         OnRentPaid?.Invoke(rentAmount);
+    }
+
+    private void OnPlayMinigameClicked()
+    {
+        if (!isShowing) return;
+
+        // Close this UI, then let GameManager handle starting the minigame
+        isShowing = false;
+        if (menuPanel != null) menuPanel.SetActive(false);
+
+        Debug.Log("[RentMenuUI] Play Minigame clicked");
+        OnPlayMinigame.Invoke();
     }
 }

@@ -112,9 +112,10 @@ public class PlayerData
     public void SendToJail()
     {
         isInJail = true;
-        jailTurnsRemaining = 3; // Standard 3 turns in jail
+        jailTurnsRemaining = 2; // Wait 2 full turns before playing again
         currentState = PlayerState.InJail;
-        Debug.Log($"{playerName} sent to jail!");
+        currentTileIndex = 10; // Jail tile
+        Debug.Log($"{playerName} sent to jail! Waiting {jailTurnsRemaining} turns.");
     }
     
     /// <summary>

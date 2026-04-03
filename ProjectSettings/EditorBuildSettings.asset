@@ -11,6 +11,21 @@ EditorBuildSettings:
   - enabled: 0
     path: Assets/Scenes/BasicScene.unity
     guid: bc761d9a86b33554f85fd11bb1f87ba3
+  - enabled: 1
+    path: Assets/MiniGames/Biss/Scenes/EnvSetUp.unity
+    guid: 24c5d664ebcaf7845b04d1c5dbca848d
+  - enabled: 1
+    path: Assets/MiniGames/BentWalad/scene/BentWaladScene.unity
+    guid: 3dd568191bbebf7428c0541dbbef4d02
+  - enabled: 1
+    path: Assets/MiniGames/3allouchEl3id/Scenes/3allouch.unity
+    guid: 039d21e9c5cfa9d419e3685ad3c02716
+  - enabled: 1
+    path: Assets/Scenes/Aymen/Khobz.unity
+    guid: 930d2fa71b8c6e842bc6aee11e8a4190
+  - enabled: 1
+    path: Assets/MiniGames/RockPaperScissors/Scenes/HandTracking_PlayerVSComputer.unity
+    guid: fc7641204423dfd4ab098b18d6face0f
   m_configObjects:
     com.unity.xr.arfoundation.simulation_settings: {fileID: 11400000, guid: 33491290b38a6094fbf61d3c24a308a5,
       type: 2}

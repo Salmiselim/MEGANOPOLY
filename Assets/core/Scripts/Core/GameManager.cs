@@ -53,13 +53,15 @@ public class CompleteGameManager : MonoBehaviour
     [SerializeField] private KeyCode cheatKey_GiveMoney       = KeyCode.F3;
     [SerializeField] private KeyCode cheatKey_TestRent        = KeyCode.F4;
     [SerializeField] private KeyCode cheatKey_BuyAll          = KeyCode.F5;
-    [SerializeField] private KeyCode cheatKey_TestTrain        = KeyCode.F6;
+    [SerializeField] private KeyCode cheatKey_TestTrain       = KeyCode.F6;
+    [SerializeField] private KeyCode cheatKey_TestMinigame    = KeyCode.F7;
 
     // Game State
     private GameState currentGameState = GameState.Setup;
     private PlayerData[] players;
     private int currentPlayerIndex = 0;
     private bool waitingForDiceRoll = false;
+    private bool isGamePaused = false;
 
     // Dice tracking
     private bool dice1HasResult = false;
@@ -70,6 +72,9 @@ public class CompleteGameManager : MonoBehaviour
     // Events
     public UnityEvent OnGameStarted = new UnityEvent();
     public UnityEvent<int> OnTurnChanged = new UnityEvent<int>();
+
+    // Minigame reference
+    private MinigameOrchestrator minigameOrchestrator;
 
     private void Awake()
     {
@@ -85,6 +90,14 @@ public class CompleteGameManager : MonoBehaviour
 
         if (boardManager == null)
             boardManager = FindObjectOfType<BoardManager>();
+
+        // Find minigame orchestrator
+        minigameOrchestrator = FindObjectOfType<MinigameOrchestrator>();
+        if (minigameOrchestrator != null)
+        {
+            minigameOrchestrator.OnMinigameEnded.AddListener(OnMinigameEnded);
+            Debug.Log("✓ MinigameOrchestrator connected");
+        }
 
         // Auto-find dice if not assigned
         if (dice == null || dice.Length < 2 || dice[0] == null || dice[1] == null)
@@ -319,15 +332,18 @@ public class CompleteGameManager : MonoBehaviour
 
     private void HandleJailTurn(PlayerData player)
     {
-        player.jailTurnsRemaining--;
-
-        if (player.jailTurnsRemaining <= 0)
+      if (player.jailTurnsRemaining > 0)
         {
-            player.ReleaseFromJail();
-            Debug.Log($"🔓 Released from jail!");
+            player.jailTurnsRemaining--;
+            Debug.Log($"🔒 {player.playerName} is in Jail. {player.jailTurnsRemaining} turn(s) remaining.");
+         EndTurn(); // Skip this turn — player waits
+      return;
         }
 
-        EndTurn();
+      // Turns served — release and let them play normally this turn
+        player.ReleaseFromJail();
+     Debug.Log($"🔓 {player.playerName} is released from Jail! Roll the dice.");
+    EnableDiceForPlayer();
     }
 
     private void EnableDiceForPlayer()
@@ -465,10 +481,10 @@ public class CompleteGameManager : MonoBehaviour
                 break;
 
             case TileType.GoToJail:
-                Debug.Log($"🚔 Going to JAIL!");
-                player.SendToJail();
-                player.currentTileIndex = 10;
+                Debug.Log($"🚔 {player.playerName} landed on Go To Jail! Sending to Jail (tile 10)...");
+               player.SendToJail(); // sets isInJail, jailTurnsRemaining=2, currentTileIndex=10
                 player.movementController?.TeleportToTile(10, boardManager.allTiles);
+                Debug.Log($"🔒 {player.playerName} is in Jail for {player.jailTurnsRemaining} turns.");
                 EndTurn();
                 break;
 
@@ -583,6 +599,23 @@ public class CompleteGameManager : MonoBehaviour
 
     private void HandleProperty(PlayerData player, TileData property)
     {
+        // Check if this property triggers a minigame
+        if (ShouldTriggerMinigame(property))
+        {
+            int minigameType = 0;
+            switch (property.propertyColor)
+            {
+                case PropertyColor.LightBlue: minigameType = 0; break; // Maps Light Blue tiles to ID 0
+                case PropertyColor.Pink:      minigameType = 1; break; // Maps Pink tiles to ID 1
+                case PropertyColor.Orange:    minigameType = 2; break; // Maps Orange tiles to ID 2
+                case PropertyColor.Green:     minigameType = 3; break; // Maps Green tiles to ID 3
+                default:                      minigameType = 0; break; // Default fallback
+            }
+            int prizeAmount = Mathf.Max(100, property.purchasePrice / 2);
+            TriggerMinigameChallenge(player, property, minigameType, prizeAmount);
+            return;
+        }
+
         if (!property.IsOwned())
         {
             // Get the tile marker to access the card
@@ -720,6 +753,57 @@ public class CompleteGameManager : MonoBehaviour
         return null;
     }
 
+    /// <summary>
+    /// Trigger a minigame challenge for the current player
+    /// minigameType: 0=Khobz, 1=3allouch, 2=BentWalad
+    /// </summary>
+    public void TriggerMinigameChallenge(PlayerData player, TileData property, int minigameType = 0, int prizeAmount = 200)
+    {
+        if (minigameOrchestrator == null)
+        {
+            Debug.LogError("[GameManager] MinigameOrchestrator not found!");
+            EndTurn();
+            return;
+        }
+
+        minigameOrchestrator.StartMinigame(minigameType, property.tileName, player, prizeAmount);
+    }
+
+    /// <summary>
+    /// Pause the game when minigame starts
+    /// </summary>
+    public void PauseGame()
+    {
+        isGamePaused = true;
+        Time.timeScale = 0f;
+        Debug.Log("[GameManager] Game paused for minigame");
+    }
+
+    /// <summary>
+    /// Resume the game when minigame ends
+    /// </summary>
+    public void ResumeGame()
+    {
+        isGamePaused = false;
+        Time.timeScale = 1f;
+        Debug.Log("[GameManager] Game resumed from minigame");
+    }
+
+    /// <summary>
+    /// Called when minigame finishes
+    /// </summary>
+    private void OnMinigameEnded(int winnerId, int prizeAmount)
+    {
+        if (winnerId >= 0 && winnerId < players.Length && prizeAmount > 0)
+        {
+            players[winnerId].AddMoney(prizeAmount);
+            Debug.Log($"[GameManager] Minigame winner: {players[winnerId].playerName} won {prizeAmount} DT");
+        }
+
+        // Continue game turn
+        EndTurn();
+    }
+
     // ── DEBUG CHEATS ─────────────────────────────────────────────────────────
 
     private void Update()
@@ -734,6 +818,7 @@ public class CompleteGameManager : MonoBehaviour
         if (Input.GetKeyDown(cheatKey_TestRent))      Cheat_TestRent();
         if (Input.GetKeyDown(cheatKey_BuyAll))        Cheat_BuyAllProperties();
         if (Input.GetKeyDown(cheatKey_TestTrain))     Cheat_TestTrain_Station();
+        if (Input.GetKeyDown(cheatKey_TestMinigame))  Cheat_TestMinigame();
     }
 
     /// <summary>
@@ -911,5 +996,74 @@ public class CompleteGameManager : MonoBehaviour
 
         Debug.Log($"[CHEAT F6] {player.playerName} → {station.tileName} — TrainMenuUI opening");
         HandleRailroad(player, station);
+    }
+
+    /// <summary>F7 — Instantly trigger the minigame associated with Khobz.</summary>
+    private void Cheat_TestMinigame()
+    {
+        PlayerData player = players[currentPlayerIndex];
+        
+        // Stop any active coroutines/dice
+        waitingForDiceRoll = false;
+        StopAllCoroutines();
+
+        // Use a dummy tile for the test. We use "BentWaladScene" in the name so GetMinigameTypeForProperty returns 2.
+        TileData dummyProperty = new TileData(99, "BentWaladScene Test Tile", TileType.Property, Vector3.zero);
+        dummyProperty.propertyColor = PropertyColor.Orange; 
+        dummyProperty.purchasePrice = 200;
+        
+        Debug.Log($"[CHEAT F7] Triggering Minigame challenge for {player.playerName} on {dummyProperty.tileName}");
+
+        int minigameType = GetMinigameTypeForProperty(dummyProperty);
+        int prizeAmount = Mathf.Max(100, dummyProperty.purchasePrice / 2);
+
+        // Directly call the method you already wrote
+        TriggerMinigameChallenge(player, dummyProperty, minigameType, prizeAmount);
+    }
+
+    // ═════════════════════════════════════════════════════════════════════════════
+    // MINIGAME INTEGRATION
+    // ═════════════════════════════════════════════════════════════════════════════
+
+    /// <summary>
+    /// Determines if a property should trigger a minigame
+    /// Override this logic to customize which properties trigger minigames
+    /// </summary>
+    private bool ShouldTriggerMinigame(TileData property)
+    {
+        // Example: Trigger minigame only on certain properties
+        // You can customize this based on property names, colors, or other criteria
+
+        // For now: only trigger on certain tile names
+        string name = property.tileName.ToLower();
+
+        // Customize: Add property names that should trigger minigames
+        bool isSpecialProperty =
+            name.Contains("Khobz".ToLower()) ||  // Change to your actual property name
+            name.Contains("3allouch".ToLower()) ||
+              name.Contains("HandTracking_PlayerVSComputer".ToLower()) // Change to your actual property name
+            || name.Contains("BentWaladScene".ToLower());     // Change to your actual property name
+
+        return isSpecialProperty && !property.IsOwned();
+    }
+
+    /// <summary>
+    /// Map a property to its minigame type
+    /// 0 = Khobz, 1 = 3allouch, 2 = BentWalad
+    /// </summary>
+    private int GetMinigameTypeForProperty(TileData property)
+    {
+        string name = property.tileName.ToLower();
+
+        if (name.Contains("Khobz".ToLower()))
+            return 0; // Khobz minigame
+        else if (name.Contains("3allouch".ToLower()))
+            return 1; // 3allouch minigame
+        else if (name.Contains("BentWaladScene".ToLower()))
+            return 2; // BentWalad minigame
+        else if (name.Contains("HandTracking_PlayerVSComputer".ToLower()))
+            return 3; // BentWalad minigame
+        else
+            return 0; // Default to Khobz
     }
 }
