@@ -1,0 +1,590 @@
+Letter,Category,Word
+a,boy's name,ahmed
+a,boy's name,adam
+a,boy's name,amir
+a,boy's name,akram
+a,boy's name,amin
+a,boy's name,anas
+a,boy's name,ayman
+a,boy's name,adnan
+a,boy's name,abdullah
+a,boy's name,ali
+a,boy's name,arham
+a,boy's name,arif
+a,boy's name,asad
+a,boy's name,ayaz
+a,boy's name,azhar
+a,boy's name,aziz
+a,boy's name,abrar
+a,boy's name,abid
+a,boy's name,abdurrahman
+a,boy's name,abubakar
+a,boy's name,adeel
+a,boy's name,adil
+a,boy's name,afnan
+a,boy's name,ahsan
+a,boy's name,akif
+a,boy's name,alauddin
+a,boy's name,ameer
+a,boy's name,amjad
+a,boy's name,anas
+a,boy's name,arfan
+a,girl's name,amal
+a,girl's name,arwa
+a,girl's name,asma
+a,girl's name,aya
+a,girl's name,ayesha
+a,girl's name,amina
+a,girl's name,aiman
+a,girl's name,alina
+a,girl's name,anaya
+a,girl's name,afnan
+a,girl's name,afra
+a,girl's name,ain
+a,girl's name,almas
+a,girl's name,alaa
+a,girl's name,amira
+a,girl's name,anisa
+a,girl's name,asiya
+a,girl's name,atiya
+a,girl's name,aylin
+a,girl's name,afifa
+a,girl's name,aiman
+a,girl's name,ain
+a,girl's name,alaa
+a,girl's name,almas
+a,girl's name,amani
+a,girl's name,arwa
+a,girl's name,asmaa
+a,girl's name,ayman
+a,girl's name,aziza
+a,object,alarm
+a,object,alarm clock
+a,object,armchair
+a,object,arrow
+a,object,ashtray
+a,object,axe
+a,object,antenna
+a,object,apron
+a,object,atlas
+a,object,awning
+a,object,air conditioner
+a,object,air freshener
+a,object,adapter
+a,object,album
+a,object,amplifier
+a,object,antique
+a,object,ash tray
+a,food,apple
+a,food,apricot
+a,food,artichoke
+a,food,almond
+a,food,avocado
+a,food,asparagus
+a,food,anchovy
+a,food,arugula
+a,food,acai
+a,country,afghanistan
+a,country,albania
+a,country,algeria
+a,country,andorra
+a,country,angola
+a,country,antigua and barbuda
+a,country,argentina
+a,country,armenia
+a,country,australia
+a,country,austria
+a,country,azerbaijan
+b,boy's name,bassem
+b,boy's name,badr
+b,boy's name,bilal
+b,boy's name,belal
+b,boy's name,bashir
+b,boy's name,barakat
+b,boy's name,burhan
+b,boy's name,bakr
+b,boy's name,baqir
+b,boy's name,baha
+b,boy's name,basil
+b,boy's name,bayazid
+b,boy's name,bilqis
+b,boy's name,buraq
+b,girl's name,basma
+b,girl's name,bushra
+b,girl's name,bahia
+b,girl's name,banan
+b,girl's name,barakah
+b,girl's name,batoul
+b,girl's name,buthaina
+b,girl's name,badia
+b,girl's name,balqis
+b,girl's name,banin
+b,girl's name,bariya
+b,girl's name,baria
+b,object,book
+b,object,ball
+b,object,bed
+b,object,blanket
+b,object,bottle
+b,object,bowl
+b,object,broom
+b,object,brush
+b,object,bucket
+b,object,bulb
+b,object,bag
+b,object,basket
+b,object,battery
+b,object,bin
+b,object,bedside table
+b,object,bench
+b,object,bicycle
+b,object,binoculars
+b,object,blackboard
+b,object,blender
+b,object,board
+b,food,bread
+b,food,banana
+b,food,beef
+b,food,beans
+b,food,burger
+b,food,biscuit
+b,food,broccoli
+b,food,blueberry
+b,food,baklava
+b,food,baba ganoush
+b,food,bamia
+b,country,bahrain
+b,country,bangladesh
+b,country,barbados
+b,country,belarus
+b,country,belgium
+b,country,belize
+b,country,benin
+b,country,bhutan
+b,country,bolivia
+b,country,bosnia and herzegovina
+b,country,botswana
+b,country,brazil
+b,country,brunei
+b,country,bulgaria
+b,country,burkina faso
+b,country,burundi
+c,boy's name,chakir
+c,boy's name,chadi
+c,boy's name,chaouki
+c,boy's name,chaker
+c,boy's name,chamseddine
+c,girl's name,chaima
+c,girl's name,chourouk
+c,girl's name,chanaz
+c,girl's name,chaima
+c,girl's name,chakila
+c,object,chair
+c,object,clock
+c,object,curtain
+c,object,cup
+c,object,carpet
+c,object,cabinet
+c,object,candle
+c,object,charger
+c,object,comb
+c,object,coaster
+c,object,calculator
+c,object,calendar
+c,object,camera
+c,object,can opener
+c,object,cap
+c,food,carrot
+c,food,chicken
+c,food,cheese
+c,food,cake
+c,food,coffee
+c,food,couscous
+c,food,cucumber
+c,food,coriander
+c,food,cumin
+c,food,cinnamon
+c,country,cambodia
+c,country,cameroon
+c,country,canada
+c,country,central african republic
+c,country,chad
+c,country,chile
+c,country,china
+c,country,colombia
+c,country,comoros
+c,country,congo
+c,country,costa rica
+c,country,croatia
+c,country,cuba
+c,country,cyprus
+c,country,czech republic
+d,boy's name,daniel
+d,boy's name,dawoud
+d,boy's name,dhia
+d,boy's name,dhiaeddine
+d,boy's name,dani
+d,boy's name,dawood
+d,girl's name,dania
+d,girl's name,dalila
+d,girl's name,doha
+d,girl's name,dina
+d,girl's name,dima
+d,girl's name,darine
+d,object,drawer
+d,object,door
+d,object,dustpan
+d,object,dish
+d,object,desk
+d,object,dust cloth
+d,object,dvd player
+d,object,dryer
+d,food,date
+d,food,dumpling
+d,food,doughnut
+d,food,duck
+d,food,durum
+d,country,denmark
+d,country,djibouti
+d,country,dominica
+d,country,dominican republic
+e,boy's name,essam
+e,boy's name,eyad
+e,boy's name,elias
+e,boy's name,emad
+e,girl's name,eman
+e,girl's name,esra
+e,girl's name,elham
+e,girl's name,evlin
+e,object,envelope
+e,object,eraser
+e,object,extension cord
+e,object,electric kettle
+e,food,egg
+e,food,eggplant
+e,food,emmental
+e,country,ecuador
+e,country,egypt
+e,country,el salvador
+e,country,equatorial guinea
+e,country,eritrea
+e,country,estonia
+e,country,ethiopia
+f,boy's name,faisal
+f,boy's name,faris
+f,boy's name,fouad
+f,boy's name,fahad
+f,boy's name,fadi
+f,girl's name,fatima
+f,girl's name,farah
+f,girl's name,fatouma
+f,girl's name,fadia
+f,girl's name,firdaus
+f,object,fan
+f,object,frame
+f,object,fork
+f,object,fridge
+f,object,flower pot
+f,object,flashlight
+f,object,filing cabinet
+f,food,falafel
+f,food,foul
+f,food,fig
+f,food,feta
+f,food,fava beans
+f,country,fiji
+f,country,finland
+f,country,france
+g,boy's name,ghassan
+g,boy's name,ghazi
+g,boy's name,gaber
+g,girl's name,ghada
+g,girl's name,gina
+g,girl's name,ghina
+g,object,glass
+g,object,globe
+g,object,grater
+g,object,guitar
+g,food,grape
+g,food,guava
+g,food,garlic
+g,food,ginger
+g,country,gabon
+g,country,gambia
+g,country,georgia
+g,country,germany
+g,country,ghana
+g,country,greece
+g,country,guatemala
+h,boy's name,hassan
+h,boy's name,hamza
+h,boy's name,hadi
+h,boy's name,hakim
+h,boy's name,husam
+h,girl's name,hana
+h,girl's name,hala
+h,girl's name,huda
+h,girl's name,hafsa
+h,girl's name,hajer
+h,object,hanger
+h,object,hose
+h,object,hairbrush
+h,object,hammer
+h,food,honey
+h,food,hummus
+h,food,halva
+h,food,harissa
+h,country,haiti
+h,country,honduras
+h,country,hungary
+i,boy's name,ibrahim
+i,boy's name,ismail
+i,boy's name,imad
+i,girl's name,inaya
+i,girl's name,iman
+i,girl's name,islah
+i,object,iron
+i,object,ink
+i,object,iron board
+i,food,ice cream
+i,food,italian sausage
+i,country,iceland
+i,country,india
+i,country,indonesia
+i,country,iran
+i,country,iraq
+i,country,ireland
+i,country,israel
+i,country,italy
+j,boy's name,jalal
+j,boy's name,jawad
+j,boy's name,jaber
+j,girl's name,jamila
+j,girl's name,janna
+j,girl's name,jawhara
+j,object,jug
+j,object,jacket
+j,object,jewelry box
+j,food,jam
+j,food,jelly
+j,country,jamaica
+j,country,japan
+j,country,jordan
+k,boy's name,khaled
+k,boy's name,karim
+k,boy's name,kamal
+k,girl's name,khadija
+k,girl's name,kawthar
+k,girl's name,kholoud
+k,object,key
+k,object,knife
+k,object,kettle
+k,object,keyboard
+k,food,kebab
+k,food,kunafa
+k,food,knafeh
+k,country,kenya
+k,country,kuwait
+k,country,kyrgyzstan
+l,boy's name,layth
+l,boy's name,louay
+l,girl's name,laila
+l,girl's name,lamia
+l,girl's name,layan
+l,object,lamp
+l,object,ladder
+l,object,laptop
+l,object,light bulb
+l,food,lemon
+l,food,lentil
+l,food,lahmacun
+l,country,laos
+l,country,latvia
+l,country,lebanon
+l,country,lesotho
+l,country,liberia
+l,country,libya
+l,country,lithuania
+l,country,luxembourg
+m,boy's name,mohammed
+m,boy's name,mahmoud
+m,boy's name,mustafa
+m,boy's name,marwan
+m,boy's name,majed
+m,girl's name,maryam
+m,girl's name,marwa
+m,girl's name,mona
+m,girl's name,malak
+m,object,mirror
+m,object,mop
+m,object,mattress
+m,object,microphone
+m,food,mango
+m,food,meat
+m,food,maamoul
+m,food,molokhia
+m,country,madagascar
+m,country,malawi
+m,country,malaysia
+m,country,maldives
+m,country,mali
+m,country,malta
+m,country,mauritania
+m,country,mauritius
+m,country,mexico
+m,country,morocco
+m,country,mozambique
+n,boy's name,nabil
+n,boy's name,nader
+n,girl's name,nour
+n,girl's name,nada
+n,girl's name,najwa
+n,object,needle
+n,object,notebook
+n,object,nightstand
+n,food,nut
+n,food,noodle
+n,country,namibia
+n,country,nepal
+n,country,netherlands
+n,country,new zealand
+n,country,niger
+n,country,nigeria
+n,country,north korea
+n,country,norway
+o,boy's name,omar
+o,boy's name,osama
+o,girl's name,oumaima
+o,girl's name,ola
+o,object,oven
+o,object,office chair
+o,food,olive
+o,food,okra
+o,country,oman
+p,boy's name,patrick
+p,girl's name,perla
+p,object,plate
+p,object,pillow
+p,object,pot
+p,object,picture frame
+p,food,pizza
+p,food,potato
+p,food,pancake
+p,country,pakistan
+p,country,panama
+p,country,papua new guinea
+p,country,paraguay
+p,country,peru
+p,country,philippines
+p,country,poland
+p,country,portugal
+q,boy's name,qais
+q,girl's name,qamar
+q,object,quilt
+q,food,quinoa
+q,country,qatar
+r,boy's name,rami
+r,boy's name,raed
+r,girl's name,rim
+r,girl's name,rania
+r,girl's name,raya
+r,object,radio
+r,object,rug
+r,object,remote
+r,object,rack
+r,food,rice
+r,food,raisin
+r,food,radish
+r,country,romania
+r,country,russia
+r,country,rwanda
+s,boy's name,sami
+s,boy's name,salah
+s,boy's name,samer
+s,girl's name,sara
+s,girl's name,salma
+s,girl's name,sana
+s,object,sofa
+s,object,spoon
+s,object,shelf
+s,object,scissors
+s,food,soup
+s,food,salad
+s,food,shawarma
+s,food,sambusa
+s,country,saint lucia
+s,country,samoa
+s,country,saudi arabia
+s,country,senegal
+s,country,serbia
+s,country,sierra leone
+s,country,singapore
+s,country,slovakia
+s,country,slovenia
+s,country,somalia
+s,country,south africa
+s,country,south korea
+s,country,spain
+s,country,sri lanka
+s,country,sudan
+s,country,sweden
+s,country,switzerland
+s,country,syria
+t,boy's name,tamer
+t,boy's name,taha
+t,girl's name,tasnim
+t,girl's name,talia
+t,object,table
+t,object,towel
+t,object,television
+t,object,telephone
+t,food,tea
+t,food,tomato
+t,food,tahini
+t,food,tabbouleh
+t,country,taiwan
+t,country,tajikistan
+t,country,tanzania
+t,country,thailand
+t,country,togo
+t,country,tunisia
+t,country,turkey
+u,boy's name,usama
+u,girl's name,umayma
+u,object,umbrella
+u,food,uva grape
+u,country,uganda
+u,country,ukraine
+u,country,united arab emirates
+u,country,united kingdom
+u,country,united states
+u,country,uruguay
+u,country,uzbekistan
+v,boy's name,victor
+v,girl's name,victoria
+v,object,vase
+v,food,vanilla
+v,country,venezuela
+v,country,vietnam
+w,boy's name,waleed
+w,girl's name,wafa
+w,object,watch
+w,object,window
+w,object,washing machine
+w,food,watermelon
+w,country,wales
+w,country,western sahara
+y,boy's name,yahya
+y,boy's name,yasser
+y,girl's name,yasmin
+y,girl's name,yara
+y,object,yarn
+y,food,yogurt
+y,country,yemen
+z,boy's name,zayd
+z,girl's name,zahra
+z,girl's name,zainab
+z,object,zipper
+z,food,zucchini
+z,country,zambia
+z,country,zimbabwe

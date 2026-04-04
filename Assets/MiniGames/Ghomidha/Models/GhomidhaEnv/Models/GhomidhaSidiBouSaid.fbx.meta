@@ -1,0 +1,735 @@
+fileFormatVersion: 2
+guid: 62220b9fe46565b41887cf76e113fa8e
+ModelImporter:
+  serializedVersion: 24200
+  internalIDToNameTable: []
+  externalObjects:
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: Material.001
+    second: {fileID: 2100000, guid: ed2669aea76aebe47b71be4b3b7a362b, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: euc_ma_lamp01__NSP_CMN_Glass
+    second: {fileID: 2100000, guid: 0cf2e06f40031624a82989ceea0889a7, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: euc_ma_lamp02__NSP_CMN_ChaoTexSpecNrmTan
+    second: {fileID: 2100000, guid: 33ec581a905c4284faaf192454cbde50, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: euc_ma_lamp03__NSP_CMN_ChaoTexSpecNrmTan
+    second: {fileID: 2100000, guid: 748f3f0e83e06ed46965f02d3664888b, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: euc_plant_sk_flowerZ01
+    second: {fileID: 2100000, guid: b229580c99e32d64095e5d30d513d52c, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: euc_plant_sk_flowerZ02
+    second: {fileID: 2100000, guid: 139169578054abd47b25c58e6d547cda, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: euc_plant_sk_flowerZ03
+    second: {fileID: 2100000, guid: 723e8ab5c4a537340b33d504b445a390, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: euc_plant_sk_flowerZ04
+    second: {fileID: 2100000, guid: cfc846a397754ca4b94a0493e8c6d243, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: euc_plant_sk_flowerZ05
+    second: {fileID: 2100000, guid: 16427f8955f414d448020d576fa01fa0, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: euc_wood_hh_barrel__NSP_CMN_ChaoTexSpecNrmTan
+    second: {fileID: 2100000, guid: eb1a86c470be03f4d94c11ddfd31675c, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: euc_wood_hh_barreldirt__NSP_CMN_ChaoTexSpecNrmTan
+    second: {fileID: 2100000, guid: 777b250242c5b3a42bf4b350282cb27b, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: euc_wood_hh_cork__NSP_CMN_ChaoTexSpecNrmTan
+    second: {fileID: 2100000, guid: ec648ef2c1e9e9541b125181d7efe0c7, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: ha__metal_handrail__NSP_CMN_ChaoTexSpecNrmTan
+    second: {fileID: 2100000, guid: 05deea88577ef764ca4366001f808abe, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: ha_door_blue__NSP_CMN_ChaoTexSpecNrmTan
+    second: {fileID: 2100000, guid: 1f5f8e6928b758b4f9411eec360673ef, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: ha_door_green__NSP_CMN_ChaoTexSpecNrmTan
+    second: {fileID: 2100000, guid: c2433c53851ea5f4cbe9c94a1ec36d6d, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: ha_door_red__NSP_CMN_ChaoTexSpecNrmTan
+    second: {fileID: 2100000, guid: 3a0d5eb0f9a93db4a9fe8806ccf595e4, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: ha_ground_brigde__NSP_CMN_ChaoTexSpecNrmTan
+    second: {fileID: 2100000, guid: cbe699cf3b5f59c45a6fdf9c4b9036d6, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: ha_stone_brigde01__NSP_CMN_ChaoTexSpecNrmTan
+    second: {fileID: 2100000, guid: ffb1f4b1782769947bafd86bc1a2e38d, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: ha_windmill_straw__NSP_CMN_ChaoTexSpecNrmTan
+    second: {fileID: 2100000, guid: 3486431d40a6bef47ae00fa316412c18, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: ha_windmill_wood__NSP_CMN_ChaoTexSpecNrmTan
+    second: {fileID: 2100000, guid: 8d0c1ab31f8412945a53a0f8ebcf5dc1, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: ha_windmill_wsidestring__NSP_CMN_ChaoTexSpecNrmTan
+    second: {fileID: 2100000, guid: 9aea8146a096376428f36a520f40fb9a, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: ha_wooddeck_blue__NSP_CMN_ChaoTexSpecNrmTan
+    second: {fileID: 2100000, guid: 40d97ee70eacf2b4a89f53b963d97228, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: ha_wooddeck_green__NSP_CMN_ChaoTexSpecNrmTan
+    second: {fileID: 2100000, guid: a4e0bee94fa9a2c4f9a8c2ad59531ae2, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: ha_wooddeck_red__NSP_CMN_ChaoTexSpecNrmTan
+    second: {fileID: 2100000, guid: 5a7ea62728cc61541b2a4cccafa9491b, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: km_icevendor01__NSP_CMN_ChaoTexSpecNrmTan
+    second: {fileID: 2100000, guid: ce203b75bc6a0174890db74a52ba22d1, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: km_icevendor02__NSP_CMN_ChaoTexSpecNrmTan
+    second: {fileID: 2100000, guid: dc992fe869b08804caf51136f5d6f2d7, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: kt_Bell__NSP_CMN_ChaoTexSpecNrmTan
+    second: {fileID: 2100000, guid: 7e97753146a9ca646925fe8157eb270e, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: kt_ground_PlamterSoil__NSP_CMN_ChaoTexSpecNrmTan
+    second: {fileID: 2100000, guid: aa590624b978c2848903c99935275e61, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: kt_ground_RawnGrass01__NSP_CMN_ChaoTexSpecNrmTan
+    second: {fileID: 2100000, guid: 34c2ad921b983494a883da5ad9614c49, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: kt_rock_cliff02__NSP_CMN_ChaoTexSpecNrmTan
+    second: {fileID: 2100000, guid: 2718025f0fa727c47bdf7d730a4b5053, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: kt_rock_cliff03__NSP_CMN_ChaoTexSpecNrmTan
+    second: {fileID: 2100000, guid: 0cf5291b862740e49b77efcb9f5163b8, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: kt_stone_GrayChip__NSP_CMN_ChaoTexSpecNrmTan
+    second: {fileID: 2100000, guid: c77918a2b0f738b4ca1d7b0196a2d5f4, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: kt_stone_TamaGround__NSP_CMN_ChaoTexSpecNrmTan
+    second: {fileID: 2100000, guid: 5e241c5612efc4846bf3fb22ec59bc88, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: kt_stone_road01__NSP_CMN_ChaoTexSpecNrmTan
+    second: {fileID: 2100000, guid: d5d8ba8d76cf6b34e8661d1a60086731, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: kt_stone_wall01__NSP_CMN_ChaoTexSpecNrmTan
+    second: {fileID: 2100000, guid: ed0a5e90b1fc528408245dc0b4bb214f, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: kt_stone_wall02__NSP_CMN_ChaoTexSpecNrmTan
+    second: {fileID: 2100000, guid: 3e7ded6af549a244a8f7389de824c75d, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: myk_euc_hh_flower__NSP_CMN_ChaoTexSpecNrmTan
+    second: {fileID: 2100000, guid: bf87d59b00403814dbcf6fc18657ed26, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: myk_euc_rock_hh_tree__NSP_CMN_ChaoTexSpecNrmTan
+    second: {fileID: 2100000, guid: c37855c034780a64398b491b83d69207, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: myk_kt_Signboard
+    second: {fileID: 2100000, guid: 83cb3c59d80718a419aa966081a11c9f, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: myk_obj_sk2_cats
+    second: {fileID: 2100000, guid: 5a23209714d871c4c8703adf3c97c49b, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: myk_rock_hh_pot__NSP_CMN_ChaoTexSpecNrmTan
+    second: {fileID: 2100000, guid: d3ac94728e351e54597730b40e3efb00, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: myk_yr_plant_bougain01__NSP_CMN_ChaoTexSpecNrmTan
+    second: {fileID: 2100000, guid: d9245ff0d5f32cf43aedb4e23d9fe6f1, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: myk_yr_plant_bougain02__NSP_CMN_ChaoTexSpecNrmTan
+    second: {fileID: 2100000, guid: f537ce3f6577c5543820675bc36e905d, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: myk_yr_plant_bougain03__NSP_CMN_ChaoTexSpecNrmTan
+    second: {fileID: 2100000, guid: 10f500f946c829f4f90d3a2ad07a577f, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: myk_yr_plant_tropical01__NSP_CMN_ChaoTexSpecNrmTan
+    second: {fileID: 2100000, guid: 2d46d5184f1285440b81171eaba01b72, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: myk_yr_plant_tropical02__NSP_CMN_ChaoTexSpecNrmTan
+    second: {fileID: 2100000, guid: 7797017ce71d05e408f5cac9ad8a75a3, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: seatest
+    second: {fileID: 2100000, guid: 579bc9de5b03b4048be3152cadaa2b37, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: tk_mortor_DartGroundl01___NSP_CMN_ChaoTexSpecNrmTan
+    second: {fileID: 2100000, guid: bc59667035401764fa82ab1ae5152880, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: tree02__NSP_CMN_ChaoTexSpecNrmTan
+    second: {fileID: 2100000, guid: d7345d4ecfa4f9e42ba604147cd11b8a, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: wall_muk_glass01__NSP_CMN_Glass
+    second: {fileID: 2100000, guid: 22c8d01a2e640fa46810cbefa6154b7d, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: ym_shopsign
+    second: {fileID: 2100000, guid: e22fef5d7aa77b246a0c28342853167e, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: yr_black__NSP_CMN_ChaoTexSpecNrmTan
+    second: {fileID: 2100000, guid: f7d02b91390f7824180e8c1bbbb8354f, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: yr_cloth_curtain__NSP_CMN_ChaoTexSpecNrmTan
+    second: {fileID: 2100000, guid: 4d3006b09665116438ce2b3ec7989c76, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: yr_mortor_bluewindow__NSP_CMN_ChaoTexSpecNrmTan
+    second: {fileID: 2100000, guid: cbf0655f81ced1643b9c2860698cdcc5, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: yr_mortor_greenwindow__NSP_CMN_ChaoTexSpecNrmTan
+    second: {fileID: 2100000, guid: 6845c7a4a47ee46419fc65062e96154e, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: yr_mortor_redwindow__NSP_CMN_ChaoTexSpecNrmTan
+    second: {fileID: 2100000, guid: 9a0e03316a7f4de4fa69f9943c6abe3d, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: yr_mortor_wall01__NSP_CMN_ChaoTexSpecNrmTan
+    second: {fileID: 2100000, guid: 56f83c68110a5d24bb659480a3f49982, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: yr_mortor_wall02__NSP_CMN_ChaoTexSpecNrmTan
+    second: {fileID: 2100000, guid: 993b57d3e8591004db4bc50d28de2a6b, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: yr_mortor_wall04__NSP_CMN_ChaoTexSpecNrmTan
+    second: {fileID: 2100000, guid: 789510de3b08fe04586462d40b3e180b, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: yr_mortor_wall05__NSP_CMN_ChaoTexSpecNrmTan
+    second: {fileID: 2100000, guid: c6c597d693ca76544af21f1feaa7f3b8, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: yr_road__NSP_CMN_ChaoTexSpecNrmTan
+    second: {fileID: 2100000, guid: 424dcc437b88f1042a37be9831a91618, type: 2}
+  - first:
+      type: UnityEngine:Texture2D
+      assembly: UnityEngine.CoreModule
+      name: euc_ma_lamp01__NSP_CMN_Glass_baseColor
+    second: {fileID: 2800000, guid: c4daf6cfe804f134dac801dee19a1982, type: 3}
+  - first:
+      type: UnityEngine:Texture2D
+      assembly: UnityEngine.CoreModule
+      name: euc_ma_lamp02__NSP_CMN_ChaoTexSpecNrmTan_baseColor
+    second: {fileID: 2800000, guid: ffbd0680fed138649b53896e0e390f2d, type: 3}
+  - first:
+      type: UnityEngine:Texture2D
+      assembly: UnityEngine.CoreModule
+      name: euc_ma_lamp03__NSP_CMN_ChaoTexSpecNrmTan_baseColor
+    second: {fileID: 2800000, guid: f1ec89b3afdab024ba430826e727c918, type: 3}
+  - first:
+      type: UnityEngine:Texture2D
+      assembly: UnityEngine.CoreModule
+      name: euc_plant_sk_flowerZ01_baseColor
+    second: {fileID: 2800000, guid: 19feaa19c08d56945883c664ff24d224, type: 3}
+  - first:
+      type: UnityEngine:Texture2D
+      assembly: UnityEngine.CoreModule
+      name: euc_plant_sk_flowerZ01_normal
+    second: {fileID: 2800000, guid: 0bb242da2f7a84f43970efd25c59443b, type: 3}
+  - first:
+      type: UnityEngine:Texture2D
+      assembly: UnityEngine.CoreModule
+      name: euc_plant_sk_flowerZ02_baseColor
+    second: {fileID: 2800000, guid: 823b88e7339f019498714a1f3ddd92bb, type: 3}
+  - first:
+      type: UnityEngine:Texture2D
+      assembly: UnityEngine.CoreModule
+      name: euc_plant_sk_flowerZ02_normal
+    second: {fileID: 2800000, guid: c5b5f4d80e3e61d408462d9e2aceaf3b, type: 3}
+  - first:
+      type: UnityEngine:Texture2D
+      assembly: UnityEngine.CoreModule
+      name: euc_plant_sk_flowerZ03_baseColor
+    second: {fileID: 2800000, guid: b1bbfc75f84f9db4fb1412bd3c14994c, type: 3}
+  - first:
+      type: UnityEngine:Texture2D
+      assembly: UnityEngine.CoreModule
+      name: euc_plant_sk_flowerZ04_baseColor
+    second: {fileID: 2800000, guid: 0e92259bfe50de74e8c382bd303ed696, type: 3}
+  - first:
+      type: UnityEngine:Texture2D
+      assembly: UnityEngine.CoreModule
+      name: euc_plant_sk_flowerZ04_normal
+    second: {fileID: 2800000, guid: d6fc2a5ec2a64af47a4fb6d74732c9d6, type: 3}
+  - first:
+      type: UnityEngine:Texture2D
+      assembly: UnityEngine.CoreModule
+      name: euc_plant_sk_flowerZ05_baseColor
+    second: {fileID: 2800000, guid: c256c730013d1eb429ea886c20088076, type: 3}
+  - first:
+      type: UnityEngine:Texture2D
+      assembly: UnityEngine.CoreModule
+      name: euc_plant_sk_flowerZ05_normal
+    second: {fileID: 2800000, guid: 9d0fcc1549f318042bef598af3b83c90, type: 3}
+  - first:
+      type: UnityEngine:Texture2D
+      assembly: UnityEngine.CoreModule
+      name: euc_wood_hh_barrel__NSP_CMN_ChaoTexSpecNrmTan_baseColor
+    second: {fileID: 2800000, guid: 3358f686254974e4c9760abb0a562a39, type: 3}
+  - first:
+      type: UnityEngine:Texture2D
+      assembly: UnityEngine.CoreModule
+      name: euc_wood_hh_barreldirt__NSP_CMN_ChaoTexSpecNrmTan_baseColor
+    second: {fileID: 2800000, guid: 65afba01867a1444c93cf501a02b9e9d, type: 3}
+  - first:
+      type: UnityEngine:Texture2D
+      assembly: UnityEngine.CoreModule
+      name: euc_wood_hh_cork__NSP_CMN_ChaoTexSpecNrmTan_baseColor
+    second: {fileID: 2800000, guid: 897b686af923fdb45b5c1b7036ca174f, type: 3}
+  - first:
+      type: UnityEngine:Texture2D
+      assembly: UnityEngine.CoreModule
+      name: ha__metal_handrail__NSP_CMN_ChaoTexSpecNrmTan_baseColor
+    second: {fileID: 2800000, guid: c7728eb49c013f241affe061603abac0, type: 3}
+  - first:
+      type: UnityEngine:Texture2D
+      assembly: UnityEngine.CoreModule
+      name: ha_door_blue__NSP_CMN_ChaoTexSpecNrmTan_baseColor
+    second: {fileID: 2800000, guid: bfab928c277f6b64c83d81cbd522c393, type: 3}
+  - first:
+      type: UnityEngine:Texture2D
+      assembly: UnityEngine.CoreModule
+      name: ha_door_green__NSP_CMN_ChaoTexSpecNrmTan_baseColor
+    second: {fileID: 2800000, guid: 48e88e6d2ca8c554185734291ce472fe, type: 3}
+  - first:
+      type: UnityEngine:Texture2D
+      assembly: UnityEngine.CoreModule
+      name: ha_door_red__NSP_CMN_ChaoTexSpecNrmTan_baseColor
+    second: {fileID: 2800000, guid: 1e3af72c79f4e3946aee2831d2ef0423, type: 3}
+  - first:
+      type: UnityEngine:Texture2D
+      assembly: UnityEngine.CoreModule
+      name: ha_ground_brigde__NSP_CMN_ChaoTexSpecNrmTan_baseColor
+    second: {fileID: 2800000, guid: e81e38dc655a110458c23bbf8a313448, type: 3}
+  - first:
+      type: UnityEngine:Texture2D
+      assembly: UnityEngine.CoreModule
+      name: ha_stone_brigde01__NSP_CMN_ChaoTexSpecNrmTan_baseColor
+    second: {fileID: 2800000, guid: a6af233745331b04fb579758812f3225, type: 3}
+  - first:
+      type: UnityEngine:Texture2D
+      assembly: UnityEngine.CoreModule
+      name: ha_windmill_straw__NSP_CMN_ChaoTexSpecNrmTan_baseColor
+    second: {fileID: 2800000, guid: 5d48a5abb0f03e843820f1dd718d0b51, type: 3}
+  - first:
+      type: UnityEngine:Texture2D
+      assembly: UnityEngine.CoreModule
+      name: ha_windmill_wood__NSP_CMN_ChaoTexSpecNrmTan_baseColor
+    second: {fileID: 2800000, guid: 2a4d19ee4f219404e9191939a2409df9, type: 3}
+  - first:
+      type: UnityEngine:Texture2D
+      assembly: UnityEngine.CoreModule
+      name: ha_windmill_wsidestring__NSP_CMN_ChaoTexSpecNrmTan_baseColor
+    second: {fileID: 2800000, guid: fb47e7a3157579141be8658c5256030a, type: 3}
+  - first:
+      type: UnityEngine:Texture2D
+      assembly: UnityEngine.CoreModule
+      name: ha_wooddeck_blue__NSP_CMN_ChaoTexSpecNrmTan_baseColor
+    second: {fileID: 2800000, guid: c4a701b6952ae574b98b679d3dbd4da6, type: 3}
+  - first:
+      type: UnityEngine:Texture2D
+      assembly: UnityEngine.CoreModule
+      name: ha_wooddeck_green__NSP_CMN_ChaoTexSpecNrmTan_baseColor
+    second: {fileID: 2800000, guid: 693de7a712cad1d4cbc622d4cbe653c7, type: 3}
+  - first:
+      type: UnityEngine:Texture2D
+      assembly: UnityEngine.CoreModule
+      name: ha_wooddeck_red__NSP_CMN_ChaoTexSpecNrmTan_baseColor
+    second: {fileID: 2800000, guid: cf02b647abe653f448b6949d7ea3e269, type: 3}
+  - first:
+      type: UnityEngine:Texture2D
+      assembly: UnityEngine.CoreModule
+      name: km_icevendor01__NSP_CMN_ChaoTexSpecNrmTan_baseColor
+    second: {fileID: 2800000, guid: 7189fa927d0c0254eb0e289a928c8569, type: 3}
+  - first:
+      type: UnityEngine:Texture2D
+      assembly: UnityEngine.CoreModule
+      name: km_icevendor02__NSP_CMN_ChaoTexSpecNrmTan_baseColor
+    second: {fileID: 2800000, guid: a6873e0dc8172794086682b7a328d969, type: 3}
+  - first:
+      type: UnityEngine:Texture2D
+      assembly: UnityEngine.CoreModule
+      name: kt_Bell__NSP_CMN_ChaoTexSpecNrmTan_baseColor
+    second: {fileID: 2800000, guid: d2f5cef5a9d04424cbe6c7522e89bdb4, type: 3}
+  - first:
+      type: UnityEngine:Texture2D
+      assembly: UnityEngine.CoreModule
+      name: kt_ground_PlamterSoil__NSP_CMN_ChaoTexSpecNrmTan_baseColor
+    second: {fileID: 2800000, guid: 10b4c995905798f478ddc682d47b42dc, type: 3}
+  - first:
+      type: UnityEngine:Texture2D
+      assembly: UnityEngine.CoreModule
+      name: kt_ground_RawnGrass01__NSP_CMN_ChaoTexSpecNrmTan_baseColor
+    second: {fileID: 2800000, guid: 0c8a317057b9d944682929f293f98d80, type: 3}
+  - first:
+      type: UnityEngine:Texture2D
+      assembly: UnityEngine.CoreModule
+      name: kt_rock_cliff02__NSP_CMN_ChaoTexSpecNrmTan_baseColor
+    second: {fileID: 2800000, guid: 2c8357943e2947f47b907f0f080a997b, type: 3}
+  - first:
+      type: UnityEngine:Texture2D
+      assembly: UnityEngine.CoreModule
+      name: kt_rock_cliff03__NSP_CMN_ChaoTexSpecNrmTan_baseColor
+    second: {fileID: 2800000, guid: 2ae303c0a59a4ed4a8d6d0de662a3a1e, type: 3}
+  - first:
+      type: UnityEngine:Texture2D
+      assembly: UnityEngine.CoreModule
+      name: kt_stone_TamaGround__NSP_CMN_ChaoTexSpecNrmTan_baseColor
+    second: {fileID: 2800000, guid: e3e13fd094df1db44874b6f6be54cd64, type: 3}
+  - first:
+      type: UnityEngine:Texture2D
+      assembly: UnityEngine.CoreModule
+      name: kt_stone_road01__NSP_CMN_ChaoTexSpecNrmTan_baseColor
+    second: {fileID: 2800000, guid: 34c92680cfcf42e4e857f53870095726, type: 3}
+  - first:
+      type: UnityEngine:Texture2D
+      assembly: UnityEngine.CoreModule
+      name: kt_stone_wall01__NSP_CMN_ChaoTexSpecNrmTan_baseColor
+    second: {fileID: 2800000, guid: 8cce9a0b46663114fa5c2ca82c76219b, type: 3}
+  - first:
+      type: UnityEngine:Texture2D
+      assembly: UnityEngine.CoreModule
+      name: kt_stone_wall02__NSP_CMN_ChaoTexSpecNrmTan_baseColor
+    second: {fileID: 2800000, guid: 8522e2364760d3f49b0567529f1297f6, type: 3}
+  - first:
+      type: UnityEngine:Texture2D
+      assembly: UnityEngine.CoreModule
+      name: myk_euc_hh_flower__NSP_CMN_ChaoTexSpecNrmTan_baseColor
+    second: {fileID: 2800000, guid: 0ce140cbfd8f42d4896d0ff4ceddd94a, type: 3}
+  - first:
+      type: UnityEngine:Texture2D
+      assembly: UnityEngine.CoreModule
+      name: myk_euc_rock_hh_tree__NSP_CMN_ChaoTexSpecNrmTan_baseColor
+    second: {fileID: 2800000, guid: acba15c30a0396a448cdc252653520ce, type: 3}
+  - first:
+      type: UnityEngine:Texture2D
+      assembly: UnityEngine.CoreModule
+      name: myk_kt_Signboard_baseColor
+    second: {fileID: 2800000, guid: 4c78107781269bf40a2128580a9190a8, type: 3}
+  - first:
+      type: UnityEngine:Texture2D
+      assembly: UnityEngine.CoreModule
+      name: myk_obj_sk2_cats_baseColor
+    second: {fileID: 2800000, guid: a0e01afc32778244b88243206d13ec42, type: 3}
+  - first:
+      type: UnityEngine:Texture2D
+      assembly: UnityEngine.CoreModule
+      name: myk_rock_hh_pot__NSP_CMN_ChaoTexSpecNrmTan_baseColor
+    second: {fileID: 2800000, guid: 0cee35150a122154cab15207ec798768, type: 3}
+  - first:
+      type: UnityEngine:Texture2D
+      assembly: UnityEngine.CoreModule
+      name: myk_yr_plant_bougain01__NSP_CMN_ChaoTexSpecNrmTan_baseColor
+    second: {fileID: 2800000, guid: 298e91ef6cf85ca4cace6c08c7862aac, type: 3}
+  - first:
+      type: UnityEngine:Texture2D
+      assembly: UnityEngine.CoreModule
+      name: myk_yr_plant_bougain02__NSP_CMN_ChaoTexSpecNrmTan_baseColor
+    second: {fileID: 2800000, guid: e0ecb3c68f3496c478303885ff9cbe1f, type: 3}
+  - first:
+      type: UnityEngine:Texture2D
+      assembly: UnityEngine.CoreModule
+      name: myk_yr_plant_bougain03__NSP_CMN_ChaoTexSpecNrmTan_baseColor
+    second: {fileID: 2800000, guid: 268ac52f1d301b04a926e9a0aaace1c0, type: 3}
+  - first:
+      type: UnityEngine:Texture2D
+      assembly: UnityEngine.CoreModule
+      name: myk_yr_plant_tropical01__NSP_CMN_ChaoTexSpecNrmTan_baseColor
+    second: {fileID: 2800000, guid: c3b4375532c2a264c95f901cbc332794, type: 3}
+  - first:
+      type: UnityEngine:Texture2D
+      assembly: UnityEngine.CoreModule
+      name: myk_yr_plant_tropical02__NSP_CMN_ChaoTexSpecNrmTan_baseColor
+    second: {fileID: 2800000, guid: 5fbeb70f75e85364989af99658827baf, type: 3}
+  - first:
+      type: UnityEngine:Texture2D
+      assembly: UnityEngine.CoreModule
+      name: seatest_baseColor
+    second: {fileID: 2800000, guid: 6be849fa969582f4592c1361c052d34c, type: 3}
+  - first:
+      type: UnityEngine:Texture2D
+      assembly: UnityEngine.CoreModule
+      name: tk_mortor_DartGroundl01___NSP_CMN_ChaoTexSpecNrmTan_baseColor
+    second: {fileID: 2800000, guid: 3c2ac757a203de140ad78e3727483f10, type: 3}
+  - first:
+      type: UnityEngine:Texture2D
+      assembly: UnityEngine.CoreModule
+      name: tree02__NSP_CMN_ChaoTexSpecNrmTan_baseColor
+    second: {fileID: 2800000, guid: ae51600ddaff5244397f06eaee0fe962, type: 3}
+  - first:
+      type: UnityEngine:Texture2D
+      assembly: UnityEngine.CoreModule
+      name: wall_muk_glass01__NSP_CMN_Glass_baseColor
+    second: {fileID: 2800000, guid: 8cf5b9879bea42841bf488fd43bef1f7, type: 3}
+  - first:
+      type: UnityEngine:Texture2D
+      assembly: UnityEngine.CoreModule
+      name: ym_shopsign_baseColor
+    second: {fileID: 2800000, guid: 6c8acc55bc8dece4c982ef17f5ecfa48, type: 3}
+  - first:
+      type: UnityEngine:Texture2D
+      assembly: UnityEngine.CoreModule
+      name: ym_shopsign_normal
+    second: {fileID: 2800000, guid: 95ee0c25885b7684c91c049244661313, type: 3}
+  - first:
+      type: UnityEngine:Texture2D
+      assembly: UnityEngine.CoreModule
+      name: yr_black__NSP_CMN_ChaoTexSpecNrmTan_baseColor
+    second: {fileID: 2800000, guid: ebe3cf3bbea2eae489984d5948465e0c, type: 3}
+  - first:
+      type: UnityEngine:Texture2D
+      assembly: UnityEngine.CoreModule
+      name: yr_cloth_curtain__NSP_CMN_ChaoTexSpecNrmTan_baseColor
+    second: {fileID: 2800000, guid: 096466360b5eb474d895b7ccb7fc10e6, type: 3}
+  - first:
+      type: UnityEngine:Texture2D
+      assembly: UnityEngine.CoreModule
+      name: yr_mortor_bluewindow__NSP_CMN_ChaoTexSpecNrmTan_baseColor
+    second: {fileID: 2800000, guid: 0887a1d2939d9504fb66832829f9dd4f, type: 3}
+  - first:
+      type: UnityEngine:Texture2D
+      assembly: UnityEngine.CoreModule
+      name: yr_mortor_greenwindow__NSP_CMN_ChaoTexSpecNrmTan_baseColor
+    second: {fileID: 2800000, guid: 2253173a98dd81544a4049b97041bf1c, type: 3}
+  - first:
+      type: UnityEngine:Texture2D
+      assembly: UnityEngine.CoreModule
+      name: yr_mortor_redwindow__NSP_CMN_ChaoTexSpecNrmTan_baseColor
+    second: {fileID: 2800000, guid: 1bdcebd38244ca84ba68b3210617fbaa, type: 3}
+  - first:
+      type: UnityEngine:Texture2D
+      assembly: UnityEngine.CoreModule
+      name: yr_mortor_wall01__NSP_CMN_ChaoTexSpecNrmTan_baseColor
+    second: {fileID: 2800000, guid: 6fe30e1a409d11a4aaa3fd352534c7a9, type: 3}
+  - first:
+      type: UnityEngine:Texture2D
+      assembly: UnityEngine.CoreModule
+      name: yr_mortor_wall02__NSP_CMN_ChaoTexSpecNrmTan_baseColor
+    second: {fileID: 2800000, guid: 555bed0cfbae00347a3caf912c4af102, type: 3}
+  - first:
+      type: UnityEngine:Texture2D
+      assembly: UnityEngine.CoreModule
+      name: yr_mortor_wall04__NSP_CMN_ChaoTexSpecNrmTan_baseColor
+    second: {fileID: 2800000, guid: 86c01baeaf56c18479c8f9bea8f187f1, type: 3}
+  - first:
+      type: UnityEngine:Texture2D
+      assembly: UnityEngine.CoreModule
+      name: yr_mortor_wall05__NSP_CMN_ChaoTexSpecNrmTan_baseColor
+    second: {fileID: 2800000, guid: 884f9f30d74c06b4f98d41897423a3cd, type: 3}
+  - first:
+      type: UnityEngine:Texture2D
+      assembly: UnityEngine.CoreModule
+      name: yr_road__NSP_CMN_ChaoTexSpecNrmTan_baseColor
+    second: {fileID: 2800000, guid: 7aac625b027e86a4a92d2a6bb7c73551, type: 3}
+  materials:
+    materialImportMode: 2
+    materialName: 0
+    materialSearch: 1
+    materialLocation: 1
+  animations:
+    legacyGenerateAnimations: 4
+    bakeSimulation: 0
+    resampleCurves: 1
+    optimizeGameObjects: 0
+    removeConstantScaleCurves: 0
+    motionNodeName: 
+    animationImportErrors: 
+    animationImportWarnings: 
+    animationRetargetingWarnings: 
+    animationDoRetargetingWarnings: 0
+    importAnimatedCustomProperties: 0
+    importConstraints: 0
+    animationCompression: 1
+    animationRotationError: 0.5
+    animationPositionError: 0.5
+    animationScaleError: 0.5
+    animationWrapMode: 0
+    extraExposedTransformPaths: []
+    extraUserProperties: []
+    clipAnimations: []
+    isReadable: 0
+  meshes:
+    lODScreenPercentages: []
+    globalScale: 1
+    meshCompression: 0
+    addColliders: 0
+    useSRGBMaterialColor: 1
+    sortHierarchyByName: 1
+    importPhysicalCameras: 1
+    importVisibility: 1
+    importBlendShapes: 1
+    importCameras: 1
+    importLights: 1
+    nodeNameCollisionStrategy: 1
+    fileIdsGeneration: 2
+    swapUVChannels: 0
+    generateSecondaryUV: 0
+    useFileUnits: 1
+    keepQuads: 0
+    weldVertices: 1
+    bakeAxisConversion: 0
+    preserveHierarchy: 0
+    skinWeightsMode: 0
+    maxBonesPerVertex: 4
+    minBoneWeight: 0.001
+    optimizeBones: 1
+    generateMeshLods: 0
+    meshLodGenerationFlags: 0
+    maximumMeshLod: -1
+    meshOptimizationFlags: -1
+    indexFormat: 0
+    secondaryUVAngleDistortion: 8
+    secondaryUVAreaDistortion: 15.000001
+    secondaryUVHardAngle: 88
+    secondaryUVMarginMethod: 1
+    secondaryUVMinLightmapResolution: 40
+    secondaryUVMinObjectScale: 1
+    secondaryUVPackMargin: 4
+    useFileScale: 1
+    strictVertexDataChecks: 0
+  tangentSpace:
+    normalSmoothAngle: 60
+    normalImportMode: 0
+    tangentImportMode: 3
+    normalCalculationMode: 4
+    legacyComputeAllNormalsFromSmoothingGroupsWhenMeshHasBlendShapes: 0
+    blendShapeNormalImportMode: 1
+    normalSmoothingSource: 0
+  referencedClips: []
+  importAnimation: 1
+  humanDescription:
+    serializedVersion: 3
+    human: []
+    skeleton: []
+    armTwist: 0.5
+    foreArmTwist: 0.5
+    upperLegTwist: 0.5
+    legTwist: 0.5
+    armStretch: 0.05
+    legStretch: 0.05
+    feetSpacing: 0
+    globalScale: 1
+    rootMotionBoneName: 
+    hasTranslationDoF: 0
+    hasExtraRoot: 0
+    skeletonHasParents: 1
+  lastHumanDescriptionAvatarSource: {instanceID: 0}
+  autoGenerateAvatarMappingIfUnspecified: 1
+  animationType: 2
+  humanoidOversampling: 1
+  avatarSetup: 0
+  addHumanoidExtraRootOnlyWhenUsingAvatar: 1
+  importBlendShapeDeformPercent: 1
+  remapMaterialsIfMaterialImportModeIsNone: 0
+  additionalBone: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

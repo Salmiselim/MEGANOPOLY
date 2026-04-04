@@ -1,0 +1,1 @@
+public enum Category { BoysName, GirlsName, Object, Food, Country }
