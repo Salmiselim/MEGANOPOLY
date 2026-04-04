@@ -23,7 +23,7 @@ public class PlayerInputBoard : MonoBehaviour
     [Tooltip("Can be a UI Button or a 3D XR Interactable object")]
     [SerializeField] private GameObject redButton; 
 
-    [SerializeField] private Transform keyboardParent; // Optional: Only if using my KeyboardButton script
+    [SerializeField] private Transform keyboardParent;
     [SerializeField] private int playerIndex;
 
     [Header("Audio")]
@@ -43,14 +43,12 @@ public class PlayerInputBoard : MonoBehaviour
 
     public void Init()
     {
-        // Explicitly map fields to array for easier indexing
         fieldTexts[0] = boyField;
         fieldTexts[1] = girlField;
         fieldTexts[2] = objectField;
         fieldTexts[3] = foodField;
         fieldTexts[4] = countryField;
 
-        // Setup fields
         for (int i = 0; i < 5; i++)
         {
             if (fieldTexts[i] == null) { Debug.LogError($"Field {i} is not assigned on Player {playerIndex} board!"); continue; }
@@ -58,17 +56,15 @@ public class PlayerInputBoard : MonoBehaviour
             fieldTexts[i].text = "";
             
             var btn = fieldTexts[i].GetComponent<Button>(); 
-            int index = i; // Closure
+            int index = i; 
             if (btn) btn.onClick.AddListener(() => SetCurrentCategory((Category)index));
         }
         
-        SetCurrentCategory(Category.BoysName); // Default
+        SetCurrentCategory(Category.BoysName); 
 
-        // Controls
         if (backspaceBtn) backspaceBtn.onClick.AddListener(Backspace);
         if (clearBtn) clearBtn.onClick.AddListener(ClearCurrent);
         
-        // Setup Red Button (Handles both UI Button and 3D XR Interactable)
         if (redButton != null)
         {
             var uiBtn = redButton.GetComponent<Button>();
@@ -81,7 +77,6 @@ public class PlayerInputBoard : MonoBehaviour
 
     private void OnRedButtonXRSelect(SelectEnterEventArgs args)
     {
-        // Check if the interactor belongs to the correct player
         var identifier = args.interactorObject.transform.GetComponentInParent<PlayerIdentifier>();
         if (identifier != null && identifier.playerIndex == playerIndex)
         {
@@ -89,7 +84,6 @@ public class PlayerInputBoard : MonoBehaviour
         }
         else if (identifier == null)
         {
-            // If no identifier system is found, allow it (for testing/simplicity)
             TrySubmit();
         }
     }
@@ -125,7 +119,6 @@ public class PlayerInputBoard : MonoBehaviour
     {
         if (manager.GameEnded) return;
 
-        // Collect current text from fields
         string[] currentWords = new string[5];
 
         if (sfxSource != null && buttonSfx != null)
@@ -138,12 +131,12 @@ public class PlayerInputBoard : MonoBehaviour
             currentWords[i] = GetTextFromField(fieldTexts[i]);
         }
 
-        // "the first to input all his words makes the game end"
         bool allFilled = currentWords.All(w => !string.IsNullOrEmpty(w?.Trim()));
         
         if (allFilled)
         {
-            manager.OnPlayerSubmit(playerIndex, currentWords);
+            // Call the ServerRpc directly to validate and end game globally if valid
+            manager.SubmitWordsServerRpc(playerIndex, currentWords[0], currentWords[1], currentWords[2], currentWords[3], currentWords[4]);
         }
         else
         {
@@ -155,7 +148,6 @@ public class PlayerInputBoard : MonoBehaviour
     {
         if (field == null) return "";
         
-        // Check if this text component is part of an InputField (common in user hierarchy)
         var inputField = field.GetComponentInParent<TMP_InputField>();
         if (inputField != null) return inputField.text;
         
