@@ -54,6 +54,29 @@ namespace RockPaperScissors
             {
                 isRoundActive = true;
             }
+            
+            // Listen for players joining to log debug messages in console
+            if (IsServer && NetworkManager.Singleton != null)
+            {
+                NetworkManager.Singleton.OnClientConnectedCallback += OnClientConnected;
+            }
+        }
+
+        public override void OnNetworkDespawn()
+        {
+            if (IsServer && NetworkManager.Singleton != null)
+            {
+                NetworkManager.Singleton.OnClientConnectedCallback -= OnClientConnected;
+            }
+        }
+
+        private void OnClientConnected(ulong clientId)
+        {
+            Debug.Log($"<color=cyan>[RPS Multiplayer]</color> Player {clientId} has entered the game!");
+            if (clientId != NetworkManager.ServerClientId)
+            {
+                Debug.Log($"<color=green>[RPS Multiplayer]</color> PLAYER 2 (Client {clientId}) IS HERE! Game is ready.");
+            }
         }
 
         private void OnChoiceSelected(Choice myChoice)
