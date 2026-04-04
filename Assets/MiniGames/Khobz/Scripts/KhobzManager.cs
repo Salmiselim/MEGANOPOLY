@@ -3,16 +3,16 @@ using System.Collections.Generic;
 using System.Linq;
 using TMPro;
 using UnityEngine;
+using Unity.Netcode;
 
-
-public class KhobzManager : MonoBehaviour
+public class KhobzManager : NetworkBehaviour
 {
     [Header("UI")]
-    public TextMeshProUGUI goalText;          // Always visible: shows the goal time
-    public TextMeshProUGUI introTimerText;    // Shows for 4 seconds then hides
+    public TextMeshProUGUI goalText;
+    public TextMeshProUGUI introTimerText;
     public TextMeshProUGUI winnerText;
-    public TextMeshProUGUI[] playerTimeTexts = new TextMeshProUGUI[4]; // Shows each player's pull time after they pull
-    public GameObject resultsPanel;           // Parent of winnerText, set inactive initially
+    public TextMeshProUGUI[] playerTimeTexts = new TextMeshProUGUI[4];
+    public GameObject resultsPanel;
 
     [Header("Audio")]
     public AudioSource bgmSource;
@@ -22,73 +22,82 @@ public class KhobzManager : MonoBehaviour
     public PlayerBread[] playerBreads = new PlayerBread[4];
     public float minGoalTime = 5f;
     public float maxGoalTime = 25f;
-    public float introDuration = 4f;          // 4-second intro countdown
-    public float maxGameDuration = 60f;       // 60-second game timeout
+    public float introDuration = 4f;
+    public float maxGameDuration = 60f;
 
-    private float goalTime;
+    private NetworkVariable<float> goalTime = new NetworkVariable<float>(0f);
+    private NetworkVariable<bool> gameRunning = new NetworkVariable<bool>(false);
     private float gameStartTime;
-    private bool gameRunning = false;
+
     private List<float> pullTimes = new List<float> { 0f, 0f, 0f, 0f };
     private List<bool> pulledPlayers = new List<bool> { false, false, false, false };
+
     private Coroutine introCoroutine;
     private Coroutine gameCoroutine;
 
     void Start()
     {
-        GenerateGoalTime();
-
-        // Goal text is ALWAYS visible
         goalText.gameObject.SetActive(true);
-        goalText.text = $"Goal: {goalTime:F2}s";
+        goalText.text = "Waiting for Game to Start...";
 
-        // Hide player time texts at start
         for (int i = 0; i < playerTimeTexts.Length; i++)
         {
-            if (playerTimeTexts[i] != null)
-                playerTimeTexts[i].text = "";
+            if (playerTimeTexts[i] != null) playerTimeTexts[i].text = "";
         }
 
         resultsPanel.SetActive(false);
-        introTimerText.gameObject.SetActive(true);
+        introTimerText.gameObject.SetActive(false);
+    }
 
-        if (bgmSource != null && bgmClip != null)
+    public override void OnNetworkSpawn()
+    {
+        base.OnNetworkSpawn();
+        
+        goalTime.OnValueChanged += (oldVal, newVal) => {
+            goalText.text = $"Goal: {newVal:F2}s";
+        };
+
+        // If late joined, update immediately
+        if (goalTime.Value > 0f)
         {
-            bgmSource.clip = bgmClip;
-            bgmSource.loop = true;
-            bgmSource.Play();
+            goalText.text = $"Goal: {goalTime.Value:F2}s";
         }
 
-        introCoroutine = StartCoroutine(IntroCountdown());
+        if (IsServer)
+        {
+            ResetGameServer();
+        }
     }
 
-    void GenerateGoalTime()
+    void GenerateGoalTimeServer()
     {
-        goalTime = Random.Range(minGoalTime, maxGoalTime);
-        goalTime = Mathf.Round(goalTime * 100f) / 100f; // 2 decimal precision
+        float target = Random.Range(minGoalTime, maxGoalTime);
+        goalTime.Value = Mathf.Round(target * 100f) / 100f;
     }
 
-    /// <summary>
-    /// Called by PlayerBread when a player successfully pulls their bread.
-    /// </summary>
-    public void RegisterPull(int playerIndex, float pullTime)
+    [ServerRpc(RequireOwnership = false)]
+    public void RegisterPullServerRpc(int playerIndex, float pullTime)
     {
-        if (!gameRunning) return; // Ignore pulls before game starts or after it ends
+        if (!gameRunning.Value) return;
 
         pullTimes[playerIndex] = pullTime;
         pulledPlayers[playerIndex] = true;
-        Debug.Log($"Player {playerIndex + 1} pulled at {pullTime:F2}s");
+        
+        UpdatePlayerTimeClientRpc(playerIndex, pullTime);
 
-        // Show this player's achieved time immediately
-        if (playerIndex < playerTimeTexts.Length && playerTimeTexts[playerIndex] != null)
-        {
-            playerTimeTexts[playerIndex].text = $"P{playerIndex + 1}: {pullTime:F2}s";
-        }
-
-        // If all players have pulled, end the game early
         if (pulledPlayers.All(p => p))
         {
             if (gameCoroutine != null) StopCoroutine(gameCoroutine);
-            DetermineWinner();
+            DetermineWinnerServer();
+        }
+    }
+
+    [Rpc(SendTo.Everyone)]
+    void UpdatePlayerTimeClientRpc(int playerIndex, float pullTime)
+    {
+        if (playerIndex >= 0 && playerIndex < playerTimeTexts.Length && playerTimeTexts[playerIndex] != null)
+        {
+            playerTimeTexts[playerIndex].text = $"P{playerIndex + 1}: {pullTime:F2}s";
         }
     }
 
@@ -97,58 +106,130 @@ public class KhobzManager : MonoBehaviour
         return Time.time - gameStartTime;
     }
 
-    IEnumerator IntroCountdown()
+    // Usually called from a UI button to retry
+    public void ResetGame()
     {
-        gameRunning = false;
+        ResetGameServerRpc();
+    }
+    
+    [ServerRpc(RequireOwnership = false)]
+    public void ResetGameServerRpc()
+    {
+        ResetGameServer();
+    }
+
+    void ResetGameServer()
+    {
+        if (!IsServer) return;
+
+        gameRunning.Value = false;
+        GenerateGoalTimeServer();
+
+        for (int i = 0; i < 4; i++)
+        {
+            pullTimes[i] = 0f;
+            pulledPlayers[i] = false;
+        }
+        
+        ResetBreadsClientRpc();
+
+        if (introCoroutine != null) StopCoroutine(introCoroutine);
+        if (gameCoroutine != null) StopCoroutine(gameCoroutine);
+
+        StartIntroClientRpc();
+        
+        introCoroutine = StartCoroutine(IntroCountdownServer());
+    }
+
+    [Rpc(SendTo.Everyone)]
+    void ResetBreadsClientRpc()
+    {
+        for (int i = 0; i < 4; i++)
+        {
+            if (playerTimeTexts[i] != null)
+                playerTimeTexts[i].text = "";
+                
+            if (playerBreads[i]) playerBreads[i].ResetPull();
+        }
+    }
+
+    [Rpc(SendTo.Everyone)]
+    void StartIntroClientRpc()
+    {
+        resultsPanel.SetActive(false);
+        introTimerText.gameObject.SetActive(true);
+        
+        if (bgmSource != null && bgmClip != null)
+        {
+            bgmSource.clip = bgmClip;
+            bgmSource.loop = true;
+            bgmSource.Play();
+        }
+    }
+
+    IEnumerator IntroCountdownServer()
+    {
+        gameRunning.Value = false;
         float elapsed = 0f;
 
         while (elapsed < introDuration)
         {
             elapsed += Time.deltaTime;
-            // Countdown: 4 → 3 → 2 → 1
             int remaining = Mathf.CeilToInt(introDuration - elapsed);
-            introTimerText.text = remaining > 0 ? remaining.ToString() : "GO!";
+            UpdateIntroTextClientRpc(remaining);
             yield return null;
         }
 
-        introTimerText.gameObject.SetActive(false);
-        gameStartTime = Time.time;
-        gameRunning = true;
-        gameCoroutine = StartCoroutine(GameLoop());
+        HideIntroClientRpc();
+        SetGameStartTimeClientRpc(); // Ensures every client zeroes out their own Time.time
+        
+        gameRunning.Value = true;
+        gameCoroutine = StartCoroutine(GameLoopServer());
+    }
+    
+    [Rpc(SendTo.Everyone)]
+    void SetGameStartTimeClientRpc()
+    {
+        gameStartTime = Time.time; 
     }
 
-    IEnumerator GameLoop()
+    [Rpc(SendTo.Everyone)]
+    void UpdateIntroTextClientRpc(int remaining)
+    {
+        introTimerText.text = remaining > 0 ? remaining.ToString() : "GO!";
+    }
+
+    [Rpc(SendTo.Everyone)]
+    void HideIntroClientRpc()
+    {
+        introTimerText.gameObject.SetActive(false);
+    }
+
+    IEnumerator GameLoopServer()
     {
         float elapsed = 0f;
-
         while (elapsed < maxGameDuration)
         {
             elapsed += Time.deltaTime;
-
-            // If all players have pulled, the game ends inside RegisterPull
-            // so this loop just handles the timeout
             yield return null;
         }
 
-        // Timeout reached
-        gameRunning = false;
+        gameRunning.Value = false;
         bool anyonePulled = pulledPlayers.Any(p => p);
 
         if (!anyonePulled)
         {
-            // Nobody pulled — everyone loses
-            ShowEveryoneLoses();
+            ShowEveryoneLosesClientRpc();
         }
         else
         {
-            // At least one player pulled — determine the closest
-            DetermineWinner();
+            DetermineWinnerServer();
         }
     }
 
-    void DetermineWinner()
+    void DetermineWinnerServer()
     {
-        gameRunning = false;
+        gameRunning.Value = false;
 
         float bestDiff = float.MaxValue;
         int winnerIndex = -1;
@@ -157,10 +238,10 @@ public class KhobzManager : MonoBehaviour
         {
             if (!pulledPlayers[i])
             {
-                pullTimes[i] = 999f; // Penalty for not pulling
+                pullTimes[i] = 999f;
             }
 
-            float diff = Mathf.Abs(pullTimes[i] - goalTime);
+            float diff = Mathf.Abs(pullTimes[i] - goalTime.Value);
             if (diff < bestDiff)
             {
                 bestDiff = diff;
@@ -168,7 +249,13 @@ public class KhobzManager : MonoBehaviour
             }
         }
 
-        winnerText.text = $"Player {winnerIndex + 1} Wins!\nYour time: {pullTimes[winnerIndex]:F2}s\nGoal: {goalTime:F2}s\nDiff: {bestDiff:F2}s";
+        ShowWinnerClientRpc(winnerIndex, pullTimes[winnerIndex], goalTime.Value, bestDiff);
+    }
+
+    [Rpc(SendTo.Everyone)]
+    void ShowWinnerClientRpc(int winnerIndex, float pullTime, float gTime, float bestDiff)
+    {
+        winnerText.text = $"Player {winnerIndex + 1} Wins!\nYour time: {pullTime:F2}s\nGoal: {gTime:F2}s\nDiff: {bestDiff:F2}s";
         resultsPanel.SetActive(true);
 
         if (bgmSource != null)
@@ -177,7 +264,8 @@ public class KhobzManager : MonoBehaviour
         }
     }
 
-    void ShowEveryoneLoses()
+    [Rpc(SendTo.Everyone)]
+    void ShowEveryoneLosesClientRpc()
     {
         winnerText.text = "Everyone Loses!";
         resultsPanel.SetActive(true);
@@ -186,29 +274,5 @@ public class KhobzManager : MonoBehaviour
         {
             bgmSource.Stop();
         }
-    }
-
-    public void ResetGame()
-    {
-        gameRunning = false;
-
-        for (int i = 0; i < 4; i++)
-        {
-            pullTimes[i] = 0f;
-            pulledPlayers[i] = false;
-            if (playerBreads[i]) playerBreads[i].ResetPull();
-
-            if (i < playerTimeTexts.Length && playerTimeTexts[i] != null)
-                playerTimeTexts[i].text = "";
-        }
-
-        if (introCoroutine != null) StopCoroutine(introCoroutine);
-        if (gameCoroutine != null) StopCoroutine(gameCoroutine);
-
-        introTimerText.gameObject.SetActive(false);
-        resultsPanel.SetActive(false);
-
-        // Goal text stays always visible
-        goalText.gameObject.SetActive(true);
     }
 }
