@@ -28,6 +28,11 @@ public class PlayerBread : NetworkBehaviour
         initialWorldPosition = transform.position;
     }
 
+    public void Init(int index)
+    {
+        this.playerIndex = index;
+    }
+
     void OnEnable()
     {
         grabInteractable.selectEntered.AddListener(OnSelectEntered);
@@ -42,8 +47,27 @@ public class PlayerBread : NetworkBehaviour
 
     void OnSelectEntered(SelectEnterEventArgs args)
     {
+        if (NetworkManager.Singleton != null)
+        {
+            int myClientId = (int)NetworkManager.Singleton.LocalClientId;
+            int myAssignedIndex = myClientId % 4;
+
+            if (playerIndex != myAssignedIndex)
+            {
+                // Force drop by temporarily disabling the interactable so opposing players can't steal bread
+                grabInteractable.enabled = false;
+                Invoke(nameof(ReenableGrab), 0.5f);
+                return;
+            }
+        }
+
         isGrabbed = true;
         hasPulled = false;
+    }
+
+    void ReenableGrab()
+    {
+        if (grabInteractable != null) grabInteractable.enabled = true;
     }
 
     void Update()

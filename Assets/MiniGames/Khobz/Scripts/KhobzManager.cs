@@ -18,6 +18,9 @@ public class KhobzManager : NetworkBehaviour
     public AudioSource bgmSource;
     public AudioClip bgmClip;
 
+    [Header("Spawn Points")]
+    public Transform[] playerSpawnPoints = new Transform[4];
+
     [Header("Game")]
     public PlayerBread[] playerBreads = new PlayerBread[4];
     public float minGoalTime = 5f;
@@ -43,6 +46,7 @@ public class KhobzManager : NetworkBehaviour
         for (int i = 0; i < playerTimeTexts.Length; i++)
         {
             if (playerTimeTexts[i] != null) playerTimeTexts[i].text = "";
+            if (i < playerBreads.Length && playerBreads[i] != null) playerBreads[i].Init(i);
         }
 
         resultsPanel.SetActive(false);
@@ -52,6 +56,22 @@ public class KhobzManager : NetworkBehaviour
     public override void OnNetworkSpawn()
     {
         base.OnNetworkSpawn();
+
+        if (playerSpawnPoints != null && playerSpawnPoints.Length > 0)
+        {
+            int clientId = (int)NetworkManager.Singleton.LocalClientId;
+            int spawnIndex = clientId % playerSpawnPoints.Length;
+            
+            if (playerSpawnPoints[spawnIndex] != null)
+            {
+                var xrOrigin = FindFirstObjectByType<Unity.XR.CoreUtils.XROrigin>();
+                if (xrOrigin != null)
+                {
+                    xrOrigin.transform.position = playerSpawnPoints[spawnIndex].position;
+                    xrOrigin.transform.rotation = playerSpawnPoints[spawnIndex].rotation;
+                }
+            }
+        }
         
         goalTime.OnValueChanged += (oldVal, newVal) => {
             goalText.text = $"Goal: {newVal:F2}s";
@@ -196,6 +216,10 @@ public class KhobzManager : NetworkBehaviour
     [Rpc(SendTo.Everyone)]
     void UpdateIntroTextClientRpc(int remaining)
     {
+        if (!introTimerText.gameObject.activeSelf) 
+        {
+            introTimerText.gameObject.SetActive(true);
+        }
         introTimerText.text = remaining > 0 ? remaining.ToString() : "GO!";
     }
 
