@@ -20,6 +20,9 @@ public class SheepManager : NetworkBehaviour
     public AudioClip bgmClip;
     public AudioClip whistleClip;
 
+    [Header("Spawn Points")]
+    public Transform[] playerSpawnPoints = new Transform[4];
+
     [Header("Game")]
     public Sheep[] allSheep; // Should be loaded with Sheep objects containing NetworkObjects
     public Material[] playerSheepMaterials = new Material[4]; // Red, Green, Blue, Yellow
@@ -50,6 +53,22 @@ public class SheepManager : NetworkBehaviour
     public override void OnNetworkSpawn()
     {
         base.OnNetworkSpawn();
+
+        if (playerSpawnPoints != null && playerSpawnPoints.Length > 0)
+        {
+            int clientId = (int)NetworkManager.Singleton.LocalClientId;
+            int spawnIndex = clientId % playerSpawnPoints.Length;
+            
+            if (playerSpawnPoints[spawnIndex] != null)
+            {
+                var xrOrigin = FindFirstObjectByType<Unity.XR.CoreUtils.XROrigin>();
+                if (xrOrigin != null)
+                {
+                    xrOrigin.transform.position = playerSpawnPoints[spawnIndex].position;
+                    xrOrigin.transform.rotation = playerSpawnPoints[spawnIndex].rotation;
+                }
+            }
+        }
         
         if (IsServer)
         {
@@ -180,6 +199,10 @@ public class SheepManager : NetworkBehaviour
     [Rpc(SendTo.Everyone)]
     void UpdateIntroTimerClientRpc(float elapsed)
     {
+        if (!introTimerText.gameObject.activeSelf) 
+        {
+            introTimerText.gameObject.SetActive(true);
+        }
         introTimerText.text = $"{elapsed:F1}";
     }
     

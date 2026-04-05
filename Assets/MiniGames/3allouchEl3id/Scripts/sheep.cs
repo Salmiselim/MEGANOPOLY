@@ -104,13 +104,13 @@ public class Sheep : NetworkBehaviour
 
     void OnGrabbed(SelectEnterEventArgs args)
     {
-        // Get grabber playerIndex
-        var interactor = args.interactorObject as XRBaseInteractor;
-        var playerIdComp = interactor?.transform.GetComponentInParent<PlayerIdentifier>();
-        
-        if (playerIdComp != null && ownerIndex.Value == playerIdComp.playerIndex)
+        int myClientId = -1;
+        if (NetworkManager.Singleton != null) myClientId = (int)NetworkManager.Singleton.LocalClientId;
+        int myAssignedIndex = myClientId % 4;
+
+        if (myClientId != -1 && ownerIndex.Value == myAssignedIndex)
         {
-            manager.CheckWinServerRpc(playerIdComp.playerIndex);
+            manager.CheckWinServerRpc(myAssignedIndex);
         }
 
         // Auto-drop timer
