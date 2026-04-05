@@ -41,8 +41,9 @@ public class PlayerInputBoard : MonoBehaviour
         manager = FindObjectOfType<BentWaladManager>();
     }
 
-    public void Init()
+    public void Init(int index)
     {
+        this.playerIndex = index;
         fieldTexts[0] = boyField;
         fieldTexts[1] = girlField;
         fieldTexts[2] = objectField;
@@ -56,8 +57,8 @@ public class PlayerInputBoard : MonoBehaviour
             fieldTexts[i].text = "";
             
             var btn = fieldTexts[i].GetComponent<Button>(); 
-            int index = i; 
-            if (btn) btn.onClick.AddListener(() => SetCurrentCategory((Category)index));
+            int capturedIndex = i; 
+            if (btn) btn.onClick.AddListener(() => SetCurrentCategory((Category)capturedIndex));
         }
         
         SetCurrentCategory(Category.BoysName); 
@@ -77,15 +78,7 @@ public class PlayerInputBoard : MonoBehaviour
 
     private void OnRedButtonXRSelect(SelectEnterEventArgs args)
     {
-        var identifier = args.interactorObject.transform.GetComponentInParent<PlayerIdentifier>();
-        if (identifier != null && identifier.playerIndex == playerIndex)
-        {
-            TrySubmit();
-        }
-        else if (identifier == null)
-        {
-            TrySubmit();
-        }
+        TrySubmit();
     }
 
     public void AppendLetter(char letter)
@@ -135,13 +128,23 @@ public class PlayerInputBoard : MonoBehaviour
         
         if (allFilled)
         {
-            // Call the ServerRpc directly to validate and end game globally if valid
-            manager.SubmitWordsServerRpc(playerIndex, currentWords[0], currentWords[1], currentWords[2], currentWords[3], currentWords[4]);
+            // Trigger the global end game sequence instead of just submitting local words
+            manager.EndRoundServerRpc();
         }
         else
         {
             Debug.Log($"Player {playerIndex + 1} tried to submit but fields are incomplete.");
         }
+    }
+
+    public void SendMyWordsToServer()
+    {
+        string[] currentWords = new string[5];
+        for (int i = 0; i < 5; i++)
+        {
+            currentWords[i] = GetTextFromField(fieldTexts[i]);
+        }
+        manager.ReportWordsServerRpc(playerIndex, currentWords[0], currentWords[1], currentWords[2], currentWords[3], currentWords[4]);
     }
 
     private string GetTextFromField(TMP_Text field)

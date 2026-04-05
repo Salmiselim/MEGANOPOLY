@@ -8,10 +8,10 @@ using Unity.Netcode;
 public class BentWaladManager : NetworkBehaviour
 {
     [Header("UI")]
-    public TextMeshProUGUI letterText;
-    public TextMeshProUGUI introTimerText;
-    public TextMeshProUGUI winnerText;
-    public GameObject resultsPanel;
+    public TextMeshProUGUI[] letterTexts = new TextMeshProUGUI[4];
+    public TextMeshProUGUI[] introTimerTexts = new TextMeshProUGUI[4];
+    public TextMeshProUGUI[] winnerTexts = new TextMeshProUGUI[4];
+    public GameObject[] resultsPanels = new GameObject[4];
 
     [Header("Audio")]
     public AudioSource bgmSource;
@@ -19,6 +19,9 @@ public class BentWaladManager : NetworkBehaviour
 
     [Header("Players")]
     public PlayerInputBoard[] playerBoards = new PlayerInputBoard[4]; // Drag 4
+
+    [Header("Spawn Points")]
+    public Transform[] playerSpawnPoints = new Transform[4]; // Drag 4 spawn points
 
     [Header("Game")]
     public string letters = "abcdefghijklmnopqrstuvwxyz";
@@ -36,17 +39,37 @@ public class BentWaladManager : NetworkBehaviour
     void Start()
     {
         LoadData();
-        introTimerText.gameObject.SetActive(false);
-        resultsPanel.SetActive(false);
-        foreach (var board in playerBoards) board.Init();
+        foreach (var t in introTimerTexts) if (t) t.gameObject.SetActive(false);
+        foreach (var p in resultsPanels) if (p) p.SetActive(false);
+        for (int i = 0; i < playerBoards.Length; i++) 
+        {
+            if (playerBoards[i] != null) playerBoards[i].Init(i);
+        }
     }
     
     public override void OnNetworkSpawn()
     {
         base.OnNetworkSpawn();
+
+        if (playerSpawnPoints != null && playerSpawnPoints.Length > 0)
+        {
+            int clientId = (int)NetworkManager.Singleton.LocalClientId;
+            int spawnIndex = clientId % playerSpawnPoints.Length;
+            
+            if (playerSpawnPoints[spawnIndex] != null)
+            {
+                var xrOrigin = FindFirstObjectByType<Unity.XR.CoreUtils.XROrigin>();
+                if (xrOrigin != null)
+                {
+                    xrOrigin.transform.position = playerSpawnPoints[spawnIndex].position;
+                    xrOrigin.transform.rotation = playerSpawnPoints[spawnIndex].rotation;
+                    Debug.Log($"[BentWaladManager] Teleported Local Client {clientId} to Spawn Point {spawnIndex}");
+                }
+            }
+        }
         
         currentLetter.OnValueChanged += (oldL, newL) => {
-            letterText.text = $"Letter: {char.ToUpper(newL)}";
+            foreach (var t in letterTexts) if (t) t.text = $"Letter: {char.ToUpper(newL)}";
         };
         
         if (IsServer)
@@ -56,7 +79,7 @@ public class BentWaladManager : NetworkBehaviour
         else
         {
             // Initial sync for late joiners
-            letterText.text = $"Letter: {char.ToUpper(currentLetter.Value)}";
+            foreach (var t in letterTexts) if (t) t.text = $"Letter: {char.ToUpper(currentLetter.Value)}";
         }
     }
 
@@ -127,15 +150,37 @@ public class BentWaladManager : NetworkBehaviour
     }
 
     [ServerRpc(RequireOwnership = false)]
-    public void SubmitWordsServerRpc(int playerIndex, string w0, string w1, string w2, string w3, string w4)
+    public void EndRoundServerRpc()
     {
         if (gameEnded.Value) return;
-
-        submissions[playerIndex] = new string[] { w0, w1, w2, w3, w4 };
         gameEnded.Value = true;
         
         LockAllBoardsClientRpc();
+        RequestAllSubmissionsClientRpc();
+        
+        StartCoroutine(CalculateScoresRoutine());
+    }
 
+    [Rpc(SendTo.Everyone)]
+    void RequestAllSubmissionsClientRpc()
+    {
+        int myIndex = (int)NetworkManager.Singleton.LocalClientId % playerBoards.Length;
+        if (playerBoards[myIndex] != null)
+        {
+            playerBoards[myIndex].SendMyWordsToServer();
+        }
+    }
+
+    [ServerRpc(RequireOwnership = false)]
+    public void ReportWordsServerRpc(int playerIndex, string w0, string w1, string w2, string w3, string w4)
+    {
+        submissions[playerIndex] = new string[] { w0, w1, w2, w3, w4 };
+    }
+
+    private IEnumerator CalculateScoresRoutine()
+    {
+        // Wait briefly for all active clients to report their local texts
+        yield return new WaitForSeconds(1.5f);
         CalculateScoresServer();
     }
 
@@ -173,8 +218,8 @@ public class BentWaladManager : NetworkBehaviour
     [Rpc(SendTo.Everyone)]
     void ShowWinnerClientRpc(int winnerIndex, int score)
     {
-        winnerText.text = $"Winner: Player {winnerIndex + 1}!\nScore: {score}/5";
-        resultsPanel.SetActive(true);
+        foreach (var t in winnerTexts) if (t) t.text = $"Winner: Player {winnerIndex + 1}!\nScore: {score}/5";
+        foreach (var p in resultsPanels) if (p) p.SetActive(true);
 
         if (bgmSource != null)
         {
@@ -211,9 +256,9 @@ public class BentWaladManager : NetworkBehaviour
     [Rpc(SendTo.Everyone)]
     void ResetUIClientRpc()
     {
-        foreach (var board in playerBoards) board.Reset();
-        introTimerText.gameObject.SetActive(false);
-        resultsPanel.SetActive(false);
+        foreach (var board in playerBoards) if (board) board.Reset();
+        foreach (var t in introTimerTexts) if (t) t.gameObject.SetActive(false);
+        foreach (var p in resultsPanels) if (p) p.SetActive(false);
         
         if (bgmSource != null && bgmClip != null)
         {
@@ -241,13 +286,13 @@ public class BentWaladManager : NetworkBehaviour
     [Rpc(SendTo.Everyone)]
     void ShowIntroTextClientRpc(bool show)
     {
-        introTimerText.gameObject.SetActive(show);
+        foreach (var t in introTimerTexts) if (t) t.gameObject.SetActive(show);
     }
     
     [Rpc(SendTo.Everyone)]
     void UpdateIntroTextClientRpc(float remaining)
     {
-        introTimerText.text = $"Starting in: {remaining}";
+        foreach (var t in introTimerTexts) if (t) t.text = $"Starting in: {remaining}";
     }
 
     IEnumerator GameLoopServer()
