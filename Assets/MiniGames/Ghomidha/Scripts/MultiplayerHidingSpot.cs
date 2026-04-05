@@ -43,17 +43,37 @@ namespace Ghomidha
         private Canvas exitCvs; private CanvasGroup exitCvg; private float exitAlpha;
         private float  hideBtnCooldown = 0f;
 
+        // Role helper — uses lobby-assigned role when available, falls back to IsHost for direct testing
+        private bool LocalPlayerIsSeeker =>
+            GhomidhaRoleManager.Instance != null
+                ? GhomidhaRoleManager.Instance.IsSeeker
+                : IsHost;
+
         private void Start()
         {
             FindRefs();
             BuildButtons();
             AddProximityCollider();
+
+            // Apply seeker/hider button visibility here — after buttons are built.
+            // OnNetworkSpawn can fire before Start in Netcode scene loading, so
+            // hideCvs/exitCvs would be null if we put this check in OnNetworkSpawn.
+            if (IsSpawned)
+                ApplyRoleVisibility();
         }
 
         public override void OnNetworkSpawn()
         {
-            // The Host is the seeker. The seeker should NEVER interact with the hide/exit buttons.
-            if (IsHost)
+            // Only apply if Start has already run (buttons exist).
+            // If Start hasn't run yet it will call ApplyRoleVisibility() itself.
+            if (hideCvs != null || exitCvs != null)
+                ApplyRoleVisibility();
+        }
+
+        private void ApplyRoleVisibility()
+        {
+            // The seeker should NEVER see hide/exit buttons.
+            if (LocalPlayerIsSeeker)
             {
                 if (hideCvs != null) hideCvs.gameObject.SetActive(false);
                 if (exitCvs != null) exitCvs.gameObject.SetActive(false);
@@ -62,8 +82,8 @@ namespace Ghomidha
 
         private void Update()
         {
-            // Do not process hiding mechanics on the host (seeker)
-            if (IsSpawned && IsHost) return;
+            // Do not process hiding mechanics for the seeker
+            if (IsSpawned && LocalPlayerIsSeeker) return;
 
             FadeCvg(hideCvg, hideAlpha);
             FadeCvg(exitCvg, exitAlpha);
@@ -95,7 +115,7 @@ namespace Ghomidha
 
         private void LateUpdate()
         {
-            if (IsSpawned && IsHost) return;
+            if (IsSpawned && LocalPlayerIsSeeker) return;
 
             bool hideReady = hideCvg != null && hideCvg.alpha > 0.5f && hideBtnCooldown <= 0f;
             SetInteractable(hideCvg, hideReady);
@@ -104,7 +124,7 @@ namespace Ghomidha
 
         private void OnTriggerEnter(Collider other)
         {
-            if (!IsSpawned || IsHost) return; // Seeker never sees buttons over collisions
+            if (!IsSpawned || LocalPlayerIsSeeker) return; // Seeker never sees hide buttons
             if (!IsPlayer(other) || playerInRange || LocalPlayerIsHiding) return;
             
             // If someone else is in the spot, don't show the button
@@ -134,7 +154,7 @@ namespace Ghomidha
 
         private void OnTriggerExit(Collider other)
         {
-            if (!IsSpawned || IsHost) return;
+            if (!IsSpawned || LocalPlayerIsSeeker) return;
             if (!IsPlayer(other)) return;
             playerInRange = false;
             hideAlpha = 0f;
@@ -217,16 +237,28 @@ namespace Ghomidha
             occupyingClientId.Value = ulong.MaxValue;
         }
 
-        // Called by SeekerController (Host)
+        // Called by MultiplayerSeekerController — works regardless of whether seeker is host or client
         public void RevealHiderBySeeker()
         {
-            if (!IsServer) return;
-            
+            if (IsServer)
+                DoReveal();
+            else
+                RevealSpotServerRpc();
+        }
+
+        [ServerRpc(RequireOwnership = false)]
+        private void RevealSpotServerRpc()
+        {
+            DoReveal();
+        }
+
+        private void DoReveal()
+        {
             ulong hiderId = occupyingClientId.Value;
             if (hiderId != ulong.MaxValue)
             {
-                occupyingClientId.Value = ulong.MaxValue; // Clear the spot
-                ForceExitClientRpc(hiderId); // Force the specific client out
+                occupyingClientId.Value = ulong.MaxValue;
+                ForceExitClientRpc(hiderId);
             }
         }
 

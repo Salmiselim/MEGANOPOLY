@@ -36,6 +36,12 @@ namespace Ghomidha
 
         public int FoundCount { get; private set; } = 0;
 
+        // Role helper — uses lobby-assigned role when available, falls back to IsHost for direct testing
+        private bool LocalPlayerIsSeeker =>
+            GhomidhaRoleManager.Instance != null
+                ? GhomidhaRoleManager.Instance.IsSeeker
+                : IsHost;
+
         private void Start()
         {
             BuildTagButton();
@@ -44,7 +50,7 @@ namespace Ghomidha
 
         private void Update()
         {
-            if (!IsSpawned || !IsHost) return; // Only the Seeker (Host) runs this logic
+            if (!IsSpawned || !LocalPlayerIsSeeker) return; // Only the assigned seeker runs this logic
 
             RefreshSpotList();
             ScanForSpots();
@@ -53,7 +59,7 @@ namespace Ghomidha
 
         private void LateUpdate()
         {
-            if (!IsSpawned || !IsHost) return;
+            if (!IsSpawned || !LocalPlayerIsSeeker) return;
 
             if (btnGroup == null) return;
             // Only clickable if fully visible and not currently showing a result
