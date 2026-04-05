@@ -77,11 +77,12 @@ namespace Ghomidha
             MultiplayerHidingSpot closest = null;
             float closestD = float.MaxValue;
 
-            // Find closest spot within radius
+            // Find closest spot within radius — measure to the actual hide position,
+            // not the root transform (they can be very different in world space).
             foreach (var spot in allSpots)
             {
                 if (spot == null) continue;
-                float dist = Vector3.Distance(seekerPos, spot.transform.position);
+                float dist = Vector3.Distance(seekerPos, spot.HideWorldPosition);
                 if (dist < tagRadius && dist < closestD)
                 {
                     closestD = dist;

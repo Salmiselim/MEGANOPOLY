@@ -2081,7 +2081,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Ghomidha.MultiplayerSeekerController
   ShowTopMostFoldoutHeaderGroup: 1
-  tagRadius: 1.5
+  tagRadius: 2.5
   resultDisplayDuration: 2
   fadeDuration: 0.2
 --- !u!1 &382531795

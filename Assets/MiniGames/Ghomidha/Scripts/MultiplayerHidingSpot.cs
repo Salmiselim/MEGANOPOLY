@@ -22,6 +22,9 @@ namespace Ghomidha
         // MaxValue means empty. Otherwise, it holds the client ID of the hider.
         public NetworkVariable<ulong> occupyingClientId = new NetworkVariable<ulong>(ulong.MaxValue);
 
+        /// <summary>World position of the actual hide point (used by seeker for distance checks).</summary>
+        public Vector3 HideWorldPosition => hidePosition != null ? hidePosition.position : transform.position;
+
         // ── Global local state ────────────────────────────────────────────
         public static bool LocalPlayerIsHiding { get; private set; } = false;
         private static MultiplayerHidingSpot s_activeSpot = null;
