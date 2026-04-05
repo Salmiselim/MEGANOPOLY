@@ -69,7 +69,7 @@ namespace BISS
         public void UpdateTimer(float secondsRemaining)
         {
             if (timerLabel == null) return;
-            timerLabel.text = $"⏱  {Mathf.Ceil(secondsRemaining):0}s";
+            timerLabel.text = $"Time: {Mathf.Ceil(secondsRemaining):0}s";
             timerLabel.color = secondsRemaining <= urgentTimerThreshold
                 ? urgentTimerColor
                 : normalTimerColor;
@@ -85,12 +85,12 @@ namespace BISS
 
             if (distanceMeters < 0f)
             {
-                distanceLabel.text = "📏  Distance: ---";
+                distanceLabel.text = "Dist: ---";
                 distanceLabel.color = normalTimerColor;
                 return;
             }
 
-            distanceLabel.text = $"📏  Distance: {distanceMeters:F2} m";
+            distanceLabel.text = $"Dist: {distanceMeters:F2} m";
 
             // Color: green when very close, red when far
             float t = Mathf.InverseLerp(closeDistanceThreshold, farDistanceThreshold, distanceMeters);

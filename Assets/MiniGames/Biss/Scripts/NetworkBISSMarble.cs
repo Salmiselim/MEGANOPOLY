@@ -56,9 +56,23 @@ namespace BISS
             }
             else
             {
-                // Disable grab for everyone who doesn't own this marble
+                // Disable grab so only the owner can pick this up.
+                // Setting interactionLayers = 0 is belt-and-suspenders: even if the
+                // interactable somehow stays enabled, no XR interactor can select it
+                // because it belongs to no interaction layer.
                 var grab = GetComponent<XRGrabInteractable>();
-                if (grab != null) grab.enabled = false;
+                if (grab != null)
+                {
+                    grab.interactionLayers = 0; // remove from ALL layers first
+                    grab.enabled = false;
+                }
+
+                // Make Rigidbody kinematic on non-owners so NetworkTransform
+                // drives the position without local physics fighting it.
+                // Without this, gravity + physics simulate locally and the marble
+                // immediately falls/teleports instead of following the owner's throw.
+                var rb = GetComponent<Rigidbody>();
+                if (rb != null) rb.isKinematic = true;
             }
         }
 

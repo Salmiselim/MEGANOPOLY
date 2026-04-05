@@ -89,14 +89,14 @@ namespace BISS
             }
 
             if (distanceLabel != null)
-                distanceLabel.text = "📏  Throw your marble!";
+                distanceLabel.text = "Throw your marble!";
         }
 
         /// <summary>Updates the countdown timer display.</summary>
         public void UpdateTimer(float secondsLeft)
         {
             if (timerLabel == null) return;
-            timerLabel.text  = $"⏱  {Mathf.Ceil(secondsLeft):0}s";
+            timerLabel.text  = $"Time: {Mathf.Ceil(secondsLeft):0}s";
             timerLabel.color = secondsLeft <= urgentThreshold ? urgentTimerColor : normalTimerColor;
         }
 
@@ -110,17 +110,17 @@ namespace BISS
             if (dist < 0f)
             {
                 // dist == -1 means timer expired
-                distanceLabel.text  = $"📏  {attemptLabel}: timed out";
+                distanceLabel.text  = $"{attemptLabel}: timed out";
                 distanceLabel.color = Color.gray;
             }
             else if (Mathf.Approximately(dist, 0f))
             {
-                distanceLabel.text  = $"🎯  {attemptLabel}: SCORED!";
+                distanceLabel.text  = $"{attemptLabel}: SCORED!";
                 distanceLabel.color = Color.green;
             }
             else
             {
-                distanceLabel.text  = $"📏  {attemptLabel}: {dist:F2}m";
+                distanceLabel.text  = $"{attemptLabel}: {dist:F2}m";
                 distanceLabel.color = dist < 0.5f ? Color.green
                                     : dist < 1.5f ? Color.yellow
                                     : Color.white;
@@ -137,9 +137,9 @@ namespace BISS
             if (leaderboardText == null) return;
 
             var sb = new StringBuilder();
-            sb.AppendLine("<b>🏆  FINAL RESULTS</b>\n");
+            sb.AppendLine("<b>-- FINAL RESULTS --</b>\n");
 
-            string[] medals = { "🥇", "🥈", "🥉", "4th" };
+            string[] medals = { "1st", "2nd", "3rd", "4th" };
 
             for (int r = 0; r < rankedPlayerIndices.Length; r++)
             {
@@ -150,7 +150,7 @@ namespace BISS
 
                 string distText;
                 if (Mathf.Approximately(dist, 0f))
-                    distText = "Scored in the hole! 🎯";
+                    distText = "Scored in the hole!";
                 else if (dist >= float.MaxValue / 3f)
                     distText = "No valid throw";
                 else
@@ -163,7 +163,7 @@ namespace BISS
             {
                 int    winner = rankedPlayerIndices[0];
                 string wHex   = PlayerHex(winner);
-                sb.AppendLine($"\n<size=130%><b><color=#{wHex}>Player {winner + 1} Wins!</color></b></size>");
+                sb.AppendLine($"\n<size=130%><b><color=#{wHex}>*** Player {winner + 1} Wins! ***</color></b></size>");
             }
 
             leaderboardText.text = sb.ToString();
