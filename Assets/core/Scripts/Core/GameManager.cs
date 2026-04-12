@@ -2,16 +2,15 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Events;
+using Unity.Netcode;
+using Unity.Services.Authentication;
 
-/// <summary>
-/// Fixed CompleteGameManager with proper array bounds checking
-/// </summary>
-public class CompleteGameManager : MonoBehaviour
+public class CompleteGameManager : NetworkBehaviour
 {
     public static CompleteGameManager Instance { get; private set; }
 
     [Header("Game Settings")]
-    [SerializeField] private int numberOfPlayers = 4;
+    [SerializeField] public int numberOfPlayers = 4;
     [SerializeField] private int startingMoney = 1500;
     [SerializeField] private int goBonus = 200;
 
@@ -20,7 +19,7 @@ public class CompleteGameManager : MonoBehaviour
     [SerializeField] private GameObject playerPrefab;
     [SerializeField] private SimpleDiceController[] dice = new SimpleDiceController[2];
 
-    [Header("Spawn System")]
+    [Header("Spawn Points")]
     [SerializeField] private bool useManualSpawnPoints = true;
     [SerializeField] private PlayerSpawnPoint[] manualSpawnPoints = new PlayerSpawnPoint[4];
 
@@ -29,268 +28,270 @@ public class CompleteGameManager : MonoBehaviour
     [SerializeField] private Vector3 manualSpawnOffset = Vector3.zero;
 
     [Header("Player Setup")]
-    [SerializeField]
-    private Color[] playerColors = new Color[4]
-    {
-        Color.red,
-        Color.blue,
-        Color.green,
-        Color.yellow
-    };
-    [SerializeField]
-    private string[] playerNames = new string[4]
-    {
-        "Player 1",
-        "Player 2",
-        "Player 3",
-        "Player 4"
-    };
+    [SerializeField] private Color[] playerColors = { Color.red, Color.blue, Color.green, Color.yellow };
+    [SerializeField] private string[] playerNames = { "Player 1", "Player 2", "Player 3", "Player 4" };
 
-    [Header("DEBUG — disable in final build")]
+    [Header("DEBUG")]
     [SerializeField] private bool enableDebugCheats = true;
-    [SerializeField] private KeyCode cheatKey_GiveMonopoly    = KeyCode.F1;
-    [SerializeField] private KeyCode cheatKey_OpenBuildMenu   = KeyCode.F2;
-    [SerializeField] private KeyCode cheatKey_GiveMoney       = KeyCode.F3;
-    [SerializeField] private KeyCode cheatKey_TestRent        = KeyCode.F4;
-    [SerializeField] private KeyCode cheatKey_BuyAll          = KeyCode.F5;
-    [SerializeField] private KeyCode cheatKey_TestTrain       = KeyCode.F6;
-    [SerializeField] private KeyCode cheatKey_TestMinigame    = KeyCode.F7;
+    [SerializeField] private KeyCode cheatKey_GiveMonopoly = KeyCode.F1;
+    [SerializeField] private KeyCode cheatKey_OpenBuildMenu = KeyCode.F2;
+    [SerializeField] private KeyCode cheatKey_GiveMoney = KeyCode.F3;
+    [SerializeField] private KeyCode cheatKey_TestRent = KeyCode.F4;
+    [SerializeField] private KeyCode cheatKey_BuyAll = KeyCode.F5;
+    [SerializeField] private KeyCode cheatKey_TestTrain = KeyCode.F6;
+    [SerializeField] private KeyCode cheatKey_TestMinigame = KeyCode.F7;
 
-    // Game State
+    // ── Auth: maps clientId → authenticated username & Unity PlayerId ─────────
+    private Dictionary<ulong, string> clientAuthNames = new Dictionary<ulong, string>();
+    private Dictionary<ulong, string> clientUnityPlayerIds = new Dictionary<ulong, string>();
+
+    // ── Runtime state ─────────────────────────────────────────────────────────
     private GameState currentGameState = GameState.Setup;
     private PlayerData[] players;
     private int currentPlayerIndex = 0;
     private bool waitingForDiceRoll = false;
     private bool isGamePaused = false;
 
-    // Dice tracking
-    private bool dice1HasResult = false;
-    private bool dice2HasResult = false;
-    private int dice1Result = 0;
-    private int dice2Result = 0;
+    private bool dice1HasResult; private int dice1Result;
+    private bool dice2HasResult; private int dice2Result;
 
-    // Events
     public UnityEvent OnGameStarted = new UnityEvent();
     public UnityEvent<int> OnTurnChanged = new UnityEvent<int>();
 
-    // Minigame reference
     private MinigameOrchestrator minigameOrchestrator;
+
+    // ── Awake ─────────────────────────────────────────────────────────────────
 
     private void Awake()
     {
-        if (Instance == null)
+        if (Instance == null) Instance = this;
+        else { Destroy(gameObject); return; }
+
+        if (boardManager == null) boardManager = FindObjectOfType<BoardManager>();
+
+        minigameOrchestrator = FindObjectOfType<MinigameOrchestrator>();
+        if (minigameOrchestrator != null)
+            minigameOrchestrator.OnMinigameEnded.AddListener(OnMinigameEnded);
+
+        AutoFindDice();
+        AutoFindSpawnPoints();
+    }
+
+    // ── NGO entry point ───────────────────────────────────────────────────────
+
+    public override void OnNetworkSpawn()
+    {
+        // ── SERVER ──────────────────────────────────────────────────────────
+        if (IsServer)
         {
-            Instance = this;
-        }
-        else
-        {
-            Destroy(gameObject);
+            NetworkManager.Singleton.OnClientConnectedCallback += OnClientConnected;
+            NetworkManager.Singleton.OnClientDisconnectCallback += OnClientDisconnected;
+            // Game starts only when NetworkBootstrapper calls ForceStartWithCurrentPlayers()
             return;
         }
 
-        if (boardManager == null)
-            boardManager = FindObjectOfType<BoardManager>();
-
-        // Find minigame orchestrator
-        minigameOrchestrator = FindObjectOfType<MinigameOrchestrator>();
-        if (minigameOrchestrator != null)
+        // ── CLIENT: guard — must be authenticated before entering the game ──
+        if (AuthManager.Instance == null || !AuthManager.Instance.IsSignedIn)
         {
-            minigameOrchestrator.OnMinigameEnded.AddListener(OnMinigameEnded);
-            Debug.Log("✓ MinigameOrchestrator connected");
+            Debug.LogError("[Client] Not authenticated! Redirecting to Auth scene.");
+            UnityEngine.SceneManagement.SceneManager.LoadScene("AuthScene");
+            return;
         }
 
-        // Auto-find dice if not assigned
-        if (dice == null || dice.Length < 2 || dice[0] == null || dice[1] == null)
-        {
-            SimpleDiceController[] foundDice = FindObjectsOfType<SimpleDiceController>();
-            if (foundDice.Length >= 2)
-            {
-                // Sort by diceNumber to ensure consistent ordering
-                System.Array.Sort(foundDice, (a, b) => a.diceNumber.CompareTo(b.diceNumber));
-                dice = new SimpleDiceController[2];
-                dice[0] = foundDice[0];
-                dice[1] = foundDice[1];
-                Debug.Log($"✓ Auto-found {foundDice.Length} dice controllers");
-            }
-            else if (foundDice.Length == 1)
-            {
-                Debug.LogWarning($"⚠️ Only found 1 dice controller, need 2");
-            }
-        }
+        // Send authenticated username + Unity PlayerId to server
+        string username = AuthManager.Instance.PlayerName ?? $"Player_{NetworkManager.Singleton.LocalClientId}";
+        string playerId = AuthManager.Instance.PlayerId;
 
-        // Auto-find spawn points
-        if (useManualSpawnPoints && (manualSpawnPoints == null || manualSpawnPoints.Length == 0 || manualSpawnPoints[0] == null))
-        {
-            PlayerSpawnPoint[] foundPoints = FindObjectsOfType<PlayerSpawnPoint>();
-            if (foundPoints.Length >= numberOfPlayers)
-            {
-                manualSpawnPoints = new PlayerSpawnPoint[numberOfPlayers];
-                System.Array.Sort(foundPoints, (a, b) => a.playerIndex.CompareTo(b.playerIndex));
-
-                for (int i = 0; i < numberOfPlayers; i++)
-                {
-                    manualSpawnPoints[i] = foundPoints[i];
-                }
-
-                Debug.Log($"✓ Auto-found {foundPoints.Length} spawn points");
-            }
-            else
-            {
-                Debug.LogWarning($"⚠️ Only found {foundPoints.Length} spawn points");
-                useManualSpawnPoints = false;
-            }
-        }
+        RegisterAuthNameServerRpc(username, playerId, NetworkManager.Singleton.LocalClientId);
+        Debug.Log($"[Client] Auth guard passed. Registered as '{username}' (PlayerId: {playerId})");
     }
 
-    private void Start()
+    // ── Auth registration RPC (client → server) ───────────────────────────────
+
+    /// <summary>
+    /// Called by each client immediately after spawning to register their
+    /// authenticated username and Unity PlayerId on the server.
+    /// </summary>
+    [ServerRpc(RequireOwnership = false)]
+    public void RegisterAuthNameServerRpc(string username, string unityPlayerId, ulong clientId, ServerRpcParams rpcParams = default)
     {
-        StartCoroutine(InitializeGame());
+        clientAuthNames[clientId] = username;
+        clientUnityPlayerIds[clientId] = unityPlayerId;
+        Debug.Log($"[Server] Client {clientId} registered → name='{username}' | playerId='{unityPlayerId}'");
     }
 
-    private IEnumerator InitializeGame()
+    // ── Client connect / disconnect callbacks ─────────────────────────────────
+
+    private void OnClientConnected(ulong clientId)
+        => Debug.Log($"[Server] Client {clientId} connected. Total: {NetworkManager.Singleton.ConnectedClientsList.Count}");
+
+    private void OnClientDisconnected(ulong clientId)
+    {
+        Debug.LogWarning($"[Server] Client {clientId} disconnected.");
+        clientAuthNames.Remove(clientId);
+        clientUnityPlayerIds.Remove(clientId);
+    }
+
+    // ── Called by NetworkBootstrapper ─────────────────────────────────────────
+
+    public void ForceStartWithCurrentPlayers()
+    {
+        if (!IsServer) return;
+        if (currentGameState != GameState.Setup) return;
+
+        int connected = NetworkManager.Singleton.ConnectedClientsList.Count;
+        if (connected == 0) { Debug.LogError("[GameManager] ForceStart: 0 players connected!"); return; }
+
+        numberOfPlayers = connected;
+        Debug.Log($"[GameManager] Force-starting with {numberOfPlayers} player(s).");
+        StartCoroutine(ServerInitGame());
+    }
+
+    // ── Server: spawn all players ─────────────────────────────────────────────
+
+    private IEnumerator ServerInitGame()
     {
         currentGameState = GameState.Setup;
-
-        Debug.Log("═══════════════════════════════════");
-        Debug.Log("   MEGANOPOLY - GAME START");
-        Debug.Log("═══════════════════════════════════");
-
-        yield return new WaitForSeconds(0.5f);
-
-        if (boardManager == null)
-        {
-            Debug.LogError("❌ BoardManager not found!");
-            yield break;
-        }
-
-        if (dice == null || dice.Length < 2 || dice[0] == null || dice[1] == null)
-        {
-            Debug.LogError("❌ Dice not assigned!");
-            yield break;
-        }
-
-        yield return new WaitForSeconds(0.5f);
-
-        InitializePlayers();
-        SetupDiceEvents();
-
-        yield return new WaitForSeconds(1f);
-        StartGame();
-    }
-
-    private void InitializePlayers()
-    {
-        Debug.Log($"\n--- Creating {numberOfPlayers} Players ---");
-
         players = new PlayerData[numberOfPlayers];
+
+        var clients = new List<ulong>(NetworkManager.Singleton.ConnectedClientsIds);
 
         for (int i = 0; i < numberOfPlayers; i++)
         {
-            players[i] = new PlayerData(i, playerNames[i], playerColors[i]);
+            // ── Resolve owner client ──────────────────────────────────────
+            ulong ownerClientId = (i < clients.Count) ? clients[i] : NetworkManager.ServerClientId;
+
+            // ── Resolve authenticated name (fallback to static array) ─────
+            string authName = clientAuthNames.TryGetValue(ownerClientId, out string n)
+                ? n
+                : (i < playerNames.Length ? playerNames[i] : $"Player {i + 1}");
+
+            // ── Resolve Unity PlayerId ────────────────────────────────────
+            string unityPlayerId = clientUnityPlayerIds.TryGetValue(ownerClientId, out string pid)
+                ? pid
+                : ownerClientId.ToString();
+
+            // ── Create PlayerData ─────────────────────────────────────────
+            players[i] = new PlayerData(i, authName, playerColors[i]);
             players[i].money = startingMoney;
+            players[i].unityPlayerId = unityPlayerId;   // store auth PlayerId
 
+            Debug.Log($"[Server] Spawning Player {i} → name='{authName}' | unityPlayerId='{unityPlayerId}' | client={ownerClientId}");
+
+            // ── Spawn avatar ──────────────────────────────────────────────
             Vector3 spawnPos = GetSpawnPosition(i);
-
-            if (playerPrefab == null)
-            {
-                Debug.LogError("❌ Player prefab not assigned!");
-                return;
-            }
-
             GameObject avatarObj = Instantiate(playerPrefab, spawnPos, Quaternion.identity);
-            avatarObj.name = $"Player_{i}_{playerNames[i]}";
+            avatarObj.name = $"Player_{i}_{authName}";
 
-            // Apply color
-            Renderer renderer = avatarObj.GetComponentInChildren<Renderer>();
-            if (renderer != null)
+            NetworkObject netObj = avatarObj.GetComponent<NetworkObject>();
+            if (netObj == null)
             {
-                Material mat = new Material(renderer.material);
-                mat.color = playerColors[i];
-                renderer.material = mat;
+                Debug.LogError("[Server] Player prefab missing NetworkObject!");
+                Destroy(avatarObj);
+                continue;
             }
 
-            players[i].playerAvatar = avatarObj;
-            players[i].avatarTransform = avatarObj.transform;
+            netObj.SpawnWithOwnership(ownerClientId, true);
 
-            // Setup movement
-            PlayerMovement movement = avatarObj.GetComponent<PlayerMovement>();
-            if (movement == null)
-                movement = avatarObj.AddComponent<PlayerMovement>();
-
-            movement.Initialize(players[i]);
-            players[i].movementController = movement;
-
-            // Subscribe to events WITH BOUNDS CHECKING
-            int playerIndex = i; // Capture for closure
-
-            movement.OnTileLanded.AddListener((tile) => {
-                // SAFE: Check if player index is valid
-                if (playerIndex >= 0 && playerIndex < players.Length && players[playerIndex] != null)
-                {
-                    OnPlayerLandedOnTile(players[playerIndex], tile);
-                }
-            });
-
-            movement.OnPassedGO.AddListener(() => {
-                // SAFE: Check if player index is valid
-                if (playerIndex >= 0 && playerIndex < players.Length && players[playerIndex] != null)
-                {
-                    HandlePassGO(players[playerIndex]);
-                }
-            });
-
-            Debug.Log($"✓ {playerNames[i]} spawned at {spawnPos}");
+            ApplyPlayerColor(avatarObj, playerColors[i]);
+            SetupPlayerAvatar(i, avatarObj);
         }
 
-        Debug.Log($"✓ All players initialized!\n");
+        yield return new WaitForSeconds(0.5f);
+        SetupDiceEvents();
+        StartGame();
+    }
+
+    // ── Avatar setup ──────────────────────────────────────────────────────────
+
+    private void ApplyPlayerColor(GameObject avatarObj, Color color)
+    {
+        Renderer rend = avatarObj.GetComponentInChildren<Renderer>();
+        if (rend != null)
+        {
+            Material mat = new Material(rend.sharedMaterial);
+            mat.color = color;
+            rend.material = mat;
+        }
+    }
+
+    private void SetupPlayerAvatar(int index, GameObject avatarObj)
+    {
+        players[index].playerAvatar = avatarObj;
+        players[index].avatarTransform = avatarObj.transform;
+
+        PlayerMovement movement = avatarObj.GetComponent<PlayerMovement>();
+        if (movement == null) movement = avatarObj.AddComponent<PlayerMovement>();
+
+        movement.Initialize(players[index]);
+        players[index].movementController = movement;
+
+        int playerIndex = index;
+        movement.OnTileLanded.AddListener((tile) =>
+        {
+            if (playerIndex >= 0 && playerIndex < players.Length && players[playerIndex] != null)
+                OnPlayerLandedOnTile(players[playerIndex], tile);
+        });
+        movement.OnPassedGO.AddListener(() =>
+        {
+            if (playerIndex >= 0 && playerIndex < players.Length && players[playerIndex] != null)
+                HandlePassGO(players[playerIndex]);
+        });
     }
 
     private Vector3 GetSpawnPosition(int playerIndex)
     {
-        if (useManualSpawnPoints && manualSpawnPoints != null && playerIndex < manualSpawnPoints.Length)
-        {
-            if (manualSpawnPoints[playerIndex] != null)
-            {
-                return manualSpawnPoints[playerIndex].transform.position;
-            }
-        }
+        if (useManualSpawnPoints && manualSpawnPoints != null &&
+            playerIndex < manualSpawnPoints.Length && manualSpawnPoints[playerIndex] != null)
+            return manualSpawnPoints[playerIndex].transform.position;
 
         TileData goTile = boardManager.GetTile(0);
-        if (goTile == null)
+        if (goTile == null) { Debug.LogError("❌ GO tile not found!"); return Vector3.zero; }
+        return goTile.worldPosition + manualSpawnOffset + Vector3.right * (playerIndex * playerSpacing);
+    }
+
+    // ── Dice ──────────────────────────────────────────────────────────────────
+
+    private void AutoFindDice()
+    {
+        if (dice != null && dice.Length >= 2 && dice[0] != null && dice[1] != null) return;
+        SimpleDiceController[] found = FindObjectsOfType<SimpleDiceController>();
+        if (found.Length >= 2)
         {
-            Debug.LogError("❌ GO tile not found!");
-            return Vector3.zero;
+            System.Array.Sort(found, (a, b) => a.diceNumber.CompareTo(b.diceNumber));
+            dice = new SimpleDiceController[2] { found[0], found[1] };
+            Debug.Log($"✓ Auto-found {found.Length} dice");
         }
+        else Debug.LogWarning($"⚠️ Only found {found.Length} dice, need 2");
+    }
 
-        Vector3 spawnPos = goTile.worldPosition + manualSpawnOffset;
-        spawnPos += Vector3.right * (playerIndex * playerSpacing);
-
-        return spawnPos;
+    private void AutoFindSpawnPoints()
+    {
+        if (!useManualSpawnPoints) return;
+        if (manualSpawnPoints != null && manualSpawnPoints.Length >= numberOfPlayers && manualSpawnPoints[0] != null) return;
+        PlayerSpawnPoint[] found = FindObjectsOfType<PlayerSpawnPoint>();
+        if (found.Length >= numberOfPlayers)
+        {
+            System.Array.Sort(found, (a, b) => a.playerIndex.CompareTo(b.playerIndex));
+            manualSpawnPoints = new PlayerSpawnPoint[numberOfPlayers];
+            for (int i = 0; i < numberOfPlayers; i++) manualSpawnPoints[i] = found[i];
+            Debug.Log($"✓ Auto-found {found.Length} spawn points");
+        }
+        else { Debug.LogWarning($"⚠️ Only {found.Length} spawn points, using procedural"); useManualSpawnPoints = false; }
     }
 
     private void SetupDiceEvents()
     {
-        if (dice[0] != null)
-        {
-            dice[0].OnDiceRolled.AddListener(OnDice1Rolled);
-            Debug.Log("✓ Dice 1 connected");
-        }
-
-        if (dice[1] != null)
-        {
-            dice[1].OnDiceRolled.AddListener(OnDice2Rolled);
-            Debug.Log("✓ Dice 2 connected");
-        }
+        if (dice[0] != null) { dice[0].OnDiceRolled.AddListener(OnDice1Rolled); Debug.Log("✓ Dice 1 connected"); }
+        if (dice[1] != null) { dice[1].OnDiceRolled.AddListener(OnDice2Rolled); Debug.Log("✓ Dice 2 connected"); }
     }
+
+    // ── Game flow ─────────────────────────────────────────────────────────────
 
     private void StartGame()
     {
         currentGameState = GameState.Playing;
-
-        Debug.Log("\n═══════════════════════════════════");
-        Debug.Log("       🎮 GAME STARTED! 🎮");
-        Debug.Log("═══════════════════════════════════\n");
-
+        Debug.Log("\n═══════════════════════════════════\n       🎮 GAME STARTED!\n═══════════════════════════════════\n");
         OnGameStarted?.Invoke();
         StartTurn(0);
     }
@@ -298,436 +299,297 @@ public class CompleteGameManager : MonoBehaviour
     private void StartTurn(int playerIndex)
     {
         currentPlayerIndex = playerIndex;
-
-        // SAFE: Bounds check
         if (currentPlayerIndex < 0 || currentPlayerIndex >= players.Length)
-        {
-            Debug.LogError($"Invalid player index: {currentPlayerIndex}");
-            return;
-        }
+        { Debug.LogError($"Invalid player index: {currentPlayerIndex}"); return; }
 
-        PlayerData currentPlayer = players[currentPlayerIndex];
+        PlayerData p = players[currentPlayerIndex];
+        p.currentState = PlayerState.WaitingToRoll;
 
-        currentPlayer.currentState = PlayerState.WaitingToRoll;
-
-        Debug.Log($"\n┌──────────────────────────────────────┐");
-        Debug.Log($"│  {currentPlayer.playerName}'s TURN");
-        Debug.Log($"├──────────────────────────────────────┤");
-        Debug.Log($"│  💰 Money: ${currentPlayer.money}");
-        Debug.Log($"│  📍 Tile: {boardManager.GetTile(currentPlayer.currentTileIndex)?.tileName ?? "Unknown"}");
-        Debug.Log($"│  🏠 Properties: {currentPlayer.ownedProperties.Count}");
-        Debug.Log($"└──────────────────────────────────────┘");
-        Debug.Log($"🎲 Press SPACE to roll!\n");
+        Debug.Log($"\n── {p.playerName}'s TURN  💰{p.money} DT  📍{boardManager.GetTile(p.currentTileIndex)?.tileName ?? "?"} ──");
 
         OnTurnChanged?.Invoke(currentPlayerIndex);
+        NotifyTurnClientRpc(currentPlayerIndex);
 
-        if (currentPlayer.isInJail)
-        {
-            HandleJailTurn(currentPlayer);
-            return;
-        }
-
+        if (p.isInJail) { HandleJailTurn(p); return; }
         EnableDiceForPlayer();
+    }
+
+    [ClientRpc]
+    private void NotifyTurnClientRpc(int playerIdx)
+    {
+        Debug.Log($"[Client] Player {playerIdx}'s turn.");
+        OnTurnChanged?.Invoke(playerIdx);
     }
 
     private void HandleJailTurn(PlayerData player)
     {
-      if (player.jailTurnsRemaining > 0)
+        if (player.jailTurnsRemaining > 0)
         {
             player.jailTurnsRemaining--;
-            Debug.Log($"🔒 {player.playerName} is in Jail. {player.jailTurnsRemaining} turn(s) remaining.");
-         EndTurn(); // Skip this turn — player waits
-      return;
+            Debug.Log($"🔒 {player.playerName} in Jail. {player.jailTurnsRemaining} turn(s) left.");
+            EndTurn();
+            return;
         }
-
-      // Turns served — release and let them play normally this turn
         player.ReleaseFromJail();
-     Debug.Log($"🔓 {player.playerName} is released from Jail! Roll the dice.");
-    EnableDiceForPlayer();
+        Debug.Log($"🔓 {player.playerName} released from Jail!");
+        EnableDiceForPlayer();
     }
 
     private void EnableDiceForPlayer()
     {
         waitingForDiceRoll = true;
-        dice1HasResult = false;
-        dice2HasResult = false;
-        dice1Result = 0;
-        dice2Result = 0;
-
+        dice1HasResult = false; dice1Result = 0;
+        dice2HasResult = false; dice2Result = 0;
         if (dice[0] != null) dice[0].ResetDice();
         if (dice[1] != null) dice[1].ResetDice();
+
+        Debug.Log($"[Server] Dice ready for Player {currentPlayerIndex} ({players[currentPlayerIndex]?.playerName})");
     }
 
-    private void OnDice1Rolled(int value)
+    public void RequestRoll()
     {
-        if (!waitingForDiceRoll) return;
-
-        dice1Result = value;
-        dice1HasResult = true;
-
-        Debug.Log($"🎲 Dice 1: {value}");
-
-        CheckBothDiceResults();
+        if (IsServer) DoRoll();
+        else RequestRollServerRpc();
     }
 
-    private void OnDice2Rolled(int value)
+    [ServerRpc(RequireOwnership = false)]
+    private void RequestRollServerRpc()
     {
-        if (!waitingForDiceRoll) return;
-
-        dice2Result = value;
-        dice2HasResult = true;
-
-        Debug.Log($"🎲 Dice 2: {value}");
-
-        CheckBothDiceResults();
+        DoRoll();
     }
 
-    private void CheckBothDiceResults()
+    private void DoRoll()
     {
-        if (dice1HasResult && dice2HasResult)
+        if (!waitingForDiceRoll)
         {
-            waitingForDiceRoll = false;
-            int total = dice1Result + dice2Result;
-
-            Debug.Log($"\n🎲🎲 TOTAL: {dice1Result} + {dice2Result} = {total}\n");
-
-            StartCoroutine(HandlePlayerMove(total));
+            Debug.LogWarning("[Server] Roll requested but not waiting — ignored.");
+            return;
         }
+        Debug.Log("[Server] Rolling dice...");
+        if (dice[0] != null) dice[0].RollDice();
+        if (dice[1] != null) dice[1].RollDice();
+    }
+
+    private void OnDice1Rolled(int value) { if (!waitingForDiceRoll) return; dice1Result = value; dice1HasResult = true; Debug.Log($"🎲 Die 1: {value}"); CheckBothDice(); }
+    private void OnDice2Rolled(int value) { if (!waitingForDiceRoll) return; dice2Result = value; dice2HasResult = true; Debug.Log($"🎲 Die 2: {value}"); CheckBothDice(); }
+
+    private void CheckBothDice()
+    {
+        if (!dice1HasResult || !dice2HasResult) return;
+        waitingForDiceRoll = false;
+        int total = dice1Result + dice2Result;
+        Debug.Log($"\n🎲🎲 {dice1Result} + {dice2Result} = {total}\n");
+        StartCoroutine(HandlePlayerMove(total));
     }
 
     private IEnumerator HandlePlayerMove(int spaces)
     {
-        // SAFE: Bounds check
         if (currentPlayerIndex < 0 || currentPlayerIndex >= players.Length)
-        {
-            Debug.LogError($"Invalid player index during move: {currentPlayerIndex}");
-            yield break;
-        }
+        { Debug.LogError($"Invalid player index during move: {currentPlayerIndex}"); yield break; }
 
-        PlayerData currentPlayer = players[currentPlayerIndex];
-        currentPlayer.currentState = PlayerState.Rolling;
-
+        PlayerData p = players[currentPlayerIndex];
+        p.currentState = PlayerState.Rolling;
         yield return new WaitForSeconds(0.5f);
 
-        Debug.Log($"🚶 {currentPlayer.playerName} moving {spaces} spaces...");
+        if (p.movementController == null) { Debug.LogError("❌ No movement controller!"); EndTurn(); yield break; }
 
-        if (currentPlayer.movementController == null)
-        {
-            Debug.LogError($"❌ No movement controller!");
-            EndTurn();
-            yield break;
-        }
+        p.movementController.MoveByDiceRoll(spaces, boardManager.allTiles);
 
-        currentPlayer.movementController.MoveByDiceRoll(spaces, boardManager.allTiles);
+        float timeout = 20f, elapsed = 0f;
+        while (p.movementController.IsMoving() && elapsed < timeout)
+        { elapsed += Time.deltaTime; yield return null; }
 
-        // Wait for movement
-        float timeout = 20f;
-        float elapsed = 0f;
-
-        while (currentPlayer.movementController.IsMoving() && elapsed < timeout)
-        {
-            elapsed += Time.deltaTime;
-            yield return null;
-        }
-
-        if (elapsed >= timeout)
-        {
-            Debug.LogError("❌ Movement timeout!");
-        }
-
+        if (elapsed >= timeout) Debug.LogError("❌ Movement timeout!");
         yield return new WaitForSeconds(0.5f);
-
-        HandleTileLanding(currentPlayer);
+        HandleTileLanding(p);
     }
 
     private void HandleTileLanding(PlayerData player)
     {
-        // SAFE: Bounds check
         if (player.currentTileIndex < 0 || player.currentTileIndex >= 40)
-        {
-            Debug.LogError($"Invalid tile index: {player.currentTileIndex}");
-            EndTurn();
-            return;
-        }
+        { Debug.LogError($"Invalid tile index: {player.currentTileIndex}"); EndTurn(); return; }
 
-        TileData landedTile = boardManager.GetTile(player.currentTileIndex);
+        TileData tile = boardManager.GetTile(player.currentTileIndex);
+        if (tile == null) { Debug.LogError($"Tile {player.currentTileIndex} is null!"); EndTurn(); return; }
 
-        if (landedTile == null)
-        {
-            Debug.LogError($"Tile {player.currentTileIndex} is null!");
-            EndTurn();
-            return;
-        }
-
-        Debug.Log($"\n📍 Landed on: {landedTile.tileName} ({landedTile.tileType})");
-
+        Debug.Log($"\n📍 Landed on: {tile.tileName} ({tile.tileType})");
         player.currentState = PlayerState.OnTile;
 
-        switch (landedTile.tileType)
+        switch (tile.tileType)
         {
-            case TileType.Property:
-                HandleProperty(player, landedTile);
-                break;
-
-            case TileType.Railroad:
-                HandleRailroad(player, landedTile);
-                break;
-
+            case TileType.Property: HandleProperty(player, tile); break;
+            case TileType.Railroad: HandleRailroad(player, tile); break;
             case TileType.Tax:
-                int tax = landedTile.baseRent;
-                player.RemoveMoney(tax);
-                Debug.Log($"💸 Paid ${tax} tax");
+                player.RemoveMoney(tile.baseRent);
+                Debug.Log($"💸 Paid ${tile.baseRent} tax");
                 EndTurn();
                 break;
-
             case TileType.GoToJail:
-                Debug.Log($"🚔 {player.playerName} landed on Go To Jail! Sending to Jail (tile 10)...");
-               player.SendToJail(); // sets isInJail, jailTurnsRemaining=2, currentTileIndex=10
+                player.SendToJail();
                 player.movementController?.TeleportToTile(10, boardManager.allTiles);
-                Debug.Log($"🔒 {player.playerName} is in Jail for {player.jailTurnsRemaining} turns.");
+                Debug.Log($"🔒 {player.playerName} sent to Jail.");
                 EndTurn();
                 break;
-
-            default:
-                EndTurn();
-                break;
+            default: EndTurn(); break;
         }
     }
 
-    // ── Railroad / Train routes ───────────────────────────────────────────────
+    // ── Railroad ──────────────────────────────────────────────────────────────
 
-    // Bidirectional routes: key = from tile index, value = to tile index
     private static readonly Dictionary<int, int> s_TrainRoutes = new Dictionary<int, int>
-    {
-        { 5,  25 }, { 25, 5  },
-        { 15, 35 }, { 35, 15 },
-    };
+    { { 5, 25 }, { 25, 5 }, { 15, 35 }, { 35, 15 } };
 
-    private static int GetTrainDestination(int fromIndex)
-    {
-        return s_TrainRoutes.TryGetValue(fromIndex, out int dest) ? dest : -1;
-    }
+    private static int GetTrainDestination(int from) =>
+        s_TrainRoutes.TryGetValue(from, out int d) ? d : -1;
 
     private static int CalculateTrainFare(TileData station, PlayerData rider, PlayerData[] allPlayers)
     {
         if (!station.IsOwned()) return 50;
         if (station.ownerId == rider.playerId) return 0;
-
         PlayerData owner = null;
-        foreach (PlayerData p in allPlayers)
-            if (p != null && p.playerId == station.ownerId) { owner = p; break; }
-
+        foreach (var p in allPlayers) if (p != null && p.playerId == station.ownerId) { owner = p; break; }
         if (owner == null) return 50;
-
-        int stationCount = 0;
-        foreach (TileData t in owner.ownedProperties)
-            if (t.tileType == TileType.Railroad) stationCount++;
-
-        int[] fareTable = { 0, 25, 50, 100, 200 };
-        return fareTable[Mathf.Clamp(stationCount, 0, 4)];
+        int cnt = 0;
+        foreach (var t in owner.ownedProperties) if (t.tileType == TileType.Railroad) cnt++;
+        return new[] { 0, 25, 50, 100, 200 }[Mathf.Clamp(cnt, 0, 4)];
     }
 
     private void HandleRailroad(PlayerData player, TileData station)
     {
         int destIndex = GetTrainDestination(station.tileIndex);
         if (destIndex < 0) { EndTurn(); return; }
-
         TileData destTile = boardManager.GetTile(destIndex);
-  if (destTile == null) { EndTurn(); return; }
+        if (destTile == null) { EndTurn(); return; }
 
-        // Unowned — offer to buy first, then show train menu
         if (!station.IsOwned())
         {
             TileMarker marker = boardManager.GetTileMarker(station.tileIndex);
-  if (PropertyCardUI.Instance != null && marker != null && marker.propertyCard != null)
-       {
-         PropertyCardUI.Instance.OnPurchaseDecision.RemoveAllListeners();
-                PropertyCardUI.Instance.OnPurchaseDecision.AddListener((didBuy) =>
-        {
-          if (didBuy) PropertyManager.Instance?.TryBuyProperty(player, station);
-        ShowTrainChoice(player, station, destTile);
-      });
-       PropertyCardUI.Instance.ShowPropertyCard(player, station, marker);
-          return;
-         }
+            if (PropertyCardUI.Instance != null && marker?.propertyCard != null)
+            {
+                PropertyCardUI.Instance.OnPurchaseDecision.RemoveAllListeners();
+                PropertyCardUI.Instance.OnPurchaseDecision.AddListener((bought) =>
+                {
+                    if (bought) PropertyManager.Instance?.TryBuyProperty(player, station);
+                    ShowTrainChoice(player, station, destTile);
+                });
+                PropertyCardUI.Instance.ShowPropertyCard(player, station, marker);
+                return;
+            }
         }
-
-      ShowTrainChoice(player, station, destTile);
+        ShowTrainChoice(player, station, destTile);
     }
 
     private void ShowTrainChoice(PlayerData player, TileData station, TileData destTile)
     {
-        if (TrainMenuUI.Instance == null)
-        {
- Debug.LogWarning("[Railroad] TrainMenuUI.Instance is null — add a TrainMenuUI canvas to the scene.");
-      EndTurn();
-    return;
- }
-
+        if (TrainMenuUI.Instance == null) { EndTurn(); return; }
         int fare = CalculateTrainFare(station, player, players);
+        Vector3 pos = player.avatarTransform != null ? player.avatarTransform.position
+                    : (Camera.main != null ? Camera.main.transform.position : Vector3.zero);
 
-        Vector3 playerPos = player.avatarTransform != null
-          ? player.avatarTransform.position
- : (Camera.main != null ? Camera.main.transform.position : Vector3.zero);
-
- TrainMenuUI.Instance.OnDecision.RemoveAllListeners();
-   TrainMenuUI.Instance.OnDecision.AddListener((tookTrain) =>
-      {
-          if (tookTrain)
- {
-       if (fare > 0)
-         {
-         if (station.IsOwned() && station.ownerId != player.playerId
-  && station.ownerId >= 0 && station.ownerId < players.Length)
-          {
-          players[station.ownerId].AddMoney(fare);
-        Debug.Log($"[Railroad] {fare} DT fare → {players[station.ownerId].playerName}");
- }
-       player.RemoveMoney(fare);
-   }
- player.currentTileIndex = destTile.tileIndex;
+        TrainMenuUI.Instance.OnDecision.RemoveAllListeners();
+        TrainMenuUI.Instance.OnDecision.AddListener((took) =>
+        {
+            if (took && fare > 0)
+            {
+                if (station.IsOwned() && station.ownerId != player.playerId
+                    && station.ownerId >= 0 && station.ownerId < players.Length)
+                    players[station.ownerId].AddMoney(fare);
+                player.RemoveMoney(fare);
+            }
+            if (took)
+            {
+                player.currentTileIndex = destTile.tileIndex;
                 player.movementController?.TeleportToTile(destTile.tileIndex, boardManager.allTiles);
-        Debug.Log($"[Railroad] {player.playerName} → {destTile.tileName}");
-    }
-        EndTurn();
+            }
+            EndTurn();
         });
-
-      TrainMenuUI.Instance.ShowTrainMenu(
-          station.tileName, destTile.tileName,
-      fare, player.money, playerPos);
+        TrainMenuUI.Instance.ShowTrainMenu(station.tileName, destTile.tileName, fare, player.money, pos);
     }
+
+    // ── Property ──────────────────────────────────────────────────────────────
 
     private void HandleProperty(PlayerData player, TileData property)
     {
-        // Check if this property triggers a minigame
         if (ShouldTriggerMinigame(property))
         {
-            int minigameType = 0;
-            switch (property.propertyColor)
+            int type = property.propertyColor switch
             {
-                case PropertyColor.LightBlue: minigameType = 0; break; // Maps Light Blue tiles to ID 0
-                case PropertyColor.Pink:      minigameType = 1; break; // Maps Pink tiles to ID 1
-                case PropertyColor.Orange:    minigameType = 2; break; // Maps Orange tiles to ID 2
-                case PropertyColor.Green:     minigameType = 3; break; // Maps Green tiles to ID 3
-                default:                      minigameType = 0; break; // Default fallback
-            }
-            int prizeAmount = Mathf.Max(100, property.purchasePrice / 2);
-            TriggerMinigameChallenge(player, property, minigameType, prizeAmount);
+                PropertyColor.Brown => 0,
+                PropertyColor.LightBlue => 1,
+                PropertyColor.Pink => 2,
+                PropertyColor.Orange => 3,
+                PropertyColor.Red => 4,
+                PropertyColor.Yellow => 5,
+                PropertyColor.Green => 6,
+                PropertyColor.DarkBlue => 7,
+                _ => 0
+            };
+            TriggerMinigameChallenge(player, property, type, Mathf.Max(100, property.purchasePrice / 2));
             return;
         }
 
         if (!property.IsOwned())
         {
-            // Get the tile marker to access the card
             TileMarker marker = boardManager.GetTileMarker(property.tileIndex);
-
-            if (PropertyCardUI.Instance != null && marker != null && marker.propertyCard != null)
+            if (PropertyCardUI.Instance != null && marker?.propertyCard != null)
             {
-                // Use animated card UI
                 PropertyCardUI.Instance.OnPurchaseDecision.RemoveAllListeners();
-                PropertyCardUI.Instance.OnPurchaseDecision.AddListener((didBuy) =>
+                PropertyCardUI.Instance.OnPurchaseDecision.AddListener((bought) =>
                 {
-                    if (didBuy)
-                    {
-                        PropertyManager.Instance?.TryBuyProperty(player, property);
-                    }
+                    if (bought) PropertyManager.Instance?.TryBuyProperty(player, property);
                     EndTurn();
                 });
-
                 PropertyCardUI.Instance.ShowPropertyCard(player, property, marker);
-                return; // Wait for player decision
+                return;
             }
-            else
-            {
-                // Fallback: console-based decision
-                Debug.Log($"🏠 {property.tileName} - {property.purchasePrice} DT");
-                Debug.Log($"💰 Your Balance: {player.money} DT");
-
-                if (player.CanAfford(property.purchasePrice))
-                    Debug.LogWarning("⚠️ PropertyCardUI not set up - auto-passing");
-            }
+            Debug.LogWarning("⚠️ PropertyCardUI not set up — auto-passing");
         }
         else if (property.ownerId == player.playerId)
         {
-            // Player landed on their OWN property — open the building menu
             if (BuildingMenuUI.Instance != null)
             {
-                Debug.Log($"[GameManager] Opening BuildingMenuUI for {property.tileName}");
                 BuildingMenuUI.Instance.OnMenuClosed.RemoveAllListeners();
                 BuildingMenuUI.Instance.OnMenuClosed.AddListener(EndTurn);
                 BuildingMenuUI.Instance.ShowBuildingMenu(player, property);
-                return; // Wait for player to close the menu
-            }
-            else
-            {
-                Debug.LogWarning("[GameManager] BuildingMenuUI.Instance is null — make sure the Canvas has the BuildingMenuUI script attached!");
+                return;
             }
         }
         else if (property.ownerId >= 0 && property.ownerId < players.Length)
         {
-            int rent = property.GetCurrentRent();
             PlayerData owner = players[property.ownerId];
-
+            int rent = property.GetCurrentRent();
             if (RentMenuUI.Instance != null)
             {
-                // Show rent payment UI — wait for player to click Pay
                 RentMenuUI.Instance.OnRentPaid.RemoveAllListeners();
-                RentMenuUI.Instance.OnRentPaid.AddListener((paidAmount) =>
+                RentMenuUI.Instance.OnRentPaid.AddListener((paid) =>
                 {
-                    if (player.RemoveMoney(paidAmount))
-                    {
-                        owner.AddMoney(paidAmount);
-                        Debug.Log($"💸 {player.playerName} paid {paidAmount} DT rent to {owner.playerName}");
-                    }
-                    else
-                    {
-                        Debug.LogWarning($"⚠️ {player.playerName} can't afford {paidAmount} DT rent!");
-                    }
+                    if (player.RemoveMoney(paid)) owner.AddMoney(paid);
+                    else Debug.LogWarning($"⚠️ {player.playerName} can't afford {paid} DT rent!");
                     EndTurn();
                 });
-
                 RentMenuUI.Instance.ShowRentMenu(player, property, owner);
-                return; // Wait for player to click Pay
+                return;
             }
-            else
-            {
-                // Fallback: silent pay if no UI
-                if (player.RemoveMoney(rent))
-                {
-                    owner.AddMoney(rent);
-                    Debug.Log($"💸 Paid {rent} DT rent to {owner.playerName}");
-                }
-            }
+            if (player.RemoveMoney(rent)) { owner.AddMoney(rent); Debug.Log($"💸 Paid {rent} DT rent"); }
         }
-
         EndTurn();
     }
 
+    private bool ShouldTriggerMinigame(TileData property) => !property.IsOwned();
+
+    // ── Helpers ───────────────────────────────────────────────────────────────
+
     private void OnPlayerLandedOnTile(PlayerData player, TileData tile)
-    {
-        if (player != null && tile != null)
-        {
-            Debug.Log($"📍 {player.playerName} → {tile.tileName}");
-        }
-    }
+    { if (player != null && tile != null) Debug.Log($"📍 {player.playerName} → {tile.tileName}"); }
 
     private void HandlePassGO(PlayerData player)
-    {
-        if (player != null)
-        {
-            player.AddMoney(goBonus);
-            Debug.Log($"💵 {player.playerName} passed GO! +${goBonus}");
-        }
-    }
+    { if (player != null) { player.AddMoney(goBonus); Debug.Log($"💵 {player.playerName} passed GO! +${goBonus}"); } }
 
     private void EndTurn()
     {
         if (currentPlayerIndex >= 0 && currentPlayerIndex < players.Length)
-        {
             players[currentPlayerIndex].currentState = PlayerState.Idle;
-        }
-
-        Debug.Log($"\n✓ Turn ended\n");
+        Debug.Log("✓ Turn ended\n");
         StartCoroutine(NextPlayerTurn());
     }
 
@@ -738,60 +600,34 @@ public class CompleteGameManager : MonoBehaviour
         StartTurn(currentPlayerIndex);
     }
 
-    /// <summary>
-    /// PUBLIC: Get all players (for PlayerMovement to check tile occupancy)
-    /// </summary>
-    public PlayerData[] GetAllPlayers()
-    {
-        return players;
-    }
+    // ── Public API ────────────────────────────────────────────────────────────
 
-    public PlayerData GetCurrentPlayer()
+    public PlayerData[] GetAllPlayers() => players;
+    public PlayerData GetCurrentPlayer() =>
+        (players != null && currentPlayerIndex >= 0 && currentPlayerIndex < players.Length)
+        ? players[currentPlayerIndex] : null;
+
+    /// <summary>Returns the PlayerData whose unityPlayerId matches the given id.</summary>
+    public PlayerData GetPlayerByUnityId(string unityPlayerId)
     {
-        if (players != null && currentPlayerIndex >= 0 && currentPlayerIndex < players.Length)
-            return players[currentPlayerIndex];
+        if (players == null) return null;
+        foreach (var p in players)
+            if (p != null && p.unityPlayerId == unityPlayerId) return p;
         return null;
     }
 
-    /// <summary>
-    /// Trigger a minigame challenge for the current player
-    /// minigameType: 0=Khobz, 1=3allouch, 2=BentWalad
-    /// </summary>
+    public void PauseGame() { isGamePaused = true; Time.timeScale = 0f; }
+    public void ResumeGame() { isGamePaused = false; Time.timeScale = 1f; }
+
+    // ── Minigame ──────────────────────────────────────────────────────────────
+
     public void TriggerMinigameChallenge(PlayerData player, TileData property, int minigameType = 0, int prizeAmount = 200)
     {
         if (minigameOrchestrator == null)
-        {
-            Debug.LogError("[GameManager] MinigameOrchestrator not found!");
-            EndTurn();
-            return;
-        }
-
+        { Debug.LogError("[GameManager] MinigameOrchestrator not found!"); EndTurn(); return; }
         minigameOrchestrator.StartMinigame(minigameType, property.tileName, player, prizeAmount);
     }
 
-    /// <summary>
-    /// Pause the game when minigame starts
-    /// </summary>
-    public void PauseGame()
-    {
-        isGamePaused = true;
-        Time.timeScale = 0f;
-        Debug.Log("[GameManager] Game paused for minigame");
-    }
-
-    /// <summary>
-    /// Resume the game when minigame ends
-    /// </summary>
-    public void ResumeGame()
-    {
-        isGamePaused = false;
-        Time.timeScale = 1f;
-        Debug.Log("[GameManager] Game resumed from minigame");
-    }
-
-    /// <summary>
-    /// Called when minigame finishes
-    /// </summary>
     private void OnMinigameEnded(int winnerId, int prizeAmount)
     {
         if (winnerId >= 0 && winnerId < players.Length && prizeAmount > 0)
@@ -799,271 +635,111 @@ public class CompleteGameManager : MonoBehaviour
             players[winnerId].AddMoney(prizeAmount);
             Debug.Log($"[GameManager] Minigame winner: {players[winnerId].playerName} won {prizeAmount} DT");
         }
-
-        // Continue game turn
         EndTurn();
     }
 
-    // ── DEBUG CHEATS ─────────────────────────────────────────────────────────
+    // ── Debug cheats ──────────────────────────────────────────────────────────
 
     private void Update()
     {
-        if (!enableDebugCheats) return;
+        if (!enableDebugCheats || !IsServer) return;
         if (players == null || currentGameState != GameState.Playing) return;
         if (currentPlayerIndex < 0 || currentPlayerIndex >= players.Length) return;
 
-        if (Input.GetKeyDown(cheatKey_GiveMonopoly))  Cheat_GiveMonopoly();
+        if (Input.GetKeyDown(cheatKey_GiveMonopoly)) Cheat_GiveMonopoly();
         if (Input.GetKeyDown(cheatKey_OpenBuildMenu)) Cheat_OpenBuildingMenu();
-        if (Input.GetKeyDown(cheatKey_GiveMoney))     Cheat_GiveMoney();
-        if (Input.GetKeyDown(cheatKey_TestRent))      Cheat_TestRent();
-        if (Input.GetKeyDown(cheatKey_BuyAll))        Cheat_BuyAllProperties();
-        if (Input.GetKeyDown(cheatKey_TestTrain))     Cheat_TestTrain_Station();
-        if (Input.GetKeyDown(cheatKey_TestMinigame))  Cheat_TestMinigame();
+        if (Input.GetKeyDown(cheatKey_GiveMoney)) Cheat_GiveMoney();
+        if (Input.GetKeyDown(cheatKey_TestRent)) Cheat_TestRent();
+        if (Input.GetKeyDown(cheatKey_BuyAll)) Cheat_BuyAllProperties();
+        if (Input.GetKeyDown(cheatKey_TestTrain)) Cheat_TestTrain_Station();
+        if (Input.GetKeyDown(cheatKey_TestMinigame)) Cheat_TestMinigame();
     }
 
-    /// <summary>
-    /// F1 — Gives the current player the first fully-free color group found on the board.
-    /// After pressing, press F2 to immediately open the building menu on the first owned property.
-    /// </summary>
     private void Cheat_GiveMonopoly()
     {
         PlayerData player = players[currentPlayerIndex];
-
         foreach (PropertyColor color in System.Enum.GetValues(typeof(PropertyColor)))
         {
             if (color == PropertyColor.None) continue;
-
             List<TileData> group = boardManager.GetTilesByColor(color);
             if (group == null || group.Count == 0) continue;
-
-            // Skip groups where another player already owns something
             bool blocked = false;
-            foreach (TileData t in group)
-            {
-                if (t.ownerId >= 0 && t.ownerId != player.playerId)
-                { blocked = true; break; }
-            }
+            foreach (var t in group) if (t.ownerId >= 0 && t.ownerId != player.playerId) { blocked = true; break; }
             if (blocked) continue;
-
-            // Give every tile in the group to this player
-            foreach (TileData t in group)
-            {
-                if (!player.ownedPropertyIndices.Contains(t.tileIndex))
-                    player.AddProperty(t);
-            }
-
-            Debug.Log($"[CHEAT F1] {player.playerName} got MONOPOLY on {color}! Press F2 to open building menu.");
+            foreach (var t in group) if (!player.ownedPropertyIndices.Contains(t.tileIndex)) player.AddProperty(t);
+            Debug.Log($"[CHEAT F1] {player.playerName} got MONOPOLY on {color}!");
             return;
         }
-
-        Debug.LogWarning("[CHEAT F1] No free color group found — all groups have mixed ownership.");
+        Debug.LogWarning("[CHEAT F1] No free color group found.");
     }
 
-    /// <summary>
-    /// F2 — Teleports the current player to their first owned property
-    /// and immediately opens the BuildingMenuUI so you can test buying houses.
-    /// </summary>
     private void Cheat_OpenBuildingMenu()
     {
         PlayerData player = players[currentPlayerIndex];
-
-        if (player.ownedProperties.Count == 0)
-        {
-            Debug.LogWarning("[CHEAT F2] Player owns no properties. Press F1 first to get a monopoly.");
-            return;
-        }
-
-        // Stop any waiting dice roll
-        waitingForDiceRoll = false;
-        StopAllCoroutines();
-
+        if (player.ownedProperties.Count == 0) { Debug.LogWarning("[CHEAT F2] No properties — press F1 first."); return; }
+        waitingForDiceRoll = false; StopAllCoroutines();
         TileData target = player.ownedProperties[0];
         player.currentTileIndex = target.tileIndex;
         player.movementController?.TeleportToTile(target.tileIndex, boardManager.allTiles);
-
-        Debug.Log($"[CHEAT F2] Teleported {player.playerName} to {target.tileName} — opening BuildingMenuUI");
-
         if (BuildingMenuUI.Instance != null)
         {
             BuildingMenuUI.Instance.OnMenuClosed.RemoveAllListeners();
             BuildingMenuUI.Instance.OnMenuClosed.AddListener(EndTurn);
             BuildingMenuUI.Instance.ShowBuildingMenu(player, target);
         }
-        else
-        {
-            Debug.LogError("[CHEAT F2] BuildingMenuUI.Instance is null! Make sure the canvas has the BuildingMenuUI script.");
-        }
+        else Debug.LogError("[CHEAT F2] BuildingMenuUI.Instance is null!");
     }
 
-    /// <summary>
-    /// F3 — Gives the current player 5000 DT so they can afford buildings.
-    /// </summary>
     private void Cheat_GiveMoney()
-    {
-        PlayerData player = players[currentPlayerIndex];
-        player.AddMoney(5000);
-        Debug.Log($"[CHEAT F3] Gave {player.playerName} 5000 DT. New balance: {player.money} DT");
-    }
+    { players[currentPlayerIndex].AddMoney(5000); Debug.Log("[CHEAT F3] +5000 DT"); }
 
-    /// <summary>
-    /// F4 — Gives ALL property tiles to Player 2, then teleports Player 1
-    /// onto the first one so the RentMenuUI pops up immediately.
-    /// </summary>
     private void Cheat_TestRent()
     {
         PlayerData player = players[currentPlayerIndex];
-        int otherIndex = (currentPlayerIndex + 1) % numberOfPlayers;
-    PlayerData otherPlayer = players[otherIndex];
-
-        // Give every property tile to the other player
-        int given = 0;
-        TileData firstTile = null;
-        foreach (TileData tile in boardManager.allTiles)
+        int otherIdx = (currentPlayerIndex + 1) % numberOfPlayers;
+        PlayerData other = players[otherIdx];
+        TileData first = null;
+        foreach (var tile in boardManager.allTiles)
         {
-     if (tile.tileType != TileType.Property) continue;
-
-  // Skip tiles already owned by current player
-            if (tile.ownerId == player.playerId) continue;
-
-   // Assign to other player
-      if (!otherPlayer.ownedPropertyIndices.Contains(tile.tileIndex))
-            {
-      otherPlayer.AddProperty(tile);
-         given++;
-  }
-
-            if (firstTile == null) firstTile = tile;
-   }
-
-        if (firstTile == null)
-  {
-      Debug.LogWarning("[CHEAT F4] No property tiles found on the board.");
-            return;
+            if (tile.tileType != TileType.Property || tile.ownerId == player.playerId) continue;
+            if (!other.ownedPropertyIndices.Contains(tile.tileIndex)) other.AddProperty(tile);
+            if (first == null) first = tile;
         }
-
-    Debug.Log($"[CHEAT F4] Gave {given} properties to {otherPlayer.playerName}.");
-
-     // Stop any active coroutines/dice
-        waitingForDiceRoll = false;
-   StopAllCoroutines();
-
-        // Teleport current player onto the first property
-  player.currentTileIndex = firstTile.tileIndex;
-        player.movementController?.TeleportToTile(firstTile.tileIndex, boardManager.allTiles);
-
- Debug.Log($"[CHEAT F4] Teleporting {player.playerName} to '{firstTile.tileName}' — RentMenuUI should open.");
-
-        HandleProperty(player, firstTile);
+        if (first == null) { Debug.LogWarning("[CHEAT F4] No property tiles found."); return; }
+        waitingForDiceRoll = false; StopAllCoroutines();
+        player.currentTileIndex = first.tileIndex;
+        player.movementController?.TeleportToTile(first.tileIndex, boardManager.allTiles);
+        HandleProperty(player, first);
     }
 
-    /// <summary>
-    /// F5 — Gives the current player ALL unowned property tiles for free
-    /// and fills their wallet so they can afford buildings immediately.
-    /// Also callable from the in-game CheatMenuUI button.
-    /// </summary>
     private void Cheat_BuyAllProperties()
     {
-        if (players == null || currentPlayerIndex < 0 || currentPlayerIndex >= players.Length) return;
-
-    PlayerData player = players[currentPlayerIndex];
-  int bought = 0;
-
-    foreach (TileData tile in boardManager.allTiles)
-      {
-         if (tile.tileType != TileType.Property) continue;
-   if (tile.IsOwned()) continue;
-            player.AddProperty(tile);
-     bought++;
-        }
-
-    player.AddMoney(99999);
-        Debug.Log($"[CHEAT F5] {player.playerName} bought all {bought} free properties and received 99999 DT.");
+        PlayerData player = players[currentPlayerIndex];
+        int bought = 0;
+        foreach (var tile in boardManager.allTiles)
+        { if (tile.tileType == TileType.Property && !tile.IsOwned()) { player.AddProperty(tile); bought++; } }
+        player.AddMoney(99999);
+        Debug.Log($"[CHEAT F5] Bought {bought} properties + 99999 DT");
     }
 
-    /// <summary>F6 — Teleport to Bizerte Station (tile 5) and open TrainMenuUI immediately.</summary>
     private void Cheat_TestTrain_Station()
     {
-     PlayerData player = players[currentPlayerIndex];
-        waitingForDiceRoll = false;
-        StopAllCoroutines();
-
-        int stationIndex = 5;
-        player.currentTileIndex = stationIndex;
-        player.movementController?.TeleportToTile(stationIndex, boardManager.allTiles);
-
-        TileData station = boardManager.GetTile(stationIndex);
-     if (station == null) { Debug.LogError("[CHEAT F6] Tile 5 not found."); return; }
-
-        Debug.Log($"[CHEAT F6] {player.playerName} → {station.tileName} — TrainMenuUI opening");
+        PlayerData player = players[currentPlayerIndex];
+        waitingForDiceRoll = false; StopAllCoroutines();
+        player.currentTileIndex = 5;
+        player.movementController?.TeleportToTile(5, boardManager.allTiles);
+        TileData station = boardManager.GetTile(5);
+        if (station == null) { Debug.LogError("[CHEAT F6] Tile 5 not found."); return; }
         HandleRailroad(player, station);
     }
 
-    /// <summary>F7 — Instantly trigger the minigame associated with Khobz.</summary>
     private void Cheat_TestMinigame()
     {
         PlayerData player = players[currentPlayerIndex];
-        
-        // Stop any active coroutines/dice
-        waitingForDiceRoll = false;
-        StopAllCoroutines();
-
-        // Use a dummy tile for the test. We use "BentWaladScene" in the name so GetMinigameTypeForProperty returns 2.
-        TileData dummyProperty = new TileData(99, "BentWaladScene Test Tile", TileType.Property, Vector3.zero);
-        dummyProperty.propertyColor = PropertyColor.Orange; 
-        dummyProperty.purchasePrice = 200;
-        
-        Debug.Log($"[CHEAT F7] Triggering Minigame challenge for {player.playerName} on {dummyProperty.tileName}");
-
-        int minigameType = GetMinigameTypeForProperty(dummyProperty);
-        int prizeAmount = Mathf.Max(100, dummyProperty.purchasePrice / 2);
-
-        // Directly call the method you already wrote
-        TriggerMinigameChallenge(player, dummyProperty, minigameType, prizeAmount);
-    }
-
-    // ═════════════════════════════════════════════════════════════════════════════
-    // MINIGAME INTEGRATION
-    // ═════════════════════════════════════════════════════════════════════════════
-
-    /// <summary>
-    /// Determines if a property should trigger a minigame
-    /// Override this logic to customize which properties trigger minigames
-    /// </summary>
-    private bool ShouldTriggerMinigame(TileData property)
-    {
-        // Example: Trigger minigame only on certain properties
-        // You can customize this based on property names, colors, or other criteria
-
-        // For now: only trigger on certain tile names
-        string name = property.tileName.ToLower();
-
-        // Customize: Add property names that should trigger minigames
-        bool isSpecialProperty =
-            name.Contains("Khobz".ToLower()) ||  // Change to your actual property name
-            name.Contains("3allouch".ToLower()) ||
-              name.Contains("HandTracking_PlayerVSComputer".ToLower()) // Change to your actual property name
-            || name.Contains("BentWaladScene".ToLower());     // Change to your actual property name
-
-        return isSpecialProperty && !property.IsOwned();
-    }
-
-    /// <summary>
-    /// Map a property to its minigame type
-    /// 0 = Khobz, 1 = 3allouch, 2 = BentWalad
-    /// </summary>
-    private int GetMinigameTypeForProperty(TileData property)
-    {
-        string name = property.tileName.ToLower();
-
-        if (name.Contains("Khobz".ToLower()))
-            return 0; // Khobz minigame
-        else if (name.Contains("3allouch".ToLower()))
-            return 1; // 3allouch minigame
-        else if (name.Contains("BentWaladScene".ToLower()))
-            return 2; // BentWalad minigame
-        else if (name.Contains("HandTracking_PlayerVSComputer".ToLower()))
-            return 3; // BentWalad minigame
-        else
-            return 0; // Default to Khobz
+        waitingForDiceRoll = false; StopAllCoroutines();
+        TileData dummy = new TileData(99, "Orange Test Tile", TileType.Property, Vector3.zero);
+        dummy.propertyColor = PropertyColor.Orange;
+        dummy.purchasePrice = 200;
+        TriggerMinigameChallenge(player, dummy, 3, 100);
     }
 }
