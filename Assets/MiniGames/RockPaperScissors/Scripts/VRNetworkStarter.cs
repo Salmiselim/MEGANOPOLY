@@ -1,4 +1,5 @@
 using Unity.Netcode;
+using Unity.Netcode.Transports.UTP;
 using UnityEngine;
 using UnityEngine.XR;
 using TMPro;
@@ -6,115 +7,132 @@ using TMPro;
 namespace RockPaperScissors
 {
     /// <summary>
-    /// VR-friendly network starter using controller buttons
-    /// Left Trigger = Start Host
-    /// Right Trigger = Start Client
-    /// OR auto-start as Client on Quest
+    /// VR-friendly network starter.
+    /// PC (Editor)  → Left Trigger  = Start Host
+    /// Quest        → Right Trigger = Start Client  (connects to HostIP)
+    ///
+    /// Before building the APK, set HostIP in the Inspector to your PC's
+    /// local IP address (run "ipconfig" on the PC to find it, e.g. 192.168.1.45).
     /// </summary>
     public class VRNetworkStarter : MonoBehaviour
     {
-        [Header("Settings")]
-        [SerializeField] private bool autoStartAsClient = false;
+        [Header("Connection")]
+        [Tooltip("PC's local IP address. Set this before building the Quest APK.\n" +
+                 "Find it by running 'ipconfig' in Command Prompt on the PC.")]
+        [SerializeField] private string hostIP = "10.180.137.88";
+
+        [Tooltip("Port must match the UnityTransport component on the NetworkManager (default 7777).")]
+        [SerializeField] private ushort port = 7777;
+
+        [Header("Auto-start")]
+        [Tooltip("When ON the Quest will automatically start as Client after 1 second. " +
+                 "Useful so you don't have to press a controller button.")]
+        [SerializeField] private bool autoStartAsClientOnQuest = true;
+
+        [Header("UI")]
         [SerializeField] private TextMeshProUGUI statusText;
-        
-        private bool hasStarted = false;
-        private InputDevice leftController;
-        private InputDevice rightController;
-        
+
+        private bool _hasStarted = false;
+        private InputDevice _leftController;
+        private InputDevice _rightController;
+
         void Start()
         {
-            // Get controllers
-            leftController = InputDevices.GetDeviceAtXRNode(XRNode.LeftHand);
-            rightController = InputDevices.GetDeviceAtXRNode(XRNode.RightHand);
-            
-            // Auto-start on Quest/Android
-            #if UNITY_ANDROID
-            if (autoStartAsClient)
+            _leftController  = InputDevices.GetDeviceAtXRNode(XRNode.LeftHand);
+            _rightController = InputDevices.GetDeviceAtXRNode(XRNode.RightHand);
+
+#if UNITY_ANDROID
+            if (autoStartAsClientOnQuest)
             {
-                Debug.Log("[VR Network] Auto-starting as Client (Quest)...");
-                Invoke(nameof(StartAsClient), 1f);
+                UpdateStatusText($"Connecting to\n{hostIP}:{port}...");
+                Invoke(nameof(StartAsClient), 1.5f);
             }
-            #endif
-            
-            UpdateStatusText("Press LEFT TRIGGER for Host\nPress RIGHT TRIGGER for Client");
+            else
+            {
+                UpdateStatusText($"Pull RIGHT TRIGGER to connect\nto {hostIP}");
+            }
+#else
+            UpdateStatusText("LEFT TRIGGER  = Host\nRIGHT TRIGGER = Client");
+#endif
         }
-        
+
         void Update()
         {
-            if (hasStarted) return;
-            
-            // Check left trigger (Host)
-            if (leftController.TryGetFeatureValue(CommonUsages.triggerButton, out bool leftTrigger) && leftTrigger)
-            {
+            if (_hasStarted) return;
+
+            // Re-cache controllers if they weren't ready at Start()
+            if (!_leftController.isValid)
+                _leftController  = InputDevices.GetDeviceAtXRNode(XRNode.LeftHand);
+            if (!_rightController.isValid)
+                _rightController = InputDevices.GetDeviceAtXRNode(XRNode.RightHand);
+
+            // Left trigger → Host
+            if (_leftController.TryGetFeatureValue(CommonUsages.triggerButton, out bool leftTrigger) && leftTrigger)
                 StartAsHost();
-            }
-            
-            // Check right trigger (Client)
-            if (rightController.TryGetFeatureValue(CommonUsages.triggerButton, out bool rightTrigger) && rightTrigger)
-            {
+
+            // Right trigger → Client
+            if (_rightController.TryGetFeatureValue(CommonUsages.triggerButton, out bool rightTrigger) && rightTrigger)
                 StartAsClient();
-            }
-            
-            // Fallback: Check primary buttons (A/X)
-            if (rightController.TryGetFeatureValue(CommonUsages.primaryButton, out bool aButton) && aButton)
-            {
-                StartAsHost();
-            }
-            
-            if (rightController.TryGetFeatureValue(CommonUsages.secondaryButton, out bool bButton) && bButton)
-            {
-                StartAsClient();
-            }
         }
-        
-        void StartAsHost()
+
+        public void StartAsHost()
         {
-            if (hasStarted) return;
-            hasStarted = true;
-            
-            Debug.Log("[VR Network] Starting as HOST...");
-            UpdateStatusText("Starting as HOST...");
-            
+            if (_hasStarted) return;
+            _hasStarted = true;
+
+            // Host listens on all interfaces — no IP needed
+            SetTransportAddress("0.0.0.0", port);
+
+            UpdateStatusText("Starting HOST...");
             if (NetworkManager.Singleton != null)
             {
                 NetworkManager.Singleton.StartHost();
-                Debug.Log($"[VR Network] Host started! IsHost: {NetworkManager.Singleton.IsHost}");
-                UpdateStatusText($"HOST ACTIVE\nPlayers: {NetworkManager.Singleton.ConnectedClients.Count}");
+                UpdateStatusText($"HOST ACTIVE\nWaiting for players...");
+                Debug.Log("[VR Network] Host started.");
             }
             else
             {
                 Debug.LogError("[VR Network] NetworkManager.Singleton is NULL!");
-                UpdateStatusText("ERROR: No NetworkManager!");
+                UpdateStatusText("ERROR: No NetworkManager found!");
             }
         }
-        
-        void StartAsClient()
+
+        public void StartAsClient()
         {
-            if (hasStarted) return;
-            hasStarted = true;
-            
-            Debug.Log("[VR Network] Starting as CLIENT...");
-            UpdateStatusText("Connecting to host...");
-            
+            if (_hasStarted) return;
+            _hasStarted = true;
+
+            // Point the transport at the PC's IP before connecting
+            SetTransportAddress(hostIP, port);
+
+            UpdateStatusText($"Connecting to\n{hostIP}:{port}...");
             if (NetworkManager.Singleton != null)
             {
                 NetworkManager.Singleton.StartClient();
-                Debug.Log($"[VR Network] Client started! IsClient: {NetworkManager.Singleton.IsClient}");
-                UpdateStatusText("CLIENT CONNECTED!");
+                Debug.Log($"[VR Network] Client connecting to {hostIP}:{port}");
             }
             else
             {
                 Debug.LogError("[VR Network] NetworkManager.Singleton is NULL!");
-                UpdateStatusText("ERROR: No NetworkManager!");
+                UpdateStatusText("ERROR: No NetworkManager found!");
             }
         }
-        
+
+        /// <summary>Sets the UnityTransport connection address at runtime before Start/Client is called.</summary>
+        private void SetTransportAddress(string ip, ushort p)
+        {
+            var transport = NetworkManager.Singleton.GetComponent<UnityTransport>();
+            if (transport != null)
+                transport.SetConnectionData(ip, p);
+            else
+                Debug.LogWarning("[VR Network] UnityTransport component not found on NetworkManager!");
+        }
+
         void UpdateStatusText(string message)
         {
             if (statusText != null)
-            {
                 statusText.text = message;
-            }
         }
     }
 }
+

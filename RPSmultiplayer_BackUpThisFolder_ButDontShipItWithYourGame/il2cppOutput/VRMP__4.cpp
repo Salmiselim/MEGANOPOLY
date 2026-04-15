@@ -1,0 +1,1230 @@
+﻿#include "pch-cpp.hpp"
+
+
+
+
+
+
+struct Dictionary_2_t28F041C4081441142A0EC7671CBE480EF50C3BBA;
+struct Dictionary_2_t82D4ED2D2DAB71E3447A80F408AED057F2CABFBD;
+struct Dictionary_2_t61D9E1A79722A10277502E526E398BA456EFD5CE;
+struct Dictionary_2_tADAADCB79520BF442347305F783A052191923466;
+struct HashSet_1_t4A2F2B74276D0AD3ED0F873045BD61E9504ECAE2;
+struct List_1_t498347DEA55185643F213F995B74FEE039FAD70F;
+struct List_1_t05915E9237850A58106982B7FE4BC5DA4E872E73;
+struct List_1_t3ED220D424138331023A4D1C1B67E3C63A19761B;
+struct List_1_tB6CC3AFBA7164AC34B1EF29A0A73721899567AE3;
+struct CharU5BU5D_t799905CF001DD5F13F7DBB310181FC4D8B7D0AAB;
+struct ColliderU5BU5D_t94A9D70F63D095AFF2A9B4613012A5F7F3141787;
+struct GameObjectU5BU5D_tFF67550DFCE87096D7A3734EA15B75896B2722CF;
+struct IntPtrU5BU5D_tFD177F8C806A6921AD7150264CCC62FA00CAD832;
+struct NetworkPhysicsInteractableU5BU5D_t01562B5FF56E4C8D6CF149E2439C9C85A407E1AC;
+struct StackTraceU5BU5D_t32FBCB20930EAF5BAE3F450FF75228E5450DA0DF;
+struct XRBaseInteractableU5BU5D_t6040A72F05BAF4285B7C4B70646708F9C2579ECD;
+struct Breakable_t6B364DB61FF2A6EC917DFBB300DAC9FE91E2C8F3;
+struct CancellationTokenSource_tAAE1E0033BCFC233801F8CB4CED5C852B350CB7B;
+struct Collider_t1CC3163924FCD6C4CC2E816373A929C1E3D55E76;
+struct GameObject_t76FEDD663AB33C991A9C9A23129337651094216F;
+struct IDictionary_t6D03155AF1FA9083817AA5B6AD7DEEACC26AB220;
+struct IEnumerator_t7B609C2FFA6EB5167D9C62A0C32A21DE2F666DAA;
+struct MiniGameBase_t7B6CA778B491B431AD2F03F35BE6D7CDA9027743;
+struct MiniGameManager_t44FD6BB14298DACBD473F8A7EAF83CD89922CE2C;
+struct MiniGame_Whack_t7E97D21412F0201471AA230190831E6571AC866E;
+struct NetworkManager_t3C1F76E0C1B39BB363D1C5C7667A5CC90A6CE468;
+struct NetworkObject_t8D6F76C7440A9E6176FC7F9268E5720C346A7366;
+struct NetworkedWhackAPig_t3A256F884EA61F8CAFB1F645E4FEE664AFEDC445;
+struct NotSupportedException_t1429765983D409BD2986508963C98D214E4EBF4A;
+struct RpcTarget_t0F23BD75DF373B0172AD08117DB945D6CD994832;
+struct SafeSerializationManager_tCBB85B95DFD1634237140CD892E82D06ECB3F5E6;
+struct String_t;
+struct Transform_tB27202C6F4E36D225EE28A13E4D662BF99785DB1;
+struct Void_t4861ACF8F4594C3437BB48B6E56783494B843915;
+struct XRInteractionManager_t93C7F7F0CFEAD83E1A70F92D05B0E663483746CD;
+struct U3CTrickRoutineU3Ed__23_t0576288007B934A0ACF0E68D0DAF36D37ABF2452;
+
+IL2CPP_EXTERN_C RuntimeClass* NotSupportedException_t1429765983D409BD2986508963C98D214E4EBF4A_il2cpp_TypeInfo_var;
+IL2CPP_EXTERN_C RuntimeClass* Vector3_t24C512C7B96BBABAD472002D0BA2BDA40A5A80B2_il2cpp_TypeInfo_var;
+IL2CPP_EXTERN_C const RuntimeMethod* NetworkVariableSerializationTypedInitializers_InitializeEqualityChecker_UnmanagedIEquatable_TisBoolean_t09A6377A54BE2F9E6985A8149F19234FD7DDFE22_m77B124A2CE439E262B19050EF276E4A54FD4DF99_RuntimeMethod_var;
+IL2CPP_EXTERN_C const RuntimeMethod* NetworkVariableSerializationTypedInitializers_InitializeEqualityChecker_UnmanagedIEquatable_TisColor_tD001788D726C3A7F1379BEED0260B9591F440C1F_mB909D1FCEF927B2C039F8D63734AE5DA657E217A_RuntimeMethod_var;
+IL2CPP_EXTERN_C const RuntimeMethod* NetworkVariableSerializationTypedInitializers_InitializeEqualityChecker_UnmanagedIEquatable_TisFixedString128Bytes_tEBC488E0CC30C6D842951A4E6F09AC58677F1952_mF50EBF58471E1F60EFEBFCC12422F7006C78CF1C_RuntimeMethod_var;
+IL2CPP_EXTERN_C const RuntimeMethod* NetworkVariableSerializationTypedInitializers_InitializeEqualityChecker_UnmanagedIEquatable_TisFixedString512Bytes_t0C425B0F2C07FEA1642C32BF8559116DF2BFF50E_mEEC0C880C380BDF433665C5268D7E996884DDD47_RuntimeMethod_var;
+IL2CPP_EXTERN_C const RuntimeMethod* NetworkVariableSerializationTypedInitializers_InitializeEqualityChecker_UnmanagedIEquatable_TisNetworkObjectReference_tDC1F1C3CC1E28DCB9229C36E30BB81F847CF77FD_m67B6E1FA6C94EB04A77D0A0E6CD6563D29454604_RuntimeMethod_var;
+IL2CPP_EXTERN_C const RuntimeMethod* NetworkVariableSerializationTypedInitializers_InitializeEqualityChecker_UnmanagedIEquatable_TisSingle_t4530F2FF86FCB0DC29F35385CA1BD21BE294761C_mF43C131F9E07A4BB1166611C44BACE3EC84E8515_RuntimeMethod_var;
+IL2CPP_EXTERN_C const RuntimeMethod* NetworkVariableSerializationTypedInitializers_InitializeEqualityChecker_UnmanagedIEquatable_TisVector3_t24C512C7B96BBABAD472002D0BA2BDA40A5A80B2_m89C1E8669DDC76C5E92E15D23CD4E3CEE1D845EE_RuntimeMethod_var;
+IL2CPP_EXTERN_C const RuntimeMethod* NetworkVariableSerializationTypedInitializers_InitializeEqualityChecker_UnmanagedValueEquals_TisGameState_t99B567B83F14873630A89D4E5B11A38D5B5EA529_m67A72943FB23EA0A9565B953A680FAB9A4B51D6D_RuntimeMethod_var;
+IL2CPP_EXTERN_C const RuntimeMethod* NetworkVariableSerializationTypedInitializers_InitializeEqualityChecker_UnmanagedValueEquals_TisInputMode_tA1FE8CD33609C5FA45BE47B528CB1F9BE7E7C556_m78EB891FEDB620B146F285F98F28E4961F771AF9_RuntimeMethod_var;
+IL2CPP_EXTERN_C const RuntimeMethod* NetworkVariableSerializationTypedInitializers_InitializeSerializer_FixedString_TisFixedString128Bytes_tEBC488E0CC30C6D842951A4E6F09AC58677F1952_mFBAC7418FAE06E3FEE5E6D8D040C89DEF645DBB8_RuntimeMethod_var;
+IL2CPP_EXTERN_C const RuntimeMethod* NetworkVariableSerializationTypedInitializers_InitializeSerializer_FixedString_TisFixedString512Bytes_t0C425B0F2C07FEA1642C32BF8559116DF2BFF50E_m4AD156116A5397F8A07B29125B83D064FB843C7E_RuntimeMethod_var;
+IL2CPP_EXTERN_C const RuntimeMethod* NetworkVariableSerializationTypedInitializers_InitializeSerializer_UnmanagedByMemcpy_TisBoolean_t09A6377A54BE2F9E6985A8149F19234FD7DDFE22_m262F7F05D2D8EAF215686867C594E83312417F31_RuntimeMethod_var;
+IL2CPP_EXTERN_C const RuntimeMethod* NetworkVariableSerializationTypedInitializers_InitializeSerializer_UnmanagedByMemcpy_TisColor_tD001788D726C3A7F1379BEED0260B9591F440C1F_mC651A75713F8BDB1E125AFA629F8F57D48220057_RuntimeMethod_var;
+IL2CPP_EXTERN_C const RuntimeMethod* NetworkVariableSerializationTypedInitializers_InitializeSerializer_UnmanagedByMemcpy_TisGameState_t99B567B83F14873630A89D4E5B11A38D5B5EA529_mCD24BC94B85D0CD9C69AC1FF5F6286FEF5B0AF5C_RuntimeMethod_var;
+IL2CPP_EXTERN_C const RuntimeMethod* NetworkVariableSerializationTypedInitializers_InitializeSerializer_UnmanagedByMemcpy_TisInputMode_tA1FE8CD33609C5FA45BE47B528CB1F9BE7E7C556_m0E9A73A707AE6AAE12EA49EF064BAC6A3AC2E381_RuntimeMethod_var;
+IL2CPP_EXTERN_C const RuntimeMethod* NetworkVariableSerializationTypedInitializers_InitializeSerializer_UnmanagedByMemcpy_TisSingle_t4530F2FF86FCB0DC29F35385CA1BD21BE294761C_m77A3CAD19584DF8EBF2CD3D502B210E474D7F52F_RuntimeMethod_var;
+IL2CPP_EXTERN_C const RuntimeMethod* NetworkVariableSerializationTypedInitializers_InitializeSerializer_UnmanagedByMemcpy_TisVector3_t24C512C7B96BBABAD472002D0BA2BDA40A5A80B2_mA593D62B26CB989C75B0E794380EEFA91621DD99_RuntimeMethod_var;
+IL2CPP_EXTERN_C const RuntimeMethod* NetworkVariableSerializationTypedInitializers_InitializeSerializer_UnmanagedINetworkSerializable_TisNetworkObjectReference_tDC1F1C3CC1E28DCB9229C36E30BB81F847CF77FD_m304AA64FF09325DECBAD36ED9B590E6769AF3ABB_RuntimeMethod_var;
+IL2CPP_EXTERN_C const RuntimeMethod* U3CTrickRoutineU3Ed__23_System_Collections_IEnumerator_Reset_m175CFF0DA1699F5102A4ACC3921981D37B164D09_RuntimeMethod_var;
+struct Exception_t_marshaled_com;
+struct Exception_t_marshaled_pinvoke;
+
+struct GameObjectU5BU5D_tFF67550DFCE87096D7A3734EA15B75896B2722CF;
+
+IL2CPP_EXTERN_C_BEGIN
+IL2CPP_EXTERN_C_END
+
+#ifdef __clang__
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Winvalid-offsetof"
+#pragma clang diagnostic ignored "-Wunused-variable"
+#endif
+struct U3CPrivateImplementationDetailsU3E_t84D667AAD87F7AA35024583BE510400506FC234C  : public RuntimeObject
+{
+};
+struct NetworkVariableSerializationHelper_t1B58AB48A5DF7AB6BEFC8C6A80BDB2346FFECF2E  : public RuntimeObject
+{
+};
+struct ValueType_t6D9B272BD21782F0A9A14F2E41F85A50E97A986F  : public RuntimeObject
+{
+};
+struct ValueType_t6D9B272BD21782F0A9A14F2E41F85A50E97A986F_marshaled_pinvoke
+{
+};
+struct ValueType_t6D9B272BD21782F0A9A14F2E41F85A50E97A986F_marshaled_com
+{
+};
+struct Boolean_t09A6377A54BE2F9E6985A8149F19234FD7DDFE22 
+{
+	bool ___m_value;
+};
+struct Enum_t2A1A94B24E3B776EEF4E5E485E290BB9D4D072E2  : public ValueType_t6D9B272BD21782F0A9A14F2E41F85A50E97A986F
+{
+};
+struct Enum_t2A1A94B24E3B776EEF4E5E485E290BB9D4D072E2_marshaled_pinvoke
+{
+};
+struct Enum_t2A1A94B24E3B776EEF4E5E485E290BB9D4D072E2_marshaled_com
+{
+};
+struct Int32_t680FF22E76F6EFAD4375103CBBFFA0421349384C 
+{
+	int32_t ___m_value;
+};
+struct IntPtr_t 
+{
+	void* ___m_value;
+};
+struct Single_t4530F2FF86FCB0DC29F35385CA1BD21BE294761C 
+{
+	float ___m_value;
+};
+struct Vector2_t1FD6F485C871E832B347AB2DC8CBA08B739D8DF7 
+{
+	float ___x;
+	float ___y;
+};
+struct Vector3_t24C512C7B96BBABAD472002D0BA2BDA40A5A80B2 
+{
+	float ___x;
+	float ___y;
+	float ___z;
+};
+struct Void_t4861ACF8F4594C3437BB48B6E56783494B843915 
+{
+	union
+	{
+		struct
+		{
+		};
+		uint8_t Void_t4861ACF8F4594C3437BB48B6E56783494B843915__padding[1];
+	};
+};
+#pragma pack(push, tp, 1)
+struct __StaticArrayInitTypeSizeU3D20_tE7BE2C1801D0386167641FA351328D189E3A6D47 
+{
+	union
+	{
+		struct
+		{
+			union
+			{
+			};
+		};
+		uint8_t __StaticArrayInitTypeSizeU3D20_tE7BE2C1801D0386167641FA351328D189E3A6D47__padding[20];
+	};
+};
+#pragma pack(pop, tp)
+#pragma pack(push, tp, 1)
+struct __StaticArrayInitTypeSizeU3D4371_tEC9A69DD3687526EADE408DE60FE9D802C237A44 
+{
+	union
+	{
+		struct
+		{
+			union
+			{
+			};
+		};
+		uint8_t __StaticArrayInitTypeSizeU3D4371_tEC9A69DD3687526EADE408DE60FE9D802C237A44__padding[4371];
+	};
+};
+#pragma pack(pop, tp)
+#pragma pack(push, tp, 1)
+struct __StaticArrayInitTypeSizeU3D6888_t9EB792C3992C1D047A6D2FE487160C5D85B68329 
+{
+	union
+	{
+		struct
+		{
+			union
+			{
+			};
+		};
+		uint8_t __StaticArrayInitTypeSizeU3D6888_t9EB792C3992C1D047A6D2FE487160C5D85B68329__padding[6888];
+	};
+};
+#pragma pack(pop, tp)
+struct Exception_t  : public RuntimeObject
+{
+	String_t* ____className;
+	String_t* ____message;
+	RuntimeObject* ____data;
+	Exception_t* ____innerException;
+	String_t* ____helpURL;
+	RuntimeObject* ____stackTrace;
+	String_t* ____stackTraceString;
+	String_t* ____remoteStackTraceString;
+	int32_t ____remoteStackIndex;
+	RuntimeObject* ____dynamicMethods;
+	int32_t ____HResult;
+	String_t* ____source;
+	SafeSerializationManager_tCBB85B95DFD1634237140CD892E82D06ECB3F5E6* ____safeSerializationManager;
+	StackTraceU5BU5D_t32FBCB20930EAF5BAE3F450FF75228E5450DA0DF* ___captured_traces;
+	IntPtrU5BU5D_tFD177F8C806A6921AD7150264CCC62FA00CAD832* ___native_trace_ips;
+	int32_t ___caught_in_unmanaged;
+};
+struct Exception_t_marshaled_pinvoke
+{
+	char* ____className;
+	char* ____message;
+	RuntimeObject* ____data;
+	Exception_t_marshaled_pinvoke* ____innerException;
+	char* ____helpURL;
+	Il2CppIUnknown* ____stackTrace;
+	char* ____stackTraceString;
+	char* ____remoteStackTraceString;
+	int32_t ____remoteStackIndex;
+	Il2CppIUnknown* ____dynamicMethods;
+	int32_t ____HResult;
+	char* ____source;
+	SafeSerializationManager_tCBB85B95DFD1634237140CD892E82D06ECB3F5E6* ____safeSerializationManager;
+	StackTraceU5BU5D_t32FBCB20930EAF5BAE3F450FF75228E5450DA0DF* ___captured_traces;
+	Il2CppSafeArray* ___native_trace_ips;
+	int32_t ___caught_in_unmanaged;
+};
+struct Exception_t_marshaled_com
+{
+	Il2CppChar* ____className;
+	Il2CppChar* ____message;
+	RuntimeObject* ____data;
+	Exception_t_marshaled_com* ____innerException;
+	Il2CppChar* ____helpURL;
+	Il2CppIUnknown* ____stackTrace;
+	Il2CppChar* ____stackTraceString;
+	Il2CppChar* ____remoteStackTraceString;
+	int32_t ____remoteStackIndex;
+	Il2CppIUnknown* ____dynamicMethods;
+	int32_t ____HResult;
+	Il2CppChar* ____source;
+	SafeSerializationManager_tCBB85B95DFD1634237140CD892E82D06ECB3F5E6* ____safeSerializationManager;
+	StackTraceU5BU5D_t32FBCB20930EAF5BAE3F450FF75228E5450DA0DF* ___captured_traces;
+	Il2CppSafeArray* ___native_trace_ips;
+	int32_t ___caught_in_unmanaged;
+};
+struct Object_tC12DECB6760A7F2CBF65D9DCF18D044C2D97152C  : public RuntimeObject
+{
+	intptr_t ___m_CachedPtr;
+};
+struct Object_tC12DECB6760A7F2CBF65D9DCF18D044C2D97152C_marshaled_pinvoke
+{
+	intptr_t ___m_CachedPtr;
+};
+struct Object_tC12DECB6760A7F2CBF65D9DCF18D044C2D97152C_marshaled_com
+{
+	intptr_t ___m_CachedPtr;
+};
+struct GameType_t079BA8BD2E8BD4FC7216C8BC5A71EC696DF9314E 
+{
+	int32_t ___value__;
+};
+struct __RpcExecStage_t5742FF9F2E363A53ECA9C00231E9BE396A6A6F39 
+{
+	int32_t ___value__;
+};
+struct U3CTrickRoutineU3Ed__23_t0576288007B934A0ACF0E68D0DAF36D37ABF2452  : public RuntimeObject
+{
+	int32_t ___U3CU3E1__state;
+	RuntimeObject* ___U3CU3E2__current;
+	NetworkedWhackAPig_t3A256F884EA61F8CAFB1F645E4FEE664AFEDC445* ___U3CU3E4__this;
+	float ___U3CriseTimeU3E5__1;
+	Vector3_t24C512C7B96BBABAD472002D0BA2BDA40A5A80B2 ___U3CstartPositionU3E5__2;
+	float ___U3CtrickHeightU3E5__3;
+	float ___U3CiU3E5__4;
+	float ___U3CpercU3E5__5;
+	float ___U3ClerpHeightU3E5__6;
+	float ___U3CiU3E5__7;
+	float ___U3CpercU3E5__8;
+	float ___U3ClerpHeightU3E5__9;
+};
+struct Component_t39FBE53E5EFCF4409111FB22C15FF73717632EC3  : public Object_tC12DECB6760A7F2CBF65D9DCF18D044C2D97152C
+{
+};
+struct GameObject_t76FEDD663AB33C991A9C9A23129337651094216F  : public Object_tC12DECB6760A7F2CBF65D9DCF18D044C2D97152C
+{
+};
+struct SystemException_tCC48D868298F4C0705279823E34B00F4FBDB7295  : public Exception_t
+{
+};
+struct Behaviour_t01970CFBBA658497AE30F311C447DB0440BAB7FA  : public Component_t39FBE53E5EFCF4409111FB22C15FF73717632EC3
+{
+};
+struct NotSupportedException_t1429765983D409BD2986508963C98D214E4EBF4A  : public SystemException_tCC48D868298F4C0705279823E34B00F4FBDB7295
+{
+};
+struct Transform_tB27202C6F4E36D225EE28A13E4D662BF99785DB1  : public Component_t39FBE53E5EFCF4409111FB22C15FF73717632EC3
+{
+};
+struct MonoBehaviour_t532A11E69716D348D8AA7F854AFCBFCB8AD17F71  : public Behaviour_t01970CFBBA658497AE30F311C447DB0440BAB7FA
+{
+	CancellationTokenSource_tAAE1E0033BCFC233801F8CB4CED5C852B350CB7B* ___m_CancellationTokenSource;
+};
+struct MiniGameBase_t7B6CA778B491B431AD2F03F35BE6D7CDA9027743  : public MonoBehaviour_t532A11E69716D348D8AA7F854AFCBFCB8AD17F71
+{
+	bool ___m_Finished;
+	String_t* ___gameName;
+	int32_t ___m_GameType;
+	float ___m_GameLength;
+	XRBaseInteractableU5BU5D_t6040A72F05BAF4285B7C4B70646708F9C2579ECD* ___m_GameInteractables;
+	MiniGameManager_t44FD6BB14298DACBD473F8A7EAF83CD89922CE2C* ___m_MiniGameManager;
+	XRInteractionManager_t93C7F7F0CFEAD83E1A70F92D05B0E663483746CD* ___m_InteractionManager;
+	float ___m_CurrentTimer;
+	bool ___m_GameEndingNotificationSent;
+};
+struct NetworkBehaviour_t1F9CC6E5B76D29ECECBB61F02D8E8EDE24CDDDCE  : public MonoBehaviour_t532A11E69716D348D8AA7F854AFCBFCB8AD17F71
+{
+	int32_t _____rpc_exec_stage;
+	NetworkManager_t3C1F76E0C1B39BB363D1C5C7667A5CC90A6CE468* ___m_NetworkManager;
+	RpcTarget_t0F23BD75DF373B0172AD08117DB945D6CD994832* ___U3CRpcTargetU3Ek__BackingField;
+	bool ___U3CIsLocalPlayerU3Ek__BackingField;
+	bool ___U3CIsOwnerU3Ek__BackingField;
+	bool ___U3CIsServerU3Ek__BackingField;
+	bool ___U3CHasAuthorityU3Ek__BackingField;
+	bool ___U3CIsSessionOwnerU3Ek__BackingField;
+	bool ___U3CServerIsHostU3Ek__BackingField;
+	bool ___U3CIsClientU3Ek__BackingField;
+	bool ___U3CIsHostU3Ek__BackingField;
+	bool ___U3CIsOwnedByServerU3Ek__BackingField;
+	bool ___U3CIsSpawnedU3Ek__BackingField;
+	NetworkObject_t8D6F76C7440A9E6176FC7F9268E5720C346A7366* ___m_NetworkObject;
+	uint64_t ___U3CNetworkObjectIdU3Ek__BackingField;
+	uint16_t ___U3CNetworkBehaviourIdU3Ek__BackingField;
+	uint16_t ___NetworkBehaviourIdCache;
+	uint64_t ___U3COwnerClientIdU3Ek__BackingField;
+	bool ___m_VarInit;
+	List_1_t498347DEA55185643F213F995B74FEE039FAD70F* ___m_DeliveryMappedNetworkVariableIndices;
+	List_1_t3ED220D424138331023A4D1C1B67E3C63A19761B* ___m_DeliveryTypesForNetworkVariableGroups;
+	List_1_tB6CC3AFBA7164AC34B1EF29A0A73721899567AE3* ___NetworkVariableFields;
+	List_1_t05915E9237850A58106982B7FE4BC5DA4E872E73* ___NetworkVariableIndexesToReset;
+	HashSet_1_t4A2F2B74276D0AD3ED0F873045BD61E9504ECAE2* ___NetworkVariableIndexesToResetSet;
+	uint64_t ___U3Cm_TargetIdBeingSynchronizedU3Ek__BackingField;
+};
+struct MiniGame_Whack_t7E97D21412F0201471AA230190831E6571AC866E  : public MiniGameBase_t7B6CA778B491B431AD2F03F35BE6D7CDA9027743
+{
+	float ___m_HammerResetTime;
+	Dictionary_2_tADAADCB79520BF442347305F783A052191923466* ___m_InteractablePoses;
+	NetworkedWhackAPig_t3A256F884EA61F8CAFB1F645E4FEE664AFEDC445* ___m_NetworkedGameplay;
+	int32_t ___m_CurrentScore;
+};
+struct NetworkedWhackAPig_t3A256F884EA61F8CAFB1F645E4FEE664AFEDC445  : public NetworkBehaviour_t1F9CC6E5B76D29ECECBB61F02D8E8EDE24CDDDCE
+{
+	GameObjectU5BU5D_tFF67550DFCE87096D7A3734EA15B75896B2722CF* ___m_ProxyPigs;
+	NetworkPhysicsInteractableU5BU5D_t01562B5FF56E4C8D6CF149E2439C9C85A407E1AC* ___m_Hammers;
+	ColliderU5BU5D_t94A9D70F63D095AFF2A9B4613012A5F7F3141787* ___m_HammerIgnoreColliders;
+	GameObject_t76FEDD663AB33C991A9C9A23129337651094216F* ___m_PigPrefab;
+	GameObject_t76FEDD663AB33C991A9C9A23129337651094216F* ___m_BadPigPrefab;
+	Vector2_t1FD6F485C871E832B347AB2DC8CBA08B739D8DF7 ___m_TimeToStaySpawnedMinMax;
+	float ___m_TimeToSpawn;
+	float ___m_ProxyShowTime;
+	float ___m_HiddenHeight;
+	float ___m_SpawnStartHeight;
+	float ___m_SpawnShowHeight;
+	Vector2_t1FD6F485C871E832B347AB2DC8CBA08B739D8DF7 ___m_TrickHeightMinMax;
+	Vector2_t1FD6F485C871E832B347AB2DC8CBA08B739D8DF7 ___m_TrickTimeMinMax;
+	float ___m_BadPigSpawn;
+	Collider_t1CC3163924FCD6C4CC2E816373A929C1E3D55E76* ___gameBarrierCollider;
+	MiniGame_Whack_t7E97D21412F0201471AA230190831E6571AC866E* ___m_MiniGame;
+	Breakable_t6B364DB61FF2A6EC917DFBB300DAC9FE91E2C8F3* ___m_CurrentBreakablePig;
+	RuntimeObject* ___m_CurrentRoutine;
+	int32_t ___m_CurrentProxyId;
+	bool ___m_Spawning;
+};
+struct U3CPrivateImplementationDetailsU3E_t84D667AAD87F7AA35024583BE510400506FC234C_StaticFields
+{
+	__StaticArrayInitTypeSizeU3D4371_tEC9A69DD3687526EADE408DE60FE9D802C237A44 ___0856EBBDAD4C6DFA1EA09A436B468BB8AF9465DD3ABA6D4846CE214B22CFCA88;
+	__StaticArrayInitTypeSizeU3D6888_t9EB792C3992C1D047A6D2FE487160C5D85B68329 ___55377B2DEBA0ED83E08F79876D5ABD9D1347E006E97CA89DC9E234C3D3AEB771;
+	__StaticArrayInitTypeSizeU3D20_tE7BE2C1801D0386167641FA351328D189E3A6D47 ___66ACECC78455A730811934ED5BF36F1B3D0E04114E9ECE48A699C1A9E014463F;
+};
+struct Boolean_t09A6377A54BE2F9E6985A8149F19234FD7DDFE22_StaticFields
+{
+	String_t* ___TrueString;
+	String_t* ___FalseString;
+};
+struct Vector2_t1FD6F485C871E832B347AB2DC8CBA08B739D8DF7_StaticFields
+{
+	Vector2_t1FD6F485C871E832B347AB2DC8CBA08B739D8DF7 ___zeroVector;
+	Vector2_t1FD6F485C871E832B347AB2DC8CBA08B739D8DF7 ___oneVector;
+	Vector2_t1FD6F485C871E832B347AB2DC8CBA08B739D8DF7 ___upVector;
+	Vector2_t1FD6F485C871E832B347AB2DC8CBA08B739D8DF7 ___downVector;
+	Vector2_t1FD6F485C871E832B347AB2DC8CBA08B739D8DF7 ___leftVector;
+	Vector2_t1FD6F485C871E832B347AB2DC8CBA08B739D8DF7 ___rightVector;
+	Vector2_t1FD6F485C871E832B347AB2DC8CBA08B739D8DF7 ___positiveInfinityVector;
+	Vector2_t1FD6F485C871E832B347AB2DC8CBA08B739D8DF7 ___negativeInfinityVector;
+};
+struct Vector3_t24C512C7B96BBABAD472002D0BA2BDA40A5A80B2_StaticFields
+{
+	Vector3_t24C512C7B96BBABAD472002D0BA2BDA40A5A80B2 ___zeroVector;
+	Vector3_t24C512C7B96BBABAD472002D0BA2BDA40A5A80B2 ___oneVector;
+	Vector3_t24C512C7B96BBABAD472002D0BA2BDA40A5A80B2 ___upVector;
+	Vector3_t24C512C7B96BBABAD472002D0BA2BDA40A5A80B2 ___downVector;
+	Vector3_t24C512C7B96BBABAD472002D0BA2BDA40A5A80B2 ___leftVector;
+	Vector3_t24C512C7B96BBABAD472002D0BA2BDA40A5A80B2 ___rightVector;
+	Vector3_t24C512C7B96BBABAD472002D0BA2BDA40A5A80B2 ___forwardVector;
+	Vector3_t24C512C7B96BBABAD472002D0BA2BDA40A5A80B2 ___backVector;
+	Vector3_t24C512C7B96BBABAD472002D0BA2BDA40A5A80B2 ___positiveInfinityVector;
+	Vector3_t24C512C7B96BBABAD472002D0BA2BDA40A5A80B2 ___negativeInfinityVector;
+};
+#ifdef __clang__
+#pragma clang diagnostic pop
+#endif
+struct GameObjectU5BU5D_tFF67550DFCE87096D7A3734EA15B75896B2722CF  : public RuntimeArray
+{
+	ALIGN_FIELD (8) GameObject_t76FEDD663AB33C991A9C9A23129337651094216F* m_Items[1];
+
+	inline GameObject_t76FEDD663AB33C991A9C9A23129337651094216F* GetAt(il2cpp_array_size_t index) const
+	{
+		IL2CPP_ARRAY_BOUNDS_CHECK(index, (uint32_t)(this)->max_length);
+		return m_Items[index];
+	}
+	inline GameObject_t76FEDD663AB33C991A9C9A23129337651094216F** GetAddressAt(il2cpp_array_size_t index)
+	{
+		IL2CPP_ARRAY_BOUNDS_CHECK(index, (uint32_t)(this)->max_length);
+		return m_Items + index;
+	}
+	inline void SetAt(il2cpp_array_size_t index, GameObject_t76FEDD663AB33C991A9C9A23129337651094216F* value)
+	{
+		IL2CPP_ARRAY_BOUNDS_CHECK(index, (uint32_t)(this)->max_length);
+		m_Items[index] = value;
+		Il2CppCodeGenWriteBarrier((void**)m_Items + index, (void*)value);
+	}
+	inline GameObject_t76FEDD663AB33C991A9C9A23129337651094216F* GetAtUnchecked(il2cpp_array_size_t index) const
+	{
+		return m_Items[index];
+	}
+	inline GameObject_t76FEDD663AB33C991A9C9A23129337651094216F** GetAddressAtUnchecked(il2cpp_array_size_t index)
+	{
+		return m_Items + index;
+	}
+	inline void SetAtUnchecked(il2cpp_array_size_t index, GameObject_t76FEDD663AB33C991A9C9A23129337651094216F* value)
+	{
+		m_Items[index] = value;
+		Il2CppCodeGenWriteBarrier((void**)m_Items + index, (void*)value);
+	}
+};
+
+
+IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void NetworkVariableSerializationTypedInitializers_InitializeSerializer_UnmanagedByMemcpy_TisColor_tD001788D726C3A7F1379BEED0260B9591F440C1F_mC651A75713F8BDB1E125AFA629F8F57D48220057_gshared (const RuntimeMethod* method) ;
+IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void NetworkVariableSerializationTypedInitializers_InitializeEqualityChecker_UnmanagedIEquatable_TisColor_tD001788D726C3A7F1379BEED0260B9591F440C1F_mB909D1FCEF927B2C039F8D63734AE5DA657E217A_gshared (const RuntimeMethod* method) ;
+IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void NetworkVariableSerializationTypedInitializers_InitializeSerializer_UnmanagedINetworkSerializable_TisNetworkObjectReference_tDC1F1C3CC1E28DCB9229C36E30BB81F847CF77FD_m304AA64FF09325DECBAD36ED9B590E6769AF3ABB_gshared (const RuntimeMethod* method) ;
+IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void NetworkVariableSerializationTypedInitializers_InitializeEqualityChecker_UnmanagedIEquatable_TisNetworkObjectReference_tDC1F1C3CC1E28DCB9229C36E30BB81F847CF77FD_m67B6E1FA6C94EB04A77D0A0E6CD6563D29454604_gshared (const RuntimeMethod* method) ;
+IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void NetworkVariableSerializationTypedInitializers_InitializeSerializer_FixedString_TisFixedString512Bytes_t0C425B0F2C07FEA1642C32BF8559116DF2BFF50E_m4AD156116A5397F8A07B29125B83D064FB843C7E_gshared (const RuntimeMethod* method) ;
+IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void NetworkVariableSerializationTypedInitializers_InitializeEqualityChecker_UnmanagedIEquatable_TisFixedString512Bytes_t0C425B0F2C07FEA1642C32BF8559116DF2BFF50E_mEEC0C880C380BDF433665C5268D7E996884DDD47_gshared (const RuntimeMethod* method) ;
+IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void NetworkVariableSerializationTypedInitializers_InitializeSerializer_UnmanagedByMemcpy_TisBoolean_t09A6377A54BE2F9E6985A8149F19234FD7DDFE22_m262F7F05D2D8EAF215686867C594E83312417F31_gshared (const RuntimeMethod* method) ;
+IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void NetworkVariableSerializationTypedInitializers_InitializeEqualityChecker_UnmanagedIEquatable_TisBoolean_t09A6377A54BE2F9E6985A8149F19234FD7DDFE22_m77B124A2CE439E262B19050EF276E4A54FD4DF99_gshared (const RuntimeMethod* method) ;
+IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void NetworkVariableSerializationTypedInitializers_InitializeSerializer_UnmanagedByMemcpy_TisVector3_t24C512C7B96BBABAD472002D0BA2BDA40A5A80B2_mA593D62B26CB989C75B0E794380EEFA91621DD99_gshared (const RuntimeMethod* method) ;
+IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void NetworkVariableSerializationTypedInitializers_InitializeEqualityChecker_UnmanagedIEquatable_TisVector3_t24C512C7B96BBABAD472002D0BA2BDA40A5A80B2_m89C1E8669DDC76C5E92E15D23CD4E3CEE1D845EE_gshared (const RuntimeMethod* method) ;
+IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void NetworkVariableSerializationTypedInitializers_InitializeSerializer_UnmanagedByMemcpy_TisSingle_t4530F2FF86FCB0DC29F35385CA1BD21BE294761C_m77A3CAD19584DF8EBF2CD3D502B210E474D7F52F_gshared (const RuntimeMethod* method) ;
+IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void NetworkVariableSerializationTypedInitializers_InitializeEqualityChecker_UnmanagedIEquatable_TisSingle_t4530F2FF86FCB0DC29F35385CA1BD21BE294761C_mF43C131F9E07A4BB1166611C44BACE3EC84E8515_gshared (const RuntimeMethod* method) ;
+IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void NetworkVariableSerializationTypedInitializers_InitializeSerializer_UnmanagedByMemcpy_TisInt32Enum_tCBAC8BA2BFF3A845FA599F303093BBBA374B6F0C_m7CDAC01F7031594B63D8126A6EB49200126FC12C_gshared (const RuntimeMethod* method) ;
+IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void NetworkVariableSerializationTypedInitializers_InitializeEqualityChecker_UnmanagedValueEquals_TisInt32Enum_tCBAC8BA2BFF3A845FA599F303093BBBA374B6F0C_mECF5D084BE0196085FD720ABB86C1C263ED36D62_gshared (const RuntimeMethod* method) ;
+IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void NetworkVariableSerializationTypedInitializers_InitializeSerializer_FixedString_TisFixedString128Bytes_tEBC488E0CC30C6D842951A4E6F09AC58677F1952_mFBAC7418FAE06E3FEE5E6D8D040C89DEF645DBB8_gshared (const RuntimeMethod* method) ;
+IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void NetworkVariableSerializationTypedInitializers_InitializeEqualityChecker_UnmanagedIEquatable_TisFixedString128Bytes_tEBC488E0CC30C6D842951A4E6F09AC58677F1952_mF50EBF58471E1F60EFEBFCC12422F7006C78CF1C_gshared (const RuntimeMethod* method) ;
+
+IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void Object__ctor_mE837C6B9FA8C6D5D109F4B2EC885D79919AC0EA2 (RuntimeObject* __this, const RuntimeMethod* method) ;
+IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR int32_t Random_Range_m6763D9767F033357F88B6637F048F4ACA4123B68 (int32_t ___0_minInclusive, int32_t ___1_maxExclusive, const RuntimeMethod* method) ;
+IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR Transform_tB27202C6F4E36D225EE28A13E4D662BF99785DB1* GameObject_get_transform_m0BC10ADFA1632166AE5544BDF9038A2650C2AE56 (GameObject_t76FEDD663AB33C991A9C9A23129337651094216F* __this, const RuntimeMethod* method) ;
+IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR Vector3_t24C512C7B96BBABAD472002D0BA2BDA40A5A80B2 Transform_get_localPosition_mA9C86B990DF0685EA1061A120218993FDCC60A95 (Transform_tB27202C6F4E36D225EE28A13E4D662BF99785DB1* __this, const RuntimeMethod* method) ;
+IL2CPP_MANAGED_FORCE_INLINE IL2CPP_METHOD_ATTR void Vector3__ctor_m376936E6B999EF1ECBE57D990A386303E2283DE0_inline (Vector3_t24C512C7B96BBABAD472002D0BA2BDA40A5A80B2* __this, float ___0_x, float ___1_y, float ___2_z, const RuntimeMethod* method) ;
+IL2CPP_MANAGED_FORCE_INLINE IL2CPP_METHOD_ATTR Vector3_t24C512C7B96BBABAD472002D0BA2BDA40A5A80B2 Vector3_get_up_m128AF3FDC820BF59D5DE86D973E7DE3F20C3AEBA_inline (const RuntimeMethod* method) ;
+IL2CPP_MANAGED_FORCE_INLINE IL2CPP_METHOD_ATTR Vector3_t24C512C7B96BBABAD472002D0BA2BDA40A5A80B2 Vector3_op_Multiply_m87BA7C578F96C8E49BB07088DAAC4649F83B0353_inline (Vector3_t24C512C7B96BBABAD472002D0BA2BDA40A5A80B2 ___0_a, float ___1_d, const RuntimeMethod* method) ;
+IL2CPP_MANAGED_FORCE_INLINE IL2CPP_METHOD_ATTR Vector3_t24C512C7B96BBABAD472002D0BA2BDA40A5A80B2 Vector3_op_Addition_m78C0EC70CB66E8DCAC225743D82B268DAEE92067_inline (Vector3_t24C512C7B96BBABAD472002D0BA2BDA40A5A80B2 ___0_a, Vector3_t24C512C7B96BBABAD472002D0BA2BDA40A5A80B2 ___1_b, const RuntimeMethod* method) ;
+IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void Transform_set_localPosition_mDE1C997F7D79C0885210B7732B4BA50EE7D73134 (Transform_tB27202C6F4E36D225EE28A13E4D662BF99785DB1* __this, Vector3_t24C512C7B96BBABAD472002D0BA2BDA40A5A80B2 ___0_value, const RuntimeMethod* method) ;
+IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void GameObject_SetActive_m638E92E1E75E519E5B24CF150B08CA8E0CDFAB92 (GameObject_t76FEDD663AB33C991A9C9A23129337651094216F* __this, bool ___0_value, const RuntimeMethod* method) ;
+IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR float Random_Range_m5236C99A7D8AE6AC9190592DC66016652A2D2494 (float ___0_minInclusive, float ___1_maxInclusive, const RuntimeMethod* method) ;
+IL2CPP_MANAGED_FORCE_INLINE IL2CPP_METHOD_ATTR float Mathf_Lerp_m47EF2FFB7647BD0A1FDC26DC03E28B19812139B5_inline (float ___0_a, float ___1_b, float ___2_t, const RuntimeMethod* method) ;
+IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR float Time_get_deltaTime_mC3195000401F0FD167DD2F948FD2BC58330D0865 (const RuntimeMethod* method) ;
+IL2CPP_MANAGED_FORCE_INLINE IL2CPP_METHOD_ATTR bool MiniGameBase_get_finished_m9E4809848E18BD89E4C9AABB89E2A8386923C05E_inline (MiniGameBase_t7B6CA778B491B431AD2F03F35BE6D7CDA9027743* __this, const RuntimeMethod* method) ;
+IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void NotSupportedException__ctor_m1398D0CDE19B36AA3DE9392879738C1EA2439CDF (NotSupportedException_t1429765983D409BD2986508963C98D214E4EBF4A* __this, const RuntimeMethod* method) ;
+inline void NetworkVariableSerializationTypedInitializers_InitializeSerializer_UnmanagedByMemcpy_TisColor_tD001788D726C3A7F1379BEED0260B9591F440C1F_mC651A75713F8BDB1E125AFA629F8F57D48220057 (const RuntimeMethod* method)
+{
+	((  void (*) (const RuntimeMethod*))NetworkVariableSerializationTypedInitializers_InitializeSerializer_UnmanagedByMemcpy_TisColor_tD001788D726C3A7F1379BEED0260B9591F440C1F_mC651A75713F8BDB1E125AFA629F8F57D48220057_gshared)(method);
+}
+inline void NetworkVariableSerializationTypedInitializers_InitializeEqualityChecker_UnmanagedIEquatable_TisColor_tD001788D726C3A7F1379BEED0260B9591F440C1F_mB909D1FCEF927B2C039F8D63734AE5DA657E217A (const RuntimeMethod* method)
+{
+	((  void (*) (const RuntimeMethod*))NetworkVariableSerializationTypedInitializers_InitializeEqualityChecker_UnmanagedIEquatable_TisColor_tD001788D726C3A7F1379BEED0260B9591F440C1F_mB909D1FCEF927B2C039F8D63734AE5DA657E217A_gshared)(method);
+}
+inline void NetworkVariableSerializationTypedInitializers_InitializeSerializer_UnmanagedINetworkSerializable_TisNetworkObjectReference_tDC1F1C3CC1E28DCB9229C36E30BB81F847CF77FD_m304AA64FF09325DECBAD36ED9B590E6769AF3ABB (const RuntimeMethod* method)
+{
+	((  void (*) (const RuntimeMethod*))NetworkVariableSerializationTypedInitializers_InitializeSerializer_UnmanagedINetworkSerializable_TisNetworkObjectReference_tDC1F1C3CC1E28DCB9229C36E30BB81F847CF77FD_m304AA64FF09325DECBAD36ED9B590E6769AF3ABB_gshared)(method);
+}
+inline void NetworkVariableSerializationTypedInitializers_InitializeEqualityChecker_UnmanagedIEquatable_TisNetworkObjectReference_tDC1F1C3CC1E28DCB9229C36E30BB81F847CF77FD_m67B6E1FA6C94EB04A77D0A0E6CD6563D29454604 (const RuntimeMethod* method)
+{
+	((  void (*) (const RuntimeMethod*))NetworkVariableSerializationTypedInitializers_InitializeEqualityChecker_UnmanagedIEquatable_TisNetworkObjectReference_tDC1F1C3CC1E28DCB9229C36E30BB81F847CF77FD_m67B6E1FA6C94EB04A77D0A0E6CD6563D29454604_gshared)(method);
+}
+inline void NetworkVariableSerializationTypedInitializers_InitializeSerializer_FixedString_TisFixedString512Bytes_t0C425B0F2C07FEA1642C32BF8559116DF2BFF50E_m4AD156116A5397F8A07B29125B83D064FB843C7E (const RuntimeMethod* method)
+{
+	((  void (*) (const RuntimeMethod*))NetworkVariableSerializationTypedInitializers_InitializeSerializer_FixedString_TisFixedString512Bytes_t0C425B0F2C07FEA1642C32BF8559116DF2BFF50E_m4AD156116A5397F8A07B29125B83D064FB843C7E_gshared)(method);
+}
+inline void NetworkVariableSerializationTypedInitializers_InitializeEqualityChecker_UnmanagedIEquatable_TisFixedString512Bytes_t0C425B0F2C07FEA1642C32BF8559116DF2BFF50E_mEEC0C880C380BDF433665C5268D7E996884DDD47 (const RuntimeMethod* method)
+{
+	((  void (*) (const RuntimeMethod*))NetworkVariableSerializationTypedInitializers_InitializeEqualityChecker_UnmanagedIEquatable_TisFixedString512Bytes_t0C425B0F2C07FEA1642C32BF8559116DF2BFF50E_mEEC0C880C380BDF433665C5268D7E996884DDD47_gshared)(method);
+}
+inline void NetworkVariableSerializationTypedInitializers_InitializeSerializer_UnmanagedByMemcpy_TisBoolean_t09A6377A54BE2F9E6985A8149F19234FD7DDFE22_m262F7F05D2D8EAF215686867C594E83312417F31 (const RuntimeMethod* method)
+{
+	((  void (*) (const RuntimeMethod*))NetworkVariableSerializationTypedInitializers_InitializeSerializer_UnmanagedByMemcpy_TisBoolean_t09A6377A54BE2F9E6985A8149F19234FD7DDFE22_m262F7F05D2D8EAF215686867C594E83312417F31_gshared)(method);
+}
+inline void NetworkVariableSerializationTypedInitializers_InitializeEqualityChecker_UnmanagedIEquatable_TisBoolean_t09A6377A54BE2F9E6985A8149F19234FD7DDFE22_m77B124A2CE439E262B19050EF276E4A54FD4DF99 (const RuntimeMethod* method)
+{
+	((  void (*) (const RuntimeMethod*))NetworkVariableSerializationTypedInitializers_InitializeEqualityChecker_UnmanagedIEquatable_TisBoolean_t09A6377A54BE2F9E6985A8149F19234FD7DDFE22_m77B124A2CE439E262B19050EF276E4A54FD4DF99_gshared)(method);
+}
+inline void NetworkVariableSerializationTypedInitializers_InitializeSerializer_UnmanagedByMemcpy_TisVector3_t24C512C7B96BBABAD472002D0BA2BDA40A5A80B2_mA593D62B26CB989C75B0E794380EEFA91621DD99 (const RuntimeMethod* method)
+{
+	((  void (*) (const RuntimeMethod*))NetworkVariableSerializationTypedInitializers_InitializeSerializer_UnmanagedByMemcpy_TisVector3_t24C512C7B96BBABAD472002D0BA2BDA40A5A80B2_mA593D62B26CB989C75B0E794380EEFA91621DD99_gshared)(method);
+}
+inline void NetworkVariableSerializationTypedInitializers_InitializeEqualityChecker_UnmanagedIEquatable_TisVector3_t24C512C7B96BBABAD472002D0BA2BDA40A5A80B2_m89C1E8669DDC76C5E92E15D23CD4E3CEE1D845EE (const RuntimeMethod* method)
+{
+	((  void (*) (const RuntimeMethod*))NetworkVariableSerializationTypedInitializers_InitializeEqualityChecker_UnmanagedIEquatable_TisVector3_t24C512C7B96BBABAD472002D0BA2BDA40A5A80B2_m89C1E8669DDC76C5E92E15D23CD4E3CEE1D845EE_gshared)(method);
+}
+inline void NetworkVariableSerializationTypedInitializers_InitializeSerializer_UnmanagedByMemcpy_TisSingle_t4530F2FF86FCB0DC29F35385CA1BD21BE294761C_m77A3CAD19584DF8EBF2CD3D502B210E474D7F52F (const RuntimeMethod* method)
+{
+	((  void (*) (const RuntimeMethod*))NetworkVariableSerializationTypedInitializers_InitializeSerializer_UnmanagedByMemcpy_TisSingle_t4530F2FF86FCB0DC29F35385CA1BD21BE294761C_m77A3CAD19584DF8EBF2CD3D502B210E474D7F52F_gshared)(method);
+}
+inline void NetworkVariableSerializationTypedInitializers_InitializeEqualityChecker_UnmanagedIEquatable_TisSingle_t4530F2FF86FCB0DC29F35385CA1BD21BE294761C_mF43C131F9E07A4BB1166611C44BACE3EC84E8515 (const RuntimeMethod* method)
+{
+	((  void (*) (const RuntimeMethod*))NetworkVariableSerializationTypedInitializers_InitializeEqualityChecker_UnmanagedIEquatable_TisSingle_t4530F2FF86FCB0DC29F35385CA1BD21BE294761C_mF43C131F9E07A4BB1166611C44BACE3EC84E8515_gshared)(method);
+}
+inline void NetworkVariableSerializationTypedInitializers_InitializeSerializer_UnmanagedByMemcpy_TisInputMode_tA1FE8CD33609C5FA45BE47B528CB1F9BE7E7C556_m0E9A73A707AE6AAE12EA49EF064BAC6A3AC2E381 (const RuntimeMethod* method)
+{
+	((  void (*) (const RuntimeMethod*))NetworkVariableSerializationTypedInitializers_InitializeSerializer_UnmanagedByMemcpy_TisInt32Enum_tCBAC8BA2BFF3A845FA599F303093BBBA374B6F0C_m7CDAC01F7031594B63D8126A6EB49200126FC12C_gshared)(method);
+}
+inline void NetworkVariableSerializationTypedInitializers_InitializeEqualityChecker_UnmanagedValueEquals_TisInputMode_tA1FE8CD33609C5FA45BE47B528CB1F9BE7E7C556_m78EB891FEDB620B146F285F98F28E4961F771AF9 (const RuntimeMethod* method)
+{
+	((  void (*) (const RuntimeMethod*))NetworkVariableSerializationTypedInitializers_InitializeEqualityChecker_UnmanagedValueEquals_TisInt32Enum_tCBAC8BA2BFF3A845FA599F303093BBBA374B6F0C_mECF5D084BE0196085FD720ABB86C1C263ED36D62_gshared)(method);
+}
+inline void NetworkVariableSerializationTypedInitializers_InitializeSerializer_FixedString_TisFixedString128Bytes_tEBC488E0CC30C6D842951A4E6F09AC58677F1952_mFBAC7418FAE06E3FEE5E6D8D040C89DEF645DBB8 (const RuntimeMethod* method)
+{
+	((  void (*) (const RuntimeMethod*))NetworkVariableSerializationTypedInitializers_InitializeSerializer_FixedString_TisFixedString128Bytes_tEBC488E0CC30C6D842951A4E6F09AC58677F1952_mFBAC7418FAE06E3FEE5E6D8D040C89DEF645DBB8_gshared)(method);
+}
+inline void NetworkVariableSerializationTypedInitializers_InitializeEqualityChecker_UnmanagedIEquatable_TisFixedString128Bytes_tEBC488E0CC30C6D842951A4E6F09AC58677F1952_mF50EBF58471E1F60EFEBFCC12422F7006C78CF1C (const RuntimeMethod* method)
+{
+	((  void (*) (const RuntimeMethod*))NetworkVariableSerializationTypedInitializers_InitializeEqualityChecker_UnmanagedIEquatable_TisFixedString128Bytes_tEBC488E0CC30C6D842951A4E6F09AC58677F1952_mF50EBF58471E1F60EFEBFCC12422F7006C78CF1C_gshared)(method);
+}
+inline void NetworkVariableSerializationTypedInitializers_InitializeSerializer_UnmanagedByMemcpy_TisGameState_t99B567B83F14873630A89D4E5B11A38D5B5EA529_mCD24BC94B85D0CD9C69AC1FF5F6286FEF5B0AF5C (const RuntimeMethod* method)
+{
+	((  void (*) (const RuntimeMethod*))NetworkVariableSerializationTypedInitializers_InitializeSerializer_UnmanagedByMemcpy_TisInt32Enum_tCBAC8BA2BFF3A845FA599F303093BBBA374B6F0C_m7CDAC01F7031594B63D8126A6EB49200126FC12C_gshared)(method);
+}
+inline void NetworkVariableSerializationTypedInitializers_InitializeEqualityChecker_UnmanagedValueEquals_TisGameState_t99B567B83F14873630A89D4E5B11A38D5B5EA529_m67A72943FB23EA0A9565B953A680FAB9A4B51D6D (const RuntimeMethod* method)
+{
+	((  void (*) (const RuntimeMethod*))NetworkVariableSerializationTypedInitializers_InitializeEqualityChecker_UnmanagedValueEquals_TisInt32Enum_tCBAC8BA2BFF3A845FA599F303093BBBA374B6F0C_mECF5D084BE0196085FD720ABB86C1C263ED36D62_gshared)(method);
+}
+IL2CPP_MANAGED_FORCE_INLINE IL2CPP_METHOD_ATTR float Mathf_Clamp01_mA7E048DBDA832D399A581BE4D6DED9FA44CE0F14_inline (float ___0_value, const RuntimeMethod* method) ;
+#ifdef __clang__
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Winvalid-offsetof"
+#pragma clang diagnostic ignored "-Wunused-variable"
+#endif
+// Method Definition Index: 121207
+IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void U3CTrickRoutineU3Ed__23__ctor_m4912FB7EDAE70D2467296623A595BF0A9E5CE789 (U3CTrickRoutineU3Ed__23_t0576288007B934A0ACF0E68D0DAF36D37ABF2452* __this, int32_t ___0_U3CU3E1__state, const RuntimeMethod* method) 
+{
+	{
+		Object__ctor_mE837C6B9FA8C6D5D109F4B2EC885D79919AC0EA2(__this, NULL);
+		int32_t L_0 = ___0_U3CU3E1__state;
+		__this->___U3CU3E1__state = L_0;
+		return;
+	}
+}
+// Method Definition Index: 121208
+IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void U3CTrickRoutineU3Ed__23_System_IDisposable_Dispose_m4877F5E1A3274A5B51249B0616480A8ED18FAEE8 (U3CTrickRoutineU3Ed__23_t0576288007B934A0ACF0E68D0DAF36D37ABF2452* __this, const RuntimeMethod* method) 
+{
+	{
+		return;
+	}
+}
+// Method Definition Index: 121209
+IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR bool U3CTrickRoutineU3Ed__23_MoveNext_mDE051D0C419B962B2773D10B37C59C351659D637 (U3CTrickRoutineU3Ed__23_t0576288007B934A0ACF0E68D0DAF36D37ABF2452* __this, const RuntimeMethod* method) 
+{
+	int32_t V_0 = 0;
+	bool V_1 = false;
+	bool V_2 = false;
+	bool V_3 = false;
+	{
+		int32_t L_0 = __this->___U3CU3E1__state;
+		V_0 = L_0;
+		int32_t L_1 = V_0;
+		switch (L_1)
+		{
+			case 0:
+			{
+				goto IL_001b;
+			}
+			case 1:
+			{
+				goto IL_001d;
+			}
+			case 2:
+			{
+				goto IL_0022;
+			}
+		}
+	}
+	{
+		goto IL_0027;
+	}
+
+IL_001b:
+	{
+		goto IL_0029;
+	}
+
+IL_001d:
+	{
+		goto IL_01e6;
+	}
+
+IL_0022:
+	{
+		goto IL_02e5;
+	}
+
+IL_0027:
+	{
+		return (bool)0;
+	}
+
+IL_0029:
+	{
+		__this->___U3CU3E1__state = (-1);
+		goto IL_0381;
+	}
+
+IL_0036:
+	{
+		//<source_info:C:/Users/msigf/Documents/GitHub/meganopoly_final/Assets/VRMPAssets/MiniGames/MiniGameScripts/WhackAPig/NetworkedWhackAPig.cs:153>
+		NetworkedWhackAPig_t3A256F884EA61F8CAFB1F645E4FEE664AFEDC445* L_2 = __this->___U3CU3E4__this;
+		NetworkedWhackAPig_t3A256F884EA61F8CAFB1F645E4FEE664AFEDC445* L_3 = __this->___U3CU3E4__this;
+		NullCheck(L_3);
+		GameObjectU5BU5D_tFF67550DFCE87096D7A3734EA15B75896B2722CF* L_4 = L_3->___m_ProxyPigs;
+		NullCheck(L_4);
+		int32_t L_5;
+		L_5 = Random_Range_m6763D9767F033357F88B6637F048F4ACA4123B68(0, ((int32_t)(((RuntimeArray*)L_4)->max_length)), NULL);
+		NullCheck(L_2);
+		L_2->___m_CurrentProxyId = L_5;
+		//<source_info:C:/Users/msigf/Documents/GitHub/meganopoly_final/Assets/VRMPAssets/MiniGames/MiniGameScripts/WhackAPig/NetworkedWhackAPig.cs:154>
+		NetworkedWhackAPig_t3A256F884EA61F8CAFB1F645E4FEE664AFEDC445* L_6 = __this->___U3CU3E4__this;
+		NullCheck(L_6);
+		float L_7 = L_6->___m_ProxyShowTime;
+		__this->___U3CriseTimeU3E5__1 = ((float)(L_7/(2.0f)));
+		//<source_info:C:/Users/msigf/Documents/GitHub/meganopoly_final/Assets/VRMPAssets/MiniGames/MiniGameScripts/WhackAPig/NetworkedWhackAPig.cs:155>
+		NetworkedWhackAPig_t3A256F884EA61F8CAFB1F645E4FEE664AFEDC445* L_8 = __this->___U3CU3E4__this;
+		NullCheck(L_8);
+		GameObjectU5BU5D_tFF67550DFCE87096D7A3734EA15B75896B2722CF* L_9 = L_8->___m_ProxyPigs;
+		NetworkedWhackAPig_t3A256F884EA61F8CAFB1F645E4FEE664AFEDC445* L_10 = __this->___U3CU3E4__this;
+		NullCheck(L_10);
+		int32_t L_11 = L_10->___m_CurrentProxyId;
+		NullCheck(L_9);
+		int32_t L_12 = L_11;
+		GameObject_t76FEDD663AB33C991A9C9A23129337651094216F* L_13 = (L_9)->GetAt(static_cast<il2cpp_array_size_t>(L_12));
+		NullCheck(L_13);
+		Transform_tB27202C6F4E36D225EE28A13E4D662BF99785DB1* L_14;
+		L_14 = GameObject_get_transform_m0BC10ADFA1632166AE5544BDF9038A2650C2AE56(L_13, NULL);
+		NullCheck(L_14);
+		Vector3_t24C512C7B96BBABAD472002D0BA2BDA40A5A80B2 L_15;
+		L_15 = Transform_get_localPosition_mA9C86B990DF0685EA1061A120218993FDCC60A95(L_14, NULL);
+		float L_16 = L_15.___x;
+		NetworkedWhackAPig_t3A256F884EA61F8CAFB1F645E4FEE664AFEDC445* L_17 = __this->___U3CU3E4__this;
+		NullCheck(L_17);
+		GameObjectU5BU5D_tFF67550DFCE87096D7A3734EA15B75896B2722CF* L_18 = L_17->___m_ProxyPigs;
+		NetworkedWhackAPig_t3A256F884EA61F8CAFB1F645E4FEE664AFEDC445* L_19 = __this->___U3CU3E4__this;
+		NullCheck(L_19);
+		int32_t L_20 = L_19->___m_CurrentProxyId;
+		NullCheck(L_18);
+		int32_t L_21 = L_20;
+		GameObject_t76FEDD663AB33C991A9C9A23129337651094216F* L_22 = (L_18)->GetAt(static_cast<il2cpp_array_size_t>(L_21));
+		NullCheck(L_22);
+		Transform_tB27202C6F4E36D225EE28A13E4D662BF99785DB1* L_23;
+		L_23 = GameObject_get_transform_m0BC10ADFA1632166AE5544BDF9038A2650C2AE56(L_22, NULL);
+		NullCheck(L_23);
+		Vector3_t24C512C7B96BBABAD472002D0BA2BDA40A5A80B2 L_24;
+		L_24 = Transform_get_localPosition_mA9C86B990DF0685EA1061A120218993FDCC60A95(L_23, NULL);
+		float L_25 = L_24.___z;
+		Vector3_t24C512C7B96BBABAD472002D0BA2BDA40A5A80B2 L_26;
+		memset((&L_26), 0, sizeof(L_26));
+		Vector3__ctor_m376936E6B999EF1ECBE57D990A386303E2283DE0_inline((&L_26), L_16, (0.0f), L_25, NULL);
+		__this->___U3CstartPositionU3E5__2 = L_26;
+		//<source_info:C:/Users/msigf/Documents/GitHub/meganopoly_final/Assets/VRMPAssets/MiniGames/MiniGameScripts/WhackAPig/NetworkedWhackAPig.cs:156>
+		NetworkedWhackAPig_t3A256F884EA61F8CAFB1F645E4FEE664AFEDC445* L_27 = __this->___U3CU3E4__this;
+		NullCheck(L_27);
+		GameObjectU5BU5D_tFF67550DFCE87096D7A3734EA15B75896B2722CF* L_28 = L_27->___m_ProxyPigs;
+		NetworkedWhackAPig_t3A256F884EA61F8CAFB1F645E4FEE664AFEDC445* L_29 = __this->___U3CU3E4__this;
+		NullCheck(L_29);
+		int32_t L_30 = L_29->___m_CurrentProxyId;
+		NullCheck(L_28);
+		int32_t L_31 = L_30;
+		GameObject_t76FEDD663AB33C991A9C9A23129337651094216F* L_32 = (L_28)->GetAt(static_cast<il2cpp_array_size_t>(L_31));
+		NullCheck(L_32);
+		Transform_tB27202C6F4E36D225EE28A13E4D662BF99785DB1* L_33;
+		L_33 = GameObject_get_transform_m0BC10ADFA1632166AE5544BDF9038A2650C2AE56(L_32, NULL);
+		Vector3_t24C512C7B96BBABAD472002D0BA2BDA40A5A80B2 L_34 = __this->___U3CstartPositionU3E5__2;
+		Vector3_t24C512C7B96BBABAD472002D0BA2BDA40A5A80B2 L_35;
+		L_35 = Vector3_get_up_m128AF3FDC820BF59D5DE86D973E7DE3F20C3AEBA_inline(NULL);
+		NetworkedWhackAPig_t3A256F884EA61F8CAFB1F645E4FEE664AFEDC445* L_36 = __this->___U3CU3E4__this;
+		NullCheck(L_36);
+		float L_37 = L_36->___m_HiddenHeight;
+		Vector3_t24C512C7B96BBABAD472002D0BA2BDA40A5A80B2 L_38;
+		L_38 = Vector3_op_Multiply_m87BA7C578F96C8E49BB07088DAAC4649F83B0353_inline(L_35, L_37, NULL);
+		Vector3_t24C512C7B96BBABAD472002D0BA2BDA40A5A80B2 L_39;
+		L_39 = Vector3_op_Addition_m78C0EC70CB66E8DCAC225743D82B268DAEE92067_inline(L_34, L_38, NULL);
+		NullCheck(L_33);
+		Transform_set_localPosition_mDE1C997F7D79C0885210B7732B4BA50EE7D73134(L_33, L_39, NULL);
+		//<source_info:C:/Users/msigf/Documents/GitHub/meganopoly_final/Assets/VRMPAssets/MiniGames/MiniGameScripts/WhackAPig/NetworkedWhackAPig.cs:157>
+		NetworkedWhackAPig_t3A256F884EA61F8CAFB1F645E4FEE664AFEDC445* L_40 = __this->___U3CU3E4__this;
+		NullCheck(L_40);
+		GameObjectU5BU5D_tFF67550DFCE87096D7A3734EA15B75896B2722CF* L_41 = L_40->___m_ProxyPigs;
+		NetworkedWhackAPig_t3A256F884EA61F8CAFB1F645E4FEE664AFEDC445* L_42 = __this->___U3CU3E4__this;
+		NullCheck(L_42);
+		int32_t L_43 = L_42->___m_CurrentProxyId;
+		NullCheck(L_41);
+		int32_t L_44 = L_43;
+		GameObject_t76FEDD663AB33C991A9C9A23129337651094216F* L_45 = (L_41)->GetAt(static_cast<il2cpp_array_size_t>(L_44));
+		NullCheck(L_45);
+		GameObject_SetActive_m638E92E1E75E519E5B24CF150B08CA8E0CDFAB92(L_45, (bool)1, NULL);
+		//<source_info:C:/Users/msigf/Documents/GitHub/meganopoly_final/Assets/VRMPAssets/MiniGames/MiniGameScripts/WhackAPig/NetworkedWhackAPig.cs:159>
+		NetworkedWhackAPig_t3A256F884EA61F8CAFB1F645E4FEE664AFEDC445* L_46 = __this->___U3CU3E4__this;
+		NullCheck(L_46);
+		Vector2_t1FD6F485C871E832B347AB2DC8CBA08B739D8DF7* L_47 = (Vector2_t1FD6F485C871E832B347AB2DC8CBA08B739D8DF7*)(&L_46->___m_TrickHeightMinMax);
+		float L_48 = L_47->___x;
+		NetworkedWhackAPig_t3A256F884EA61F8CAFB1F645E4FEE664AFEDC445* L_49 = __this->___U3CU3E4__this;
+		NullCheck(L_49);
+		Vector2_t1FD6F485C871E832B347AB2DC8CBA08B739D8DF7* L_50 = (Vector2_t1FD6F485C871E832B347AB2DC8CBA08B739D8DF7*)(&L_49->___m_TrickHeightMinMax);
+		float L_51 = L_50->___y;
+		float L_52;
+		L_52 = Random_Range_m5236C99A7D8AE6AC9190592DC66016652A2D2494(L_48, L_51, NULL);
+		__this->___U3CtrickHeightU3E5__3 = L_52;
+		//<source_info:C:/Users/msigf/Documents/GitHub/meganopoly_final/Assets/VRMPAssets/MiniGames/MiniGameScripts/WhackAPig/NetworkedWhackAPig.cs:163>
+		__this->___U3CiU3E5__4 = (0.0f);
+		goto IL_0200;
+	}
+
+IL_0163:
+	{
+		//<source_info:C:/Users/msigf/Documents/GitHub/meganopoly_final/Assets/VRMPAssets/MiniGames/MiniGameScripts/WhackAPig/NetworkedWhackAPig.cs:165>
+		float L_53 = __this->___U3CiU3E5__4;
+		float L_54 = __this->___U3CriseTimeU3E5__1;
+		__this->___U3CpercU3E5__5 = ((float)(L_53/L_54));
+		//<source_info:C:/Users/msigf/Documents/GitHub/meganopoly_final/Assets/VRMPAssets/MiniGames/MiniGameScripts/WhackAPig/NetworkedWhackAPig.cs:167>
+		NetworkedWhackAPig_t3A256F884EA61F8CAFB1F645E4FEE664AFEDC445* L_55 = __this->___U3CU3E4__this;
+		NullCheck(L_55);
+		float L_56 = L_55->___m_HiddenHeight;
+		float L_57 = __this->___U3CtrickHeightU3E5__3;
+		float L_58 = __this->___U3CpercU3E5__5;
+		float L_59;
+		L_59 = Mathf_Lerp_m47EF2FFB7647BD0A1FDC26DC03E28B19812139B5_inline(L_56, L_57, L_58, NULL);
+		__this->___U3ClerpHeightU3E5__6 = L_59;
+		//<source_info:C:/Users/msigf/Documents/GitHub/meganopoly_final/Assets/VRMPAssets/MiniGames/MiniGameScripts/WhackAPig/NetworkedWhackAPig.cs:168>
+		NetworkedWhackAPig_t3A256F884EA61F8CAFB1F645E4FEE664AFEDC445* L_60 = __this->___U3CU3E4__this;
+		NullCheck(L_60);
+		GameObjectU5BU5D_tFF67550DFCE87096D7A3734EA15B75896B2722CF* L_61 = L_60->___m_ProxyPigs;
+		NetworkedWhackAPig_t3A256F884EA61F8CAFB1F645E4FEE664AFEDC445* L_62 = __this->___U3CU3E4__this;
+		NullCheck(L_62);
+		int32_t L_63 = L_62->___m_CurrentProxyId;
+		NullCheck(L_61);
+		int32_t L_64 = L_63;
+		GameObject_t76FEDD663AB33C991A9C9A23129337651094216F* L_65 = (L_61)->GetAt(static_cast<il2cpp_array_size_t>(L_64));
+		NullCheck(L_65);
+		Transform_tB27202C6F4E36D225EE28A13E4D662BF99785DB1* L_66;
+		L_66 = GameObject_get_transform_m0BC10ADFA1632166AE5544BDF9038A2650C2AE56(L_65, NULL);
+		Vector3_t24C512C7B96BBABAD472002D0BA2BDA40A5A80B2 L_67 = __this->___U3CstartPositionU3E5__2;
+		Vector3_t24C512C7B96BBABAD472002D0BA2BDA40A5A80B2 L_68;
+		L_68 = Vector3_get_up_m128AF3FDC820BF59D5DE86D973E7DE3F20C3AEBA_inline(NULL);
+		float L_69 = __this->___U3ClerpHeightU3E5__6;
+		Vector3_t24C512C7B96BBABAD472002D0BA2BDA40A5A80B2 L_70;
+		L_70 = Vector3_op_Multiply_m87BA7C578F96C8E49BB07088DAAC4649F83B0353_inline(L_68, L_69, NULL);
+		Vector3_t24C512C7B96BBABAD472002D0BA2BDA40A5A80B2 L_71;
+		L_71 = Vector3_op_Addition_m78C0EC70CB66E8DCAC225743D82B268DAEE92067_inline(L_67, L_70, NULL);
+		NullCheck(L_66);
+		Transform_set_localPosition_mDE1C997F7D79C0885210B7732B4BA50EE7D73134(L_66, L_71, NULL);
+		//<source_info:C:/Users/msigf/Documents/GitHub/meganopoly_final/Assets/VRMPAssets/MiniGames/MiniGameScripts/WhackAPig/NetworkedWhackAPig.cs:169>
+		__this->___U3CU3E2__current = NULL;
+		Il2CppCodeGenWriteBarrier((void**)(&__this->___U3CU3E2__current), (void*)NULL);
+		__this->___U3CU3E1__state = 1;
+		return (bool)1;
+	}
+
+IL_01e6:
+	{
+		__this->___U3CU3E1__state = (-1);
+		//<source_info:C:/Users/msigf/Documents/GitHub/meganopoly_final/Assets/VRMPAssets/MiniGames/MiniGameScripts/WhackAPig/NetworkedWhackAPig.cs:163>
+		float L_72 = __this->___U3CiU3E5__4;
+		float L_73;
+		L_73 = Time_get_deltaTime_mC3195000401F0FD167DD2F948FD2BC58330D0865(NULL);
+		__this->___U3CiU3E5__4 = ((float)il2cpp_codegen_add(L_72, L_73));
+	}
+
+IL_0200:
+	{
+		//<source_info:C:/Users/msigf/Documents/GitHub/meganopoly_final/Assets/VRMPAssets/MiniGames/MiniGameScripts/WhackAPig/NetworkedWhackAPig.cs:163>
+		float L_74 = __this->___U3CiU3E5__4;
+		float L_75 = __this->___U3CriseTimeU3E5__1;
+		V_1 = (bool)((((float)L_74) < ((float)L_75))? 1 : 0);
+		bool L_76 = V_1;
+		if (L_76)
+		{
+			goto IL_0163;
+		}
+	}
+	{
+		//<source_info:C:/Users/msigf/Documents/GitHub/meganopoly_final/Assets/VRMPAssets/MiniGames/MiniGameScripts/WhackAPig/NetworkedWhackAPig.cs:171>
+		NetworkedWhackAPig_t3A256F884EA61F8CAFB1F645E4FEE664AFEDC445* L_77 = __this->___U3CU3E4__this;
+		NullCheck(L_77);
+		GameObjectU5BU5D_tFF67550DFCE87096D7A3734EA15B75896B2722CF* L_78 = L_77->___m_ProxyPigs;
+		NetworkedWhackAPig_t3A256F884EA61F8CAFB1F645E4FEE664AFEDC445* L_79 = __this->___U3CU3E4__this;
+		NullCheck(L_79);
+		int32_t L_80 = L_79->___m_CurrentProxyId;
+		NullCheck(L_78);
+		int32_t L_81 = L_80;
+		GameObject_t76FEDD663AB33C991A9C9A23129337651094216F* L_82 = (L_78)->GetAt(static_cast<il2cpp_array_size_t>(L_81));
+		NullCheck(L_82);
+		Transform_tB27202C6F4E36D225EE28A13E4D662BF99785DB1* L_83;
+		L_83 = GameObject_get_transform_m0BC10ADFA1632166AE5544BDF9038A2650C2AE56(L_82, NULL);
+		Vector3_t24C512C7B96BBABAD472002D0BA2BDA40A5A80B2 L_84 = __this->___U3CstartPositionU3E5__2;
+		Vector3_t24C512C7B96BBABAD472002D0BA2BDA40A5A80B2 L_85;
+		L_85 = Vector3_get_up_m128AF3FDC820BF59D5DE86D973E7DE3F20C3AEBA_inline(NULL);
+		float L_86 = __this->___U3CtrickHeightU3E5__3;
+		Vector3_t24C512C7B96BBABAD472002D0BA2BDA40A5A80B2 L_87;
+		L_87 = Vector3_op_Multiply_m87BA7C578F96C8E49BB07088DAAC4649F83B0353_inline(L_85, L_86, NULL);
+		Vector3_t24C512C7B96BBABAD472002D0BA2BDA40A5A80B2 L_88;
+		L_88 = Vector3_op_Addition_m78C0EC70CB66E8DCAC225743D82B268DAEE92067_inline(L_84, L_87, NULL);
+		NullCheck(L_83);
+		Transform_set_localPosition_mDE1C997F7D79C0885210B7732B4BA50EE7D73134(L_83, L_88, NULL);
+		//<source_info:C:/Users/msigf/Documents/GitHub/meganopoly_final/Assets/VRMPAssets/MiniGames/MiniGameScripts/WhackAPig/NetworkedWhackAPig.cs:174>
+		__this->___U3CiU3E5__7 = (0.0f);
+		goto IL_02ff;
+	}
+
+IL_0262:
+	{
+		//<source_info:C:/Users/msigf/Documents/GitHub/meganopoly_final/Assets/VRMPAssets/MiniGames/MiniGameScripts/WhackAPig/NetworkedWhackAPig.cs:176>
+		float L_89 = __this->___U3CiU3E5__7;
+		float L_90 = __this->___U3CriseTimeU3E5__1;
+		__this->___U3CpercU3E5__8 = ((float)(L_89/L_90));
+		//<source_info:C:/Users/msigf/Documents/GitHub/meganopoly_final/Assets/VRMPAssets/MiniGames/MiniGameScripts/WhackAPig/NetworkedWhackAPig.cs:178>
+		float L_91 = __this->___U3CtrickHeightU3E5__3;
+		NetworkedWhackAPig_t3A256F884EA61F8CAFB1F645E4FEE664AFEDC445* L_92 = __this->___U3CU3E4__this;
+		NullCheck(L_92);
+		float L_93 = L_92->___m_HiddenHeight;
+		float L_94 = __this->___U3CpercU3E5__8;
+		float L_95;
+		L_95 = Mathf_Lerp_m47EF2FFB7647BD0A1FDC26DC03E28B19812139B5_inline(L_91, L_93, L_94, NULL);
+		__this->___U3ClerpHeightU3E5__9 = L_95;
+		//<source_info:C:/Users/msigf/Documents/GitHub/meganopoly_final/Assets/VRMPAssets/MiniGames/MiniGameScripts/WhackAPig/NetworkedWhackAPig.cs:179>
+		NetworkedWhackAPig_t3A256F884EA61F8CAFB1F645E4FEE664AFEDC445* L_96 = __this->___U3CU3E4__this;
+		NullCheck(L_96);
+		GameObjectU5BU5D_tFF67550DFCE87096D7A3734EA15B75896B2722CF* L_97 = L_96->___m_ProxyPigs;
+		NetworkedWhackAPig_t3A256F884EA61F8CAFB1F645E4FEE664AFEDC445* L_98 = __this->___U3CU3E4__this;
+		NullCheck(L_98);
+		int32_t L_99 = L_98->___m_CurrentProxyId;
+		NullCheck(L_97);
+		int32_t L_100 = L_99;
+		GameObject_t76FEDD663AB33C991A9C9A23129337651094216F* L_101 = (L_97)->GetAt(static_cast<il2cpp_array_size_t>(L_100));
+		NullCheck(L_101);
+		Transform_tB27202C6F4E36D225EE28A13E4D662BF99785DB1* L_102;
+		L_102 = GameObject_get_transform_m0BC10ADFA1632166AE5544BDF9038A2650C2AE56(L_101, NULL);
+		Vector3_t24C512C7B96BBABAD472002D0BA2BDA40A5A80B2 L_103 = __this->___U3CstartPositionU3E5__2;
+		Vector3_t24C512C7B96BBABAD472002D0BA2BDA40A5A80B2 L_104;
+		L_104 = Vector3_get_up_m128AF3FDC820BF59D5DE86D973E7DE3F20C3AEBA_inline(NULL);
+		float L_105 = __this->___U3ClerpHeightU3E5__9;
+		Vector3_t24C512C7B96BBABAD472002D0BA2BDA40A5A80B2 L_106;
+		L_106 = Vector3_op_Multiply_m87BA7C578F96C8E49BB07088DAAC4649F83B0353_inline(L_104, L_105, NULL);
+		Vector3_t24C512C7B96BBABAD472002D0BA2BDA40A5A80B2 L_107;
+		L_107 = Vector3_op_Addition_m78C0EC70CB66E8DCAC225743D82B268DAEE92067_inline(L_103, L_106, NULL);
+		NullCheck(L_102);
+		Transform_set_localPosition_mDE1C997F7D79C0885210B7732B4BA50EE7D73134(L_102, L_107, NULL);
+		//<source_info:C:/Users/msigf/Documents/GitHub/meganopoly_final/Assets/VRMPAssets/MiniGames/MiniGameScripts/WhackAPig/NetworkedWhackAPig.cs:180>
+		__this->___U3CU3E2__current = NULL;
+		Il2CppCodeGenWriteBarrier((void**)(&__this->___U3CU3E2__current), (void*)NULL);
+		__this->___U3CU3E1__state = 2;
+		return (bool)1;
+	}
+
+IL_02e5:
+	{
+		__this->___U3CU3E1__state = (-1);
+		//<source_info:C:/Users/msigf/Documents/GitHub/meganopoly_final/Assets/VRMPAssets/MiniGames/MiniGameScripts/WhackAPig/NetworkedWhackAPig.cs:174>
+		float L_108 = __this->___U3CiU3E5__7;
+		float L_109;
+		L_109 = Time_get_deltaTime_mC3195000401F0FD167DD2F948FD2BC58330D0865(NULL);
+		__this->___U3CiU3E5__7 = ((float)il2cpp_codegen_add(L_108, L_109));
+	}
+
+IL_02ff:
+	{
+		//<source_info:C:/Users/msigf/Documents/GitHub/meganopoly_final/Assets/VRMPAssets/MiniGames/MiniGameScripts/WhackAPig/NetworkedWhackAPig.cs:174>
+		float L_110 = __this->___U3CiU3E5__7;
+		float L_111 = __this->___U3CriseTimeU3E5__1;
+		V_2 = (bool)((((float)L_110) < ((float)L_111))? 1 : 0);
+		bool L_112 = V_2;
+		if (L_112)
+		{
+			goto IL_0262;
+		}
+	}
+	{
+		//<source_info:C:/Users/msigf/Documents/GitHub/meganopoly_final/Assets/VRMPAssets/MiniGames/MiniGameScripts/WhackAPig/NetworkedWhackAPig.cs:182>
+		NetworkedWhackAPig_t3A256F884EA61F8CAFB1F645E4FEE664AFEDC445* L_113 = __this->___U3CU3E4__this;
+		NullCheck(L_113);
+		GameObjectU5BU5D_tFF67550DFCE87096D7A3734EA15B75896B2722CF* L_114 = L_113->___m_ProxyPigs;
+		NetworkedWhackAPig_t3A256F884EA61F8CAFB1F645E4FEE664AFEDC445* L_115 = __this->___U3CU3E4__this;
+		NullCheck(L_115);
+		int32_t L_116 = L_115->___m_CurrentProxyId;
+		NullCheck(L_114);
+		int32_t L_117 = L_116;
+		GameObject_t76FEDD663AB33C991A9C9A23129337651094216F* L_118 = (L_114)->GetAt(static_cast<il2cpp_array_size_t>(L_117));
+		NullCheck(L_118);
+		Transform_tB27202C6F4E36D225EE28A13E4D662BF99785DB1* L_119;
+		L_119 = GameObject_get_transform_m0BC10ADFA1632166AE5544BDF9038A2650C2AE56(L_118, NULL);
+		Vector3_t24C512C7B96BBABAD472002D0BA2BDA40A5A80B2 L_120 = __this->___U3CstartPositionU3E5__2;
+		Vector3_t24C512C7B96BBABAD472002D0BA2BDA40A5A80B2 L_121;
+		L_121 = Vector3_get_up_m128AF3FDC820BF59D5DE86D973E7DE3F20C3AEBA_inline(NULL);
+		NetworkedWhackAPig_t3A256F884EA61F8CAFB1F645E4FEE664AFEDC445* L_122 = __this->___U3CU3E4__this;
+		NullCheck(L_122);
+		float L_123 = L_122->___m_HiddenHeight;
+		Vector3_t24C512C7B96BBABAD472002D0BA2BDA40A5A80B2 L_124;
+		L_124 = Vector3_op_Multiply_m87BA7C578F96C8E49BB07088DAAC4649F83B0353_inline(L_121, L_123, NULL);
+		Vector3_t24C512C7B96BBABAD472002D0BA2BDA40A5A80B2 L_125;
+		L_125 = Vector3_op_Addition_m78C0EC70CB66E8DCAC225743D82B268DAEE92067_inline(L_120, L_124, NULL);
+		NullCheck(L_119);
+		Transform_set_localPosition_mDE1C997F7D79C0885210B7732B4BA50EE7D73134(L_119, L_125, NULL);
+		//<source_info:C:/Users/msigf/Documents/GitHub/meganopoly_final/Assets/VRMPAssets/MiniGames/MiniGameScripts/WhackAPig/NetworkedWhackAPig.cs:185>
+		NetworkedWhackAPig_t3A256F884EA61F8CAFB1F645E4FEE664AFEDC445* L_126 = __this->___U3CU3E4__this;
+		NullCheck(L_126);
+		GameObjectU5BU5D_tFF67550DFCE87096D7A3734EA15B75896B2722CF* L_127 = L_126->___m_ProxyPigs;
+		NetworkedWhackAPig_t3A256F884EA61F8CAFB1F645E4FEE664AFEDC445* L_128 = __this->___U3CU3E4__this;
+		NullCheck(L_128);
+		int32_t L_129 = L_128->___m_CurrentProxyId;
+		NullCheck(L_127);
+		int32_t L_130 = L_129;
+		GameObject_t76FEDD663AB33C991A9C9A23129337651094216F* L_131 = (L_127)->GetAt(static_cast<il2cpp_array_size_t>(L_130));
+		NullCheck(L_131);
+		GameObject_SetActive_m638E92E1E75E519E5B24CF150B08CA8E0CDFAB92(L_131, (bool)0, NULL);
+		Vector3_t24C512C7B96BBABAD472002D0BA2BDA40A5A80B2* L_132 = (Vector3_t24C512C7B96BBABAD472002D0BA2BDA40A5A80B2*)(&__this->___U3CstartPositionU3E5__2);
+		il2cpp_codegen_initobj(L_132, sizeof(Vector3_t24C512C7B96BBABAD472002D0BA2BDA40A5A80B2));
+	}
+
+IL_0381:
+	{
+		//<source_info:C:/Users/msigf/Documents/GitHub/meganopoly_final/Assets/VRMPAssets/MiniGames/MiniGameScripts/WhackAPig/NetworkedWhackAPig.cs:150>
+		NetworkedWhackAPig_t3A256F884EA61F8CAFB1F645E4FEE664AFEDC445* L_133 = __this->___U3CU3E4__this;
+		NullCheck(L_133);
+		MiniGame_Whack_t7E97D21412F0201471AA230190831E6571AC866E* L_134 = L_133->___m_MiniGame;
+		NullCheck(L_134);
+		bool L_135;
+		L_135 = MiniGameBase_get_finished_m9E4809848E18BD89E4C9AABB89E2A8386923C05E_inline(L_134, NULL);
+		V_3 = (bool)((((int32_t)L_135) == ((int32_t)0))? 1 : 0);
+		bool L_136 = V_3;
+		if (L_136)
+		{
+			goto IL_0036;
+		}
+	}
+	{
+		//<source_info:C:/Users/msigf/Documents/GitHub/meganopoly_final/Assets/VRMPAssets/MiniGames/MiniGameScripts/WhackAPig/NetworkedWhackAPig.cs:187>
+		return (bool)0;
+	}
+}
+// Method Definition Index: 121210
+IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR RuntimeObject* U3CTrickRoutineU3Ed__23_System_Collections_Generic_IEnumeratorU3CSystem_ObjectU3E_get_Current_mDDC1B3B466FAE2E6CD09E8804020B62AD15E64CF (U3CTrickRoutineU3Ed__23_t0576288007B934A0ACF0E68D0DAF36D37ABF2452* __this, const RuntimeMethod* method) 
+{
+	{
+		RuntimeObject* L_0 = __this->___U3CU3E2__current;
+		return L_0;
+	}
+}
+// Method Definition Index: 121211
+IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void U3CTrickRoutineU3Ed__23_System_Collections_IEnumerator_Reset_m175CFF0DA1699F5102A4ACC3921981D37B164D09 (U3CTrickRoutineU3Ed__23_t0576288007B934A0ACF0E68D0DAF36D37ABF2452* __this, const RuntimeMethod* method) 
+{
+	{
+		NotSupportedException_t1429765983D409BD2986508963C98D214E4EBF4A* L_0 = (NotSupportedException_t1429765983D409BD2986508963C98D214E4EBF4A*)il2cpp_codegen_object_new(((RuntimeClass*)il2cpp_codegen_initialize_runtime_metadata_inline((uintptr_t*)&NotSupportedException_t1429765983D409BD2986508963C98D214E4EBF4A_il2cpp_TypeInfo_var)));
+		NotSupportedException__ctor_m1398D0CDE19B36AA3DE9392879738C1EA2439CDF(L_0, NULL);
+		IL2CPP_RAISE_MANAGED_EXCEPTION(L_0, ((RuntimeMethod*)il2cpp_codegen_initialize_runtime_metadata_inline((uintptr_t*)&U3CTrickRoutineU3Ed__23_System_Collections_IEnumerator_Reset_m175CFF0DA1699F5102A4ACC3921981D37B164D09_RuntimeMethod_var)));
+	}
+}
+// Method Definition Index: 121212
+IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR RuntimeObject* U3CTrickRoutineU3Ed__23_System_Collections_IEnumerator_get_Current_mB93AF4958497A66C480BA2F7CBF73A52FCA37E58 (U3CTrickRoutineU3Ed__23_t0576288007B934A0ACF0E68D0DAF36D37ABF2452* __this, const RuntimeMethod* method) 
+{
+	{
+		RuntimeObject* L_0 = __this->___U3CU3E2__current;
+		return L_0;
+	}
+}
+#ifdef __clang__
+#pragma clang diagnostic pop
+#endif
+#ifdef __clang__
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Winvalid-offsetof"
+#pragma clang diagnostic ignored "-Wunused-variable"
+#endif
+#ifdef __clang__
+#pragma clang diagnostic pop
+#endif
+#ifdef __clang__
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Winvalid-offsetof"
+#pragma clang diagnostic ignored "-Wunused-variable"
+#endif
+#ifdef __clang__
+#pragma clang diagnostic pop
+#endif
+#ifdef __clang__
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Winvalid-offsetof"
+#pragma clang diagnostic ignored "-Wunused-variable"
+#endif
+#ifdef __clang__
+#pragma clang diagnostic pop
+#endif
+#ifdef __clang__
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Winvalid-offsetof"
+#pragma clang diagnostic ignored "-Wunused-variable"
+#endif
+#ifdef __clang__
+#pragma clang diagnostic pop
+#endif
+#ifdef __clang__
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Winvalid-offsetof"
+#pragma clang diagnostic ignored "-Wunused-variable"
+#endif
+// Method Definition Index: 121213
+IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void NetworkVariableSerializationHelper_InitializeSerialization_m4BCF63DC765F0B8BA9EDB8D0257B1133A621E042 (const RuntimeMethod* method) 
+{
+	static bool s_Il2CppMethodInitialized;
+	if (!s_Il2CppMethodInitialized)
+	{
+		il2cpp_codegen_initialize_runtime_metadata((uintptr_t*)&NetworkVariableSerializationTypedInitializers_InitializeEqualityChecker_UnmanagedIEquatable_TisBoolean_t09A6377A54BE2F9E6985A8149F19234FD7DDFE22_m77B124A2CE439E262B19050EF276E4A54FD4DF99_RuntimeMethod_var);
+		il2cpp_codegen_initialize_runtime_metadata((uintptr_t*)&NetworkVariableSerializationTypedInitializers_InitializeEqualityChecker_UnmanagedIEquatable_TisColor_tD001788D726C3A7F1379BEED0260B9591F440C1F_mB909D1FCEF927B2C039F8D63734AE5DA657E217A_RuntimeMethod_var);
+		il2cpp_codegen_initialize_runtime_metadata((uintptr_t*)&NetworkVariableSerializationTypedInitializers_InitializeEqualityChecker_UnmanagedIEquatable_TisFixedString128Bytes_tEBC488E0CC30C6D842951A4E6F09AC58677F1952_mF50EBF58471E1F60EFEBFCC12422F7006C78CF1C_RuntimeMethod_var);
+		il2cpp_codegen_initialize_runtime_metadata((uintptr_t*)&NetworkVariableSerializationTypedInitializers_InitializeEqualityChecker_UnmanagedIEquatable_TisFixedString512Bytes_t0C425B0F2C07FEA1642C32BF8559116DF2BFF50E_mEEC0C880C380BDF433665C5268D7E996884DDD47_RuntimeMethod_var);
+		il2cpp_codegen_initialize_runtime_metadata((uintptr_t*)&NetworkVariableSerializationTypedInitializers_InitializeEqualityChecker_UnmanagedIEquatable_TisNetworkObjectReference_tDC1F1C3CC1E28DCB9229C36E30BB81F847CF77FD_m67B6E1FA6C94EB04A77D0A0E6CD6563D29454604_RuntimeMethod_var);
+		il2cpp_codegen_initialize_runtime_metadata((uintptr_t*)&NetworkVariableSerializationTypedInitializers_InitializeEqualityChecker_UnmanagedIEquatable_TisSingle_t4530F2FF86FCB0DC29F35385CA1BD21BE294761C_mF43C131F9E07A4BB1166611C44BACE3EC84E8515_RuntimeMethod_var);
+		il2cpp_codegen_initialize_runtime_metadata((uintptr_t*)&NetworkVariableSerializationTypedInitializers_InitializeEqualityChecker_UnmanagedIEquatable_TisVector3_t24C512C7B96BBABAD472002D0BA2BDA40A5A80B2_m89C1E8669DDC76C5E92E15D23CD4E3CEE1D845EE_RuntimeMethod_var);
+		il2cpp_codegen_initialize_runtime_metadata((uintptr_t*)&NetworkVariableSerializationTypedInitializers_InitializeEqualityChecker_UnmanagedValueEquals_TisGameState_t99B567B83F14873630A89D4E5B11A38D5B5EA529_m67A72943FB23EA0A9565B953A680FAB9A4B51D6D_RuntimeMethod_var);
+		il2cpp_codegen_initialize_runtime_metadata((uintptr_t*)&NetworkVariableSerializationTypedInitializers_InitializeEqualityChecker_UnmanagedValueEquals_TisInputMode_tA1FE8CD33609C5FA45BE47B528CB1F9BE7E7C556_m78EB891FEDB620B146F285F98F28E4961F771AF9_RuntimeMethod_var);
+		il2cpp_codegen_initialize_runtime_metadata((uintptr_t*)&NetworkVariableSerializationTypedInitializers_InitializeSerializer_FixedString_TisFixedString128Bytes_tEBC488E0CC30C6D842951A4E6F09AC58677F1952_mFBAC7418FAE06E3FEE5E6D8D040C89DEF645DBB8_RuntimeMethod_var);
+		il2cpp_codegen_initialize_runtime_metadata((uintptr_t*)&NetworkVariableSerializationTypedInitializers_InitializeSerializer_FixedString_TisFixedString512Bytes_t0C425B0F2C07FEA1642C32BF8559116DF2BFF50E_m4AD156116A5397F8A07B29125B83D064FB843C7E_RuntimeMethod_var);
+		il2cpp_codegen_initialize_runtime_metadata((uintptr_t*)&NetworkVariableSerializationTypedInitializers_InitializeSerializer_UnmanagedByMemcpy_TisBoolean_t09A6377A54BE2F9E6985A8149F19234FD7DDFE22_m262F7F05D2D8EAF215686867C594E83312417F31_RuntimeMethod_var);
+		il2cpp_codegen_initialize_runtime_metadata((uintptr_t*)&NetworkVariableSerializationTypedInitializers_InitializeSerializer_UnmanagedByMemcpy_TisColor_tD001788D726C3A7F1379BEED0260B9591F440C1F_mC651A75713F8BDB1E125AFA629F8F57D48220057_RuntimeMethod_var);
+		il2cpp_codegen_initialize_runtime_metadata((uintptr_t*)&NetworkVariableSerializationTypedInitializers_InitializeSerializer_UnmanagedByMemcpy_TisGameState_t99B567B83F14873630A89D4E5B11A38D5B5EA529_mCD24BC94B85D0CD9C69AC1FF5F6286FEF5B0AF5C_RuntimeMethod_var);
+		il2cpp_codegen_initialize_runtime_metadata((uintptr_t*)&NetworkVariableSerializationTypedInitializers_InitializeSerializer_UnmanagedByMemcpy_TisInputMode_tA1FE8CD33609C5FA45BE47B528CB1F9BE7E7C556_m0E9A73A707AE6AAE12EA49EF064BAC6A3AC2E381_RuntimeMethod_var);
+		il2cpp_codegen_initialize_runtime_metadata((uintptr_t*)&NetworkVariableSerializationTypedInitializers_InitializeSerializer_UnmanagedByMemcpy_TisSingle_t4530F2FF86FCB0DC29F35385CA1BD21BE294761C_m77A3CAD19584DF8EBF2CD3D502B210E474D7F52F_RuntimeMethod_var);
+		il2cpp_codegen_initialize_runtime_metadata((uintptr_t*)&NetworkVariableSerializationTypedInitializers_InitializeSerializer_UnmanagedByMemcpy_TisVector3_t24C512C7B96BBABAD472002D0BA2BDA40A5A80B2_mA593D62B26CB989C75B0E794380EEFA91621DD99_RuntimeMethod_var);
+		il2cpp_codegen_initialize_runtime_metadata((uintptr_t*)&NetworkVariableSerializationTypedInitializers_InitializeSerializer_UnmanagedINetworkSerializable_TisNetworkObjectReference_tDC1F1C3CC1E28DCB9229C36E30BB81F847CF77FD_m304AA64FF09325DECBAD36ED9B590E6769AF3ABB_RuntimeMethod_var);
+		s_Il2CppMethodInitialized = true;
+	}
+	{
+		NetworkVariableSerializationTypedInitializers_InitializeSerializer_UnmanagedByMemcpy_TisColor_tD001788D726C3A7F1379BEED0260B9591F440C1F_mC651A75713F8BDB1E125AFA629F8F57D48220057(NetworkVariableSerializationTypedInitializers_InitializeSerializer_UnmanagedByMemcpy_TisColor_tD001788D726C3A7F1379BEED0260B9591F440C1F_mC651A75713F8BDB1E125AFA629F8F57D48220057_RuntimeMethod_var);
+		NetworkVariableSerializationTypedInitializers_InitializeEqualityChecker_UnmanagedIEquatable_TisColor_tD001788D726C3A7F1379BEED0260B9591F440C1F_mB909D1FCEF927B2C039F8D63734AE5DA657E217A(NetworkVariableSerializationTypedInitializers_InitializeEqualityChecker_UnmanagedIEquatable_TisColor_tD001788D726C3A7F1379BEED0260B9591F440C1F_mB909D1FCEF927B2C039F8D63734AE5DA657E217A_RuntimeMethod_var);
+		NetworkVariableSerializationTypedInitializers_InitializeSerializer_UnmanagedINetworkSerializable_TisNetworkObjectReference_tDC1F1C3CC1E28DCB9229C36E30BB81F847CF77FD_m304AA64FF09325DECBAD36ED9B590E6769AF3ABB(NetworkVariableSerializationTypedInitializers_InitializeSerializer_UnmanagedINetworkSerializable_TisNetworkObjectReference_tDC1F1C3CC1E28DCB9229C36E30BB81F847CF77FD_m304AA64FF09325DECBAD36ED9B590E6769AF3ABB_RuntimeMethod_var);
+		NetworkVariableSerializationTypedInitializers_InitializeEqualityChecker_UnmanagedIEquatable_TisNetworkObjectReference_tDC1F1C3CC1E28DCB9229C36E30BB81F847CF77FD_m67B6E1FA6C94EB04A77D0A0E6CD6563D29454604(NetworkVariableSerializationTypedInitializers_InitializeEqualityChecker_UnmanagedIEquatable_TisNetworkObjectReference_tDC1F1C3CC1E28DCB9229C36E30BB81F847CF77FD_m67B6E1FA6C94EB04A77D0A0E6CD6563D29454604_RuntimeMethod_var);
+		NetworkVariableSerializationTypedInitializers_InitializeSerializer_FixedString_TisFixedString512Bytes_t0C425B0F2C07FEA1642C32BF8559116DF2BFF50E_m4AD156116A5397F8A07B29125B83D064FB843C7E(NetworkVariableSerializationTypedInitializers_InitializeSerializer_FixedString_TisFixedString512Bytes_t0C425B0F2C07FEA1642C32BF8559116DF2BFF50E_m4AD156116A5397F8A07B29125B83D064FB843C7E_RuntimeMethod_var);
+		NetworkVariableSerializationTypedInitializers_InitializeEqualityChecker_UnmanagedIEquatable_TisFixedString512Bytes_t0C425B0F2C07FEA1642C32BF8559116DF2BFF50E_mEEC0C880C380BDF433665C5268D7E996884DDD47(NetworkVariableSerializationTypedInitializers_InitializeEqualityChecker_UnmanagedIEquatable_TisFixedString512Bytes_t0C425B0F2C07FEA1642C32BF8559116DF2BFF50E_mEEC0C880C380BDF433665C5268D7E996884DDD47_RuntimeMethod_var);
+		NetworkVariableSerializationTypedInitializers_InitializeSerializer_UnmanagedByMemcpy_TisBoolean_t09A6377A54BE2F9E6985A8149F19234FD7DDFE22_m262F7F05D2D8EAF215686867C594E83312417F31(NetworkVariableSerializationTypedInitializers_InitializeSerializer_UnmanagedByMemcpy_TisBoolean_t09A6377A54BE2F9E6985A8149F19234FD7DDFE22_m262F7F05D2D8EAF215686867C594E83312417F31_RuntimeMethod_var);
+		NetworkVariableSerializationTypedInitializers_InitializeEqualityChecker_UnmanagedIEquatable_TisBoolean_t09A6377A54BE2F9E6985A8149F19234FD7DDFE22_m77B124A2CE439E262B19050EF276E4A54FD4DF99(NetworkVariableSerializationTypedInitializers_InitializeEqualityChecker_UnmanagedIEquatable_TisBoolean_t09A6377A54BE2F9E6985A8149F19234FD7DDFE22_m77B124A2CE439E262B19050EF276E4A54FD4DF99_RuntimeMethod_var);
+		NetworkVariableSerializationTypedInitializers_InitializeSerializer_UnmanagedByMemcpy_TisVector3_t24C512C7B96BBABAD472002D0BA2BDA40A5A80B2_mA593D62B26CB989C75B0E794380EEFA91621DD99(NetworkVariableSerializationTypedInitializers_InitializeSerializer_UnmanagedByMemcpy_TisVector3_t24C512C7B96BBABAD472002D0BA2BDA40A5A80B2_mA593D62B26CB989C75B0E794380EEFA91621DD99_RuntimeMethod_var);
+		NetworkVariableSerializationTypedInitializers_InitializeEqualityChecker_UnmanagedIEquatable_TisVector3_t24C512C7B96BBABAD472002D0BA2BDA40A5A80B2_m89C1E8669DDC76C5E92E15D23CD4E3CEE1D845EE(NetworkVariableSerializationTypedInitializers_InitializeEqualityChecker_UnmanagedIEquatable_TisVector3_t24C512C7B96BBABAD472002D0BA2BDA40A5A80B2_m89C1E8669DDC76C5E92E15D23CD4E3CEE1D845EE_RuntimeMethod_var);
+		NetworkVariableSerializationTypedInitializers_InitializeSerializer_UnmanagedByMemcpy_TisSingle_t4530F2FF86FCB0DC29F35385CA1BD21BE294761C_m77A3CAD19584DF8EBF2CD3D502B210E474D7F52F(NetworkVariableSerializationTypedInitializers_InitializeSerializer_UnmanagedByMemcpy_TisSingle_t4530F2FF86FCB0DC29F35385CA1BD21BE294761C_m77A3CAD19584DF8EBF2CD3D502B210E474D7F52F_RuntimeMethod_var);
+		NetworkVariableSerializationTypedInitializers_InitializeEqualityChecker_UnmanagedIEquatable_TisSingle_t4530F2FF86FCB0DC29F35385CA1BD21BE294761C_mF43C131F9E07A4BB1166611C44BACE3EC84E8515(NetworkVariableSerializationTypedInitializers_InitializeEqualityChecker_UnmanagedIEquatable_TisSingle_t4530F2FF86FCB0DC29F35385CA1BD21BE294761C_mF43C131F9E07A4BB1166611C44BACE3EC84E8515_RuntimeMethod_var);
+		NetworkVariableSerializationTypedInitializers_InitializeSerializer_UnmanagedByMemcpy_TisInputMode_tA1FE8CD33609C5FA45BE47B528CB1F9BE7E7C556_m0E9A73A707AE6AAE12EA49EF064BAC6A3AC2E381(NetworkVariableSerializationTypedInitializers_InitializeSerializer_UnmanagedByMemcpy_TisInputMode_tA1FE8CD33609C5FA45BE47B528CB1F9BE7E7C556_m0E9A73A707AE6AAE12EA49EF064BAC6A3AC2E381_RuntimeMethod_var);
+		NetworkVariableSerializationTypedInitializers_InitializeEqualityChecker_UnmanagedValueEquals_TisInputMode_tA1FE8CD33609C5FA45BE47B528CB1F9BE7E7C556_m78EB891FEDB620B146F285F98F28E4961F771AF9(NetworkVariableSerializationTypedInitializers_InitializeEqualityChecker_UnmanagedValueEquals_TisInputMode_tA1FE8CD33609C5FA45BE47B528CB1F9BE7E7C556_m78EB891FEDB620B146F285F98F28E4961F771AF9_RuntimeMethod_var);
+		NetworkVariableSerializationTypedInitializers_InitializeSerializer_FixedString_TisFixedString128Bytes_tEBC488E0CC30C6D842951A4E6F09AC58677F1952_mFBAC7418FAE06E3FEE5E6D8D040C89DEF645DBB8(NetworkVariableSerializationTypedInitializers_InitializeSerializer_FixedString_TisFixedString128Bytes_tEBC488E0CC30C6D842951A4E6F09AC58677F1952_mFBAC7418FAE06E3FEE5E6D8D040C89DEF645DBB8_RuntimeMethod_var);
+		NetworkVariableSerializationTypedInitializers_InitializeEqualityChecker_UnmanagedIEquatable_TisFixedString128Bytes_tEBC488E0CC30C6D842951A4E6F09AC58677F1952_mF50EBF58471E1F60EFEBFCC12422F7006C78CF1C(NetworkVariableSerializationTypedInitializers_InitializeEqualityChecker_UnmanagedIEquatable_TisFixedString128Bytes_tEBC488E0CC30C6D842951A4E6F09AC58677F1952_mF50EBF58471E1F60EFEBFCC12422F7006C78CF1C_RuntimeMethod_var);
+		NetworkVariableSerializationTypedInitializers_InitializeSerializer_UnmanagedByMemcpy_TisGameState_t99B567B83F14873630A89D4E5B11A38D5B5EA529_mCD24BC94B85D0CD9C69AC1FF5F6286FEF5B0AF5C(NetworkVariableSerializationTypedInitializers_InitializeSerializer_UnmanagedByMemcpy_TisGameState_t99B567B83F14873630A89D4E5B11A38D5B5EA529_mCD24BC94B85D0CD9C69AC1FF5F6286FEF5B0AF5C_RuntimeMethod_var);
+		NetworkVariableSerializationTypedInitializers_InitializeEqualityChecker_UnmanagedValueEquals_TisGameState_t99B567B83F14873630A89D4E5B11A38D5B5EA529_m67A72943FB23EA0A9565B953A680FAB9A4B51D6D(NetworkVariableSerializationTypedInitializers_InitializeEqualityChecker_UnmanagedValueEquals_TisGameState_t99B567B83F14873630A89D4E5B11A38D5B5EA529_m67A72943FB23EA0A9565B953A680FAB9A4B51D6D_RuntimeMethod_var);
+		return;
+	}
+}
+#ifdef __clang__
+#pragma clang diagnostic pop
+#endif
+// Method Definition Index: 80955
+IL2CPP_MANAGED_FORCE_INLINE IL2CPP_METHOD_ATTR void Vector3__ctor_m376936E6B999EF1ECBE57D990A386303E2283DE0_inline (Vector3_t24C512C7B96BBABAD472002D0BA2BDA40A5A80B2* __this, float ___0_x, float ___1_y, float ___2_z, const RuntimeMethod* method) 
+{
+	{
+		float L_0 = ___0_x;
+		__this->___x = L_0;
+		float L_1 = ___1_y;
+		__this->___y = L_1;
+		float L_2 = ___2_z;
+		__this->___z = L_2;
+		return;
+	}
+}
+// Method Definition Index: 80989
+IL2CPP_MANAGED_FORCE_INLINE IL2CPP_METHOD_ATTR Vector3_t24C512C7B96BBABAD472002D0BA2BDA40A5A80B2 Vector3_get_up_m128AF3FDC820BF59D5DE86D973E7DE3F20C3AEBA_inline (const RuntimeMethod* method) 
+{
+	static bool s_Il2CppMethodInitialized;
+	if (!s_Il2CppMethodInitialized)
+	{
+		il2cpp_codegen_initialize_runtime_metadata((uintptr_t*)&Vector3_t24C512C7B96BBABAD472002D0BA2BDA40A5A80B2_il2cpp_TypeInfo_var);
+		s_Il2CppMethodInitialized = true;
+	}
+	{
+		Vector3_t24C512C7B96BBABAD472002D0BA2BDA40A5A80B2 L_0 = ((Vector3_t24C512C7B96BBABAD472002D0BA2BDA40A5A80B2_StaticFields*)il2cpp_codegen_static_fields_for(Vector3_t24C512C7B96BBABAD472002D0BA2BDA40A5A80B2_il2cpp_TypeInfo_var))->___upVector;
+		return L_0;
+	}
+}
+// Method Definition Index: 80996
+IL2CPP_MANAGED_FORCE_INLINE IL2CPP_METHOD_ATTR Vector3_t24C512C7B96BBABAD472002D0BA2BDA40A5A80B2 Vector3_op_Multiply_m87BA7C578F96C8E49BB07088DAAC4649F83B0353_inline (Vector3_t24C512C7B96BBABAD472002D0BA2BDA40A5A80B2 ___0_a, float ___1_d, const RuntimeMethod* method) 
+{
+	Vector3_t24C512C7B96BBABAD472002D0BA2BDA40A5A80B2 V_0;
+	memset((&V_0), 0, sizeof(V_0));
+	{
+		il2cpp_codegen_initobj((&V_0), sizeof(Vector3_t24C512C7B96BBABAD472002D0BA2BDA40A5A80B2));
+		Vector3_t24C512C7B96BBABAD472002D0BA2BDA40A5A80B2 L_0 = ___0_a;
+		float L_1 = L_0.___x;
+		float L_2 = ___1_d;
+		(&V_0)->___x = ((float)il2cpp_codegen_multiply(L_1, L_2));
+		Vector3_t24C512C7B96BBABAD472002D0BA2BDA40A5A80B2 L_3 = ___0_a;
+		float L_4 = L_3.___y;
+		float L_5 = ___1_d;
+		(&V_0)->___y = ((float)il2cpp_codegen_multiply(L_4, L_5));
+		Vector3_t24C512C7B96BBABAD472002D0BA2BDA40A5A80B2 L_6 = ___0_a;
+		float L_7 = L_6.___z;
+		float L_8 = ___1_d;
+		(&V_0)->___z = ((float)il2cpp_codegen_multiply(L_7, L_8));
+		Vector3_t24C512C7B96BBABAD472002D0BA2BDA40A5A80B2 L_9 = V_0;
+		return L_9;
+	}
+}
+// Method Definition Index: 80993
+IL2CPP_MANAGED_FORCE_INLINE IL2CPP_METHOD_ATTR Vector3_t24C512C7B96BBABAD472002D0BA2BDA40A5A80B2 Vector3_op_Addition_m78C0EC70CB66E8DCAC225743D82B268DAEE92067_inline (Vector3_t24C512C7B96BBABAD472002D0BA2BDA40A5A80B2 ___0_a, Vector3_t24C512C7B96BBABAD472002D0BA2BDA40A5A80B2 ___1_b, const RuntimeMethod* method) 
+{
+	Vector3_t24C512C7B96BBABAD472002D0BA2BDA40A5A80B2 V_0;
+	memset((&V_0), 0, sizeof(V_0));
+	{
+		il2cpp_codegen_initobj((&V_0), sizeof(Vector3_t24C512C7B96BBABAD472002D0BA2BDA40A5A80B2));
+		Vector3_t24C512C7B96BBABAD472002D0BA2BDA40A5A80B2 L_0 = ___0_a;
+		float L_1 = L_0.___x;
+		Vector3_t24C512C7B96BBABAD472002D0BA2BDA40A5A80B2 L_2 = ___1_b;
+		float L_3 = L_2.___x;
+		(&V_0)->___x = ((float)il2cpp_codegen_add(L_1, L_3));
+		Vector3_t24C512C7B96BBABAD472002D0BA2BDA40A5A80B2 L_4 = ___0_a;
+		float L_5 = L_4.___y;
+		Vector3_t24C512C7B96BBABAD472002D0BA2BDA40A5A80B2 L_6 = ___1_b;
+		float L_7 = L_6.___y;
+		(&V_0)->___y = ((float)il2cpp_codegen_add(L_5, L_7));
+		Vector3_t24C512C7B96BBABAD472002D0BA2BDA40A5A80B2 L_8 = ___0_a;
+		float L_9 = L_8.___z;
+		Vector3_t24C512C7B96BBABAD472002D0BA2BDA40A5A80B2 L_10 = ___1_b;
+		float L_11 = L_10.___z;
+		(&V_0)->___z = ((float)il2cpp_codegen_add(L_9, L_11));
+		Vector3_t24C512C7B96BBABAD472002D0BA2BDA40A5A80B2 L_12 = V_0;
+		return L_12;
+	}
+}
+// Method Definition Index: 81102
+IL2CPP_MANAGED_FORCE_INLINE IL2CPP_METHOD_ATTR float Mathf_Lerp_m47EF2FFB7647BD0A1FDC26DC03E28B19812139B5_inline (float ___0_a, float ___1_b, float ___2_t, const RuntimeMethod* method) 
+{
+	float V_0 = 0.0f;
+	{
+		float L_0 = ___0_a;
+		float L_1 = ___1_b;
+		float L_2 = ___0_a;
+		float L_3 = ___2_t;
+		float L_4;
+		L_4 = Mathf_Clamp01_mA7E048DBDA832D399A581BE4D6DED9FA44CE0F14_inline(L_3, NULL);
+		V_0 = ((float)il2cpp_codegen_add(L_0, ((float)il2cpp_codegen_multiply(((float)il2cpp_codegen_subtract(L_1, L_2)), L_4))));
+		goto IL_0010;
+	}
+
+IL_0010:
+	{
+		float L_5 = V_0;
+		return L_5;
+	}
+}
+// Method Definition Index: 120974
+IL2CPP_MANAGED_FORCE_INLINE IL2CPP_METHOD_ATTR bool MiniGameBase_get_finished_m9E4809848E18BD89E4C9AABB89E2A8386923C05E_inline (MiniGameBase_t7B6CA778B491B431AD2F03F35BE6D7CDA9027743* __this, const RuntimeMethod* method) 
+{
+	{
+		//<source_info:C:/Users/msigf/Documents/GitHub/meganopoly_final/Assets/VRMPAssets/MiniGames/MiniGameScripts/MiniGameBase.cs:19>
+		bool L_0 = __this->___m_Finished;
+		return L_0;
+	}
+}
+// Method Definition Index: 81101
+IL2CPP_MANAGED_FORCE_INLINE IL2CPP_METHOD_ATTR float Mathf_Clamp01_mA7E048DBDA832D399A581BE4D6DED9FA44CE0F14_inline (float ___0_value, const RuntimeMethod* method) 
+{
+	bool V_0 = false;
+	float V_1 = 0.0f;
+	bool V_2 = false;
+	{
+		float L_0 = ___0_value;
+		V_0 = (bool)((((float)L_0) < ((float)(0.0f)))? 1 : 0);
+		bool L_1 = V_0;
+		if (!L_1)
+		{
+			goto IL_0015;
+		}
+	}
+	{
+		V_1 = (0.0f);
+		goto IL_002d;
+	}
+
+IL_0015:
+	{
+		float L_2 = ___0_value;
+		V_2 = (bool)((((float)L_2) > ((float)(1.0f)))? 1 : 0);
+		bool L_3 = V_2;
+		if (!L_3)
+		{
+			goto IL_0029;
+		}
+	}
+	{
+		V_1 = (1.0f);
+		goto IL_002d;
+	}
+
+IL_0029:
+	{
+		float L_4 = ___0_value;
+		V_1 = L_4;
+		goto IL_002d;
+	}
+
+IL_002d:
+	{
+		float L_5 = V_1;
+		return L_5;
+	}
+}
