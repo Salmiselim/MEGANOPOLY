@@ -76,7 +76,7 @@ namespace Ghomidha
             _roleLabel.fontStyle    = FontStyles.Bold;
             _roleLabel.color        = Color.white;
             _roleLabel.alignment    = TextAlignmentOptions.Center;
-            _roleLabel.enableWordWrapping = false;
+            _roleLabel.textWrappingMode = TextWrappingModes.NoWrap;
 
             // ── Small "ROLE" header ──────────────────────────────────────────
             var hdrGo = new GameObject("Header");
