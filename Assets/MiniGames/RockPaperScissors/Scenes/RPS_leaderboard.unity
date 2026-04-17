@@ -283,14 +283,14 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d5a57f767e5e46a458fc5d3c628d0cbb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Unity.Netcode.Runtime::Unity.Netcode.NetworkObject
-  GlobalObjectIdHash: 2279348279
+  GlobalObjectIdHash: 2807562644
   InScenePlacedSourceGlobalObjectIdHash: 0
   DeferredDespawnTick: 0
   Ownership: 1
   AlwaysReplicateAsRoot: 0
   SynchronizeTransform: 1
   ActiveSceneSynchronization: 0
-  SceneMigrationSynchronization: 0
+  SceneMigrationSynchronization: 1
   SpawnWithObservers: 1
   DontDestroyWithOwner: 0
   AutoObjectParentSync: 1
@@ -315,10 +315,7 @@ MonoBehaviour:
   resultText: {fileID: 1615331611}
   localPlayerChoiceText: {fileID: 319429633}
   opponentChoiceText: {fileID: 397025007}
-  roundText: {fileID: 0}
-  scoreText: {fileID: 0}
   backgroundVideo: {fileID: 1141935035}
-  totalRounds: 3
 --- !u!1001 &163148847
 PrefabInstance:
   m_ObjectHideFlags: 0
