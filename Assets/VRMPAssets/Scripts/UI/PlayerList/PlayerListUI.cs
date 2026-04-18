@@ -55,6 +55,19 @@ namespace XRMultiplayer
 
             XRINetworkGameManager.Instance.OnPlayerStateChanged += ConnectedPlayerStateChange;
             XRINetworkGameManager.Connected.Subscribe(OnConnected);
+
+            // Populate players that are already connected before this UI initialization
+            if (Unity.Netcode.NetworkManager.Singleton != null && Unity.Netcode.NetworkManager.Singleton.IsListening)
+            {
+                XRINetworkPlayer[] allPlayers = FindObjectsByType<XRINetworkPlayer>(FindObjectsSortMode.None);
+                foreach (XRINetworkPlayer p in allPlayers)
+                {
+                    if (p.NetworkObject != null && p.NetworkObject.IsSpawned)
+                    {
+                        ConnectedPlayerStateChange(p.NetworkObject.OwnerClientId, true);
+                    }
+                }
+            }
         }
 
         void OnConnected(bool connected)

@@ -964,11 +964,11 @@ PlayerSettings:
   captureStartupLogs: {}
   activeInputHandler: 2
   windowsGamepadBackendHint: 0
-  cloudProjectId: 
+  cloudProjectId: c8453ac8-b42e-4627-b7a9-44eee1e8a0e0
   framebufferDepthMemorylessMode: 0
   qualitySettingsNames: []
-  projectName: com.unity.vr-multiplayer
-  organizationId: 
+  projectName: MEGANOPOLY_FINAL
+  organizationId: aymenghozzi2000
   cloudEnabled: 0
   legacyClampBlendShapeWeights: 0
   hmiLoadingImage: {fileID: 0}

@@ -11,6 +11,9 @@ namespace XRMultiplayer
         public TMP_Text playerInitial;
         public Image playerIconImage;
 
+        [Header("Lobby Status")]
+        public TMP_Text statusText;
+
         [Header("Mic Button")]
         public Image voiceChatFillImage;
         [SerializeField] Button m_MicButton;
@@ -25,7 +28,10 @@ namespace XRMultiplayer
             m_Player = player;
             m_Player.onColorUpdated += UpdateColor;
             m_Player.onNameUpdated += UpdateName;
+            m_Player.onReadyUpdated += UpdateReadyUI;
+            UpdateReadyUI(m_Player.isReady.Value);
             m_Player.selfMuted.OnValueChanged += UpdateSelfMutedState;
+
             m_MicButton.onClick.AddListener(Squelch);
             m_Player.squelched.Subscribe(UpdateSquelchedState);
             m_SquelchedIcon.enabled = false;
@@ -44,6 +50,7 @@ namespace XRMultiplayer
         {
             m_Player.onColorUpdated -= UpdateColor;
             m_Player.onNameUpdated -= UpdateName;
+            m_Player.onReadyUpdated -= UpdateReadyUI;
             m_Player.selfMuted.OnValueChanged -= UpdateSelfMutedState;
             m_MicButton.onClick.RemoveListener(Squelch);
             m_Player.squelched.Unsubscribe(UpdateSquelchedState);
@@ -69,6 +76,15 @@ namespace XRMultiplayer
                 }
                 playerSlotName.text = playerName;
                 playerInitial.text = newName.Substring(0, 1);
+            }
+        }
+
+        void UpdateReadyUI(bool isReady)
+        {
+            if (statusText != null)
+            {
+                statusText.text = isReady ? "Ready" : "Not Ready";
+                statusText.color = isReady ? Color.green : Color.gray;
             }
         }
 
