@@ -6,6 +6,9 @@ EditorBuildSettings:
   serializedVersion: 2
   m_Scenes:
   - enabled: 1
+    path: Assets/MiniGames/RockPaperScissors/Scenes/RPS_relay.unity
+    guid: 6a81294bfd4c5514fb680eb906dafed5
+  - enabled: 1
     path: Assets/MiniGames/RockPaperScissors/Scenes/RPS_MultiplayerNoHandDetection
       1.unity
     guid: ba98441ed432b374499ffd602e9269a7
