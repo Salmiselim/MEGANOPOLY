@@ -67,7 +67,7 @@ sysinfo.txt
 mono_crash.*
 
 # Builds
-/relaybuilds/
+/[Rr]elay[Bb]uilds/
 *.apk
 *.aab
 *.unitypackage
