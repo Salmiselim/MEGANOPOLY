@@ -11457,6 +11457,7 @@ GameObject:
   - component: {fileID: 1853007516}
   - component: {fileID: 1853007515}
   - component: {fileID: 1853007518}
+  - component: {fileID: 1853007519}
   m_Layer: 0
   m_Name: _GameManagers
   m_TagString: Untagged
@@ -11614,6 +11615,18 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::NetworkBootstrapper
   minPlayersToStart: 2
   autoStartAt: 4
+--- !u!114 &1853007519
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1853007511}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 637f6207d877c31438bbdc400c11ce5a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::PlayerDataApplier
 --- !u!1 &1880529407
 GameObject:
   m_ObjectHideFlags: 0

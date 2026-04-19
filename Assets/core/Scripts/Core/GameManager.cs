@@ -41,7 +41,7 @@ public class CompleteGameManager : NetworkBehaviour
     [SerializeField] private KeyCode cheatKey_TestTrain = KeyCode.F6;
     [SerializeField] private KeyCode cheatKey_TestMinigame = KeyCode.F7;
 
-    // ── Auth: maps clientId → authenticated username & Unity PlayerId ─────────
+    // ── Auth maps ─────────────────────────────────────────────────────────────
     private Dictionary<ulong, string> clientAuthNames = new Dictionary<ulong, string>();
     private Dictionary<ulong, string> clientUnityPlayerIds = new Dictionary<ulong, string>();
 
@@ -86,11 +86,10 @@ public class CompleteGameManager : NetworkBehaviour
         {
             NetworkManager.Singleton.OnClientConnectedCallback += OnClientConnected;
             NetworkManager.Singleton.OnClientDisconnectCallback += OnClientDisconnected;
-            // Game starts only when NetworkBootstrapper calls ForceStartWithCurrentPlayers()
             return;
         }
 
-        // ── CLIENT: guard — must be authenticated before entering the game ──
+        // ── CLIENT: auth guard ───────────────────────────────────────────────
         if (AuthManager.Instance == null || !AuthManager.Instance.IsSignedIn)
         {
             Debug.LogError("[Client] Not authenticated! Redirecting to Auth scene.");
@@ -98,7 +97,6 @@ public class CompleteGameManager : NetworkBehaviour
             return;
         }
 
-        // Send authenticated username + Unity PlayerId to server
         string username = AuthManager.Instance.PlayerName ?? $"Player_{NetworkManager.Singleton.LocalClientId}";
         string playerId = AuthManager.Instance.PlayerId;
 
@@ -106,21 +104,17 @@ public class CompleteGameManager : NetworkBehaviour
         Debug.Log($"[Client] Auth guard passed. Registered as '{username}' (PlayerId: {playerId})");
     }
 
-    // ── Auth registration RPC (client → server) ───────────────────────────────
+    // ── Auth registration (client → server) ───────────────────────────────────
 
-    /// <summary>
-    /// Called by each client immediately after spawning to register their
-    /// authenticated username and Unity PlayerId on the server.
-    /// </summary>
     [ServerRpc(RequireOwnership = false)]
     public void RegisterAuthNameServerRpc(string username, string unityPlayerId, ulong clientId, ServerRpcParams rpcParams = default)
     {
         clientAuthNames[clientId] = username;
         clientUnityPlayerIds[clientId] = unityPlayerId;
-        Debug.Log($"[Server] Client {clientId} registered → name='{username}' | playerId='{unityPlayerId}'");
+        Debug.Log($"[Server] Client {clientId} registered → '{username}' | id='{unityPlayerId}'");
     }
 
-    // ── Client connect / disconnect callbacks ─────────────────────────────────
+    // ── Connect / disconnect ──────────────────────────────────────────────────
 
     private void OnClientConnected(ulong clientId)
         => Debug.Log($"[Server] Client {clientId} connected. Total: {NetworkManager.Singleton.ConnectedClientsList.Count}");
@@ -158,27 +152,18 @@ public class CompleteGameManager : NetworkBehaviour
 
         for (int i = 0; i < numberOfPlayers; i++)
         {
-            // ── Resolve owner client ──────────────────────────────────────
             ulong ownerClientId = (i < clients.Count) ? clients[i] : NetworkManager.ServerClientId;
-
-            // ── Resolve authenticated name (fallback to static array) ─────
             string authName = clientAuthNames.TryGetValue(ownerClientId, out string n)
-                ? n
-                : (i < playerNames.Length ? playerNames[i] : $"Player {i + 1}");
-
-            // ── Resolve Unity PlayerId ────────────────────────────────────
+                                    ? n : (i < playerNames.Length ? playerNames[i] : $"Player {i + 1}");
             string unityPlayerId = clientUnityPlayerIds.TryGetValue(ownerClientId, out string pid)
-                ? pid
-                : ownerClientId.ToString();
+                                    ? pid : ownerClientId.ToString();
 
-            // ── Create PlayerData ─────────────────────────────────────────
             players[i] = new PlayerData(i, authName, playerColors[i]);
             players[i].money = startingMoney;
-            players[i].unityPlayerId = unityPlayerId;   // store auth PlayerId
+            players[i].unityPlayerId = unityPlayerId;
 
-            Debug.Log($"[Server] Spawning Player {i} → name='{authName}' | unityPlayerId='{unityPlayerId}' | client={ownerClientId}");
+            Debug.Log($"[Server] Spawning Player {i} → '{authName}' | id='{unityPlayerId}' | client={ownerClientId}");
 
-            // ── Spawn avatar ──────────────────────────────────────────────
             Vector3 spawnPos = GetSpawnPosition(i);
             GameObject avatarObj = Instantiate(playerPrefab, spawnPos, Quaternion.identity);
             avatarObj.name = $"Player_{i}_{authName}";
@@ -192,7 +177,6 @@ public class CompleteGameManager : NetworkBehaviour
             }
 
             netObj.SpawnWithOwnership(ownerClientId, true);
-
             ApplyPlayerColor(avatarObj, playerColors[i]);
             SetupPlayerAvatar(i, avatarObj);
         }
@@ -202,7 +186,7 @@ public class CompleteGameManager : NetworkBehaviour
         StartGame();
     }
 
-    // ── Avatar setup ──────────────────────────────────────────────────────────
+    // ── Avatar helpers ────────────────────────────────────────────────────────
 
     private void ApplyPlayerColor(GameObject avatarObj, Color color)
     {
@@ -342,7 +326,6 @@ public class CompleteGameManager : NetworkBehaviour
         dice2HasResult = false; dice2Result = 0;
         if (dice[0] != null) dice[0].ResetDice();
         if (dice[1] != null) dice[1].ResetDice();
-
         Debug.Log($"[Server] Dice ready for Player {currentPlayerIndex} ({players[currentPlayerIndex]?.playerName})");
     }
 
@@ -353,18 +336,11 @@ public class CompleteGameManager : NetworkBehaviour
     }
 
     [ServerRpc(RequireOwnership = false)]
-    private void RequestRollServerRpc()
-    {
-        DoRoll();
-    }
+    private void RequestRollServerRpc() => DoRoll();
 
     private void DoRoll()
     {
-        if (!waitingForDiceRoll)
-        {
-            Debug.LogWarning("[Server] Roll requested but not waiting — ignored.");
-            return;
-        }
+        if (!waitingForDiceRoll) { Debug.LogWarning("[Server] Roll requested but not waiting — ignored."); return; }
         Debug.Log("[Server] Rolling dice...");
         if (dice[0] != null) dice[0].RollDice();
         if (dice[1] != null) dice[1].RollDice();
@@ -536,7 +512,12 @@ public class CompleteGameManager : NetworkBehaviour
                 PropertyCardUI.Instance.OnPurchaseDecision.RemoveAllListeners();
                 PropertyCardUI.Instance.OnPurchaseDecision.AddListener((bought) =>
                 {
-                    if (bought) PropertyManager.Instance?.TryBuyProperty(player, property);
+                    if (bought)
+                    {
+                        PropertyManager.Instance?.TryBuyProperty(player, property);
+                        // ── Cloud save: properties changed ────────────────
+                        _ = CloudSaveManager.Instance?.SavePropertiesOnlyAsync(player);
+                    }
                     EndTurn();
                 });
                 PropertyCardUI.Instance.ShowPropertyCard(player, property, marker);
@@ -583,12 +564,23 @@ public class CompleteGameManager : NetworkBehaviour
     { if (player != null && tile != null) Debug.Log($"📍 {player.playerName} → {tile.tileName}"); }
 
     private void HandlePassGO(PlayerData player)
-    { if (player != null) { player.AddMoney(goBonus); Debug.Log($"💵 {player.playerName} passed GO! +${goBonus}"); } }
+    {
+        if (player == null) return;
+        player.AddMoney(goBonus);
+        Debug.Log($"💵 {player.playerName} passed GO! +${goBonus}");
+    }
 
     private void EndTurn()
     {
         if (currentPlayerIndex >= 0 && currentPlayerIndex < players.Length)
-            players[currentPlayerIndex].currentState = PlayerState.Idle;
+        {
+            PlayerData p = players[currentPlayerIndex];
+            p.currentState = PlayerState.Idle;
+
+            // ── Cloud save: quick-save profile after every turn ───────────
+            _ = CloudSaveManager.Instance?.SaveProfileOnlyAsync(p);
+        }
+
         Debug.Log("✓ Turn ended\n");
         StartCoroutine(NextPlayerTurn());
     }
@@ -603,11 +595,11 @@ public class CompleteGameManager : NetworkBehaviour
     // ── Public API ────────────────────────────────────────────────────────────
 
     public PlayerData[] GetAllPlayers() => players;
+
     public PlayerData GetCurrentPlayer() =>
         (players != null && currentPlayerIndex >= 0 && currentPlayerIndex < players.Length)
         ? players[currentPlayerIndex] : null;
 
-    /// <summary>Returns the PlayerData whose unityPlayerId matches the given id.</summary>
     public PlayerData GetPlayerByUnityId(string unityPlayerId)
     {
         if (players == null) return null;
@@ -634,6 +626,9 @@ public class CompleteGameManager : NetworkBehaviour
         {
             players[winnerId].AddMoney(prizeAmount);
             Debug.Log($"[GameManager] Minigame winner: {players[winnerId].playerName} won {prizeAmount} DT");
+
+            // ── Cloud save: money changed from minigame ───────────────────
+            _ = CloudSaveManager.Instance?.SaveProfileOnlyAsync(players[winnerId]);
         }
         EndTurn();
     }
