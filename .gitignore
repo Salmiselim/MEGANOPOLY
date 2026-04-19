@@ -68,6 +68,7 @@ mono_crash.*
 
 # Builds
 /[Rr]elay[Bb]uilds/
+/Relay_test_BackUpThisFolder_ButDontShipItWithYourGame/
 *.apk
 *.aab
 *.unitypackage
