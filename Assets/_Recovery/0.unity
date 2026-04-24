@@ -2311,9 +2311,6 @@ MonoBehaviour:
   titleText: {fileID: 1332562370}
   descriptionText: {fileID: 2081163560}
   displayDuration: 20
-  followSpeed: 5
-  positionOffset: {x: 0, y: -0.1, z: 1.5}
-  lookAtCamera: 1
 --- !u!114 &658053679
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -5081,9 +5078,6 @@ MonoBehaviour:
   titleText: {fileID: 1332562370}
   descriptionText: {fileID: 2081163560}
   displayDuration: 20
-  followSpeed: 5
-  positionOffset: {x: 1, y: -1, z: 0}
-  lookAtCamera: 1
 --- !u!1 &1992484351
 GameObject:
   m_ObjectHideFlags: 0
@@ -5114,7 +5108,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d5a57f767e5e46a458fc5d3c628d0cbb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Unity.Netcode.Runtime::Unity.Netcode.NetworkObject
-  GlobalObjectIdHash: 1300016869
+  GlobalObjectIdHash: 3816893435
   InScenePlacedSourceGlobalObjectIdHash: 0
   DeferredDespawnTick: 0
   Ownership: 1

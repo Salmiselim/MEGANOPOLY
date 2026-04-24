@@ -117,7 +117,8 @@ namespace XRMultiplayer
                 if (XRINetworkGameManager.Instance.sessionManager.currentSession != null)
                     maxPlayers = XRINetworkGameManager.maxPlayers;
 
-                m_PlayerCountText.text = $"{m_PlayerDictionary.Keys.Count}/{maxPlayers}";
+                if (m_PlayerCountText != null)
+                    m_PlayerCountText.text = $"{m_PlayerDictionary.Keys.Count}/{maxPlayers}";
             }
         }
 
@@ -144,7 +145,8 @@ namespace XRMultiplayer
                     if (XRINetworkGameManager.Instance.sessionManager.currentSession != null)
                         maxPlayers = XRINetworkGameManager.Instance.sessionManager.currentSession.MaxPlayers;
 
-                    m_PlayerCountText.text = $"{m_PlayerDictionary.Keys.Count}/{maxPlayers}";
+                    if (m_PlayerCountText != null)
+                        m_PlayerCountText.text = $"{m_PlayerDictionary.Keys.Count}/{maxPlayers}";
                 }
             }
             else

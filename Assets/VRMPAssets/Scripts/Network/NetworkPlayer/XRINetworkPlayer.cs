@@ -200,7 +200,7 @@ namespace XRMultiplayer
                 {
                     m_VoicePositionCheckTimer += m_VoicePositionUpdateTime;
 
-                    if (Vector3.Distance(m_PrevHeadPos, m_HeadOrigin.position) > m_VoiceUpdatePosotionDelta)
+                    if (m_HeadOrigin != null && Vector3.Distance(m_PrevHeadPos, m_HeadOrigin.position) > m_VoiceUpdatePosotionDelta)
                     {
                         m_PrevHeadPos = m_HeadOrigin.position;
                         if (XRINetworkGameManager.Instance.positionalVoiceChat)

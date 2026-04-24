@@ -1,4 +1,4 @@
-﻿using System.Collections;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Events;
@@ -717,6 +717,11 @@ public class CompleteGameManager : MonoBehaviour
         {
             player.AddMoney(goBonus);
             Debug.Log($"💵 {player.playerName} passed GO! +${goBonus}");
+
+            if (AchievementManager.Instance != null && player.playerId == 0) // Note: Replace specific player ID check if needed later, but local unlock makes sense
+            {
+                AchievementManager.Instance.UnlockAchievement("pass_go");
+            }
         }
     }
 
@@ -798,6 +803,11 @@ public class CompleteGameManager : MonoBehaviour
         {
             players[winnerId].AddMoney(prizeAmount);
             Debug.Log($"[GameManager] Minigame winner: {players[winnerId].playerName} won {prizeAmount} DT");
+
+            if (AchievementManager.Instance != null && winnerId == 0) // Same assumption: logic runs for local player if winnerId == local
+            {
+                AchievementManager.Instance.UnlockAchievement("first_minigame_win");
+            }
         }
 
         // Continue game turn

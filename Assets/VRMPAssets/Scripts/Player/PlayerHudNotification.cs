@@ -21,6 +21,7 @@ namespace XRMultiplayer
         /// The speed at which the toast follows the camera.
         /// </summary>
         [SerializeField] float m_FollowSpeed = 5.0f;
+        [SerializeField] Vector3 m_PositionOffset = new Vector3(0, 0, 1.5f); // 1.5m in front by default
 
         /// <summary>
         /// The amount of time to display the toast.
@@ -95,6 +96,11 @@ namespace XRMultiplayer
         /// </summary>
         public void ShowText(string textToShow, float displayTime = 3.0f)
         {
+            if (m_Text == null || m_LayoutGroupTransform == null || m_CanvasGroup == null)
+            {
+                return;
+            }
+
             m_DisplayTime = displayTime;
             m_Text.text = textToShow;
             m_LayoutGroupTransform.gameObject.SetActive(true);
@@ -105,7 +111,12 @@ namespace XRMultiplayer
         /// <inheritdoc/>
         private void LateUpdate()
         {
-            m_Transform.position = m_Camera.transform.position;
+            if (m_Transform == null || m_Camera == null)
+            {
+                return;
+            }
+
+            m_Transform.position = m_Camera.transform.position + m_Camera.transform.TransformDirection(m_PositionOffset);
 
             Quaternion lookRot = Quaternion.LookRotation(m_Camera.transform.forward);
 
