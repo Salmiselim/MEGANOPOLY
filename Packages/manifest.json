@@ -1,5 +1,6 @@
 {
   "dependencies": {
+    "com.unity.2d.sprite": "1.0.0",
     "com.unity.animation.rigging": "1.4.1",
     "com.unity.burst": "1.8.27",
     "com.unity.feature.development": "1.0.2",

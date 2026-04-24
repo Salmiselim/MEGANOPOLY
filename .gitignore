@@ -103,3 +103,6 @@ InitTestScene*.unity*
 # Claude Code internal worktrees and session data
 .claude/worktrees/
 .claude/
+
+# Unity crash recovery files
+Assets/_Recovery/
