@@ -23,26 +23,6 @@ public class XROwnershipGuard : NetworkBehaviour
     [Tooltip("Drag in the 'Camera Offset' child GameObject. Auto-found if left blank.")]
     [SerializeField] private GameObject cameraOffsetRoot;
 
-    // ── Awake: disable BEFORE Input System touches anything ──────────────────
-
-    private void Awake()
-    {
-        // Find Camera Offset if not assigned
-        if (cameraOffsetRoot == null)
-            cameraOffsetRoot = FindCameraOffset();
-
-        if (cameraOffsetRoot != null)
-        {
-            cameraOffsetRoot.SetActive(false);
-            Debug.Log($"[XROwnershipGuard] Camera Offset disabled on {gameObject.name} (pre-network).");
-        }
-        else
-        {
-            Debug.LogWarning($"[XROwnershipGuard] Could not find Camera Offset on {gameObject.name}. " +
-                             "XR Input may register on non-owner clients.");
-        }
-    }
-
     // ── OnNetworkSpawn: runs after NGO sets IsOwner ───────────────────────────
 
     public override void OnNetworkSpawn()
@@ -52,28 +32,49 @@ public class XROwnershipGuard : NetworkBehaviour
 
         if (cameraOffsetRoot == null)
         {
-            Debug.LogError($"[XROwnershipGuard] OnNetworkSpawn: still no Camera Offset on {gameObject.name}!");
+            Debug.LogError($"[XROwnershipGuard] OnNetworkSpawn: no Camera Offset found on {gameObject.name}!");
             return;
         }
 
-        bool enable = IsOwner;
-        cameraOffsetRoot.SetActive(enable);
-
-        Debug.Log($"[XROwnershipGuard] {gameObject.name} — IsOwner={enable} → Camera Offset {(enable ? "ENABLED" : "DISABLED")}");
-
-        // Also enable/disable the AudioListener so only owner's is active
-        AudioListener al = cameraOffsetRoot.GetComponentInChildren<AudioListener>(true);
-        if (al != null) al.enabled = enable;
-
-        // Tag the owner's camera as MainCamera so Camera.main works
-        if (enable)
+        if (IsOwner)
         {
-            Camera cam = cameraOffsetRoot.GetComponentInChildren<Camera>(true);
-            if (cam != null)
+            // 1. Cleanly disable the old offline XROrigin / Camera instead of destroying it
+            Camera[] allCams = FindObjectsOfType<Camera>();
+            foreach (Camera c in allCams)
             {
-                cam.tag = "MainCamera";
-                Debug.Log($"[XROwnershipGuard] Tagged {cam.name} as MainCamera.");
+                if (c.transform.root != this.transform.root && c.gameObject.scene.name != "DontDestroyOnLoad")
+                {
+                    // Disable the old camera and its root object cleanly
+                    c.enabled = false;
+                    
+                    var oldOrigin = c.transform.root.GetComponentInChildren<XROrigin>(true);
+                    if (oldOrigin != null)
+                    {
+                        oldOrigin.gameObject.SetActive(false);
+                    }
+                    else
+                    {
+                        c.gameObject.SetActive(false);
+                    }
+                }
             }
+
+            // 2. Ensure our camera is tagged correctly
+            Camera myCam = cameraOffsetRoot.GetComponentInChildren<Camera>(true);
+            if (myCam != null)
+            {
+                myCam.tag = "MainCamera";
+            }
+
+            Debug.Log($"[XROwnershipGuard] Local Player spawned. Keeping Camera Rig.");
+        }
+        else
+        {
+            // 3. We DO NOT own this player. Destroy their camera rig physically 
+            // so it cannot act like a camera on our screen.
+            Destroy(cameraOffsetRoot);
+
+            Debug.Log($"[XROwnershipGuard] Remote Player spawned. Destroyed their Camera Rig.");
         }
     }
 

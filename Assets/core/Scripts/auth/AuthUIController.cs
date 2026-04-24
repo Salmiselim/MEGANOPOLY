@@ -44,6 +44,22 @@ public class AuthUIController : MonoBehaviour
         SetLoading(false);
     }
 
+    // ── XR Ray Wrappers ───────────────────────────────────────────────────────
+    // Wire these to XRSimpleInteractable → Select Entered on each button GO.
+    // XR events require public void — async Task cannot be wired in Inspector.
+
+    /// <summary>XR Simple Interactable → Select Entered → Login button</summary>
+    public void LoginButtonPressed() => _ = OnLoginClicked();
+
+    /// <summary>XR Simple Interactable → Select Entered → Register button</summary>
+    public void RegisterButtonPressed() => _ = OnRegisterClicked();
+
+    /// <summary>XR Simple Interactable → Select Entered → Resume button</summary>
+    public void ResumeButtonPressed() => OnResumeClicked();
+
+    /// <summary>XR Simple Interactable → Select Entered → New Game button</summary>
+    public void NewGameButtonPressed() => OnNewGameClicked();
+
     // ── Login ─────────────────────────────────────────────────────────────────
 
     private async Task OnLoginClicked()
@@ -62,7 +78,6 @@ public class AuthUIController : MonoBehaviour
 
         feedbackText.text = "Login successful!";
 
-        // ── Show resume prompt if cloud save exists ───────────────────────
         if (AuthManager.Instance.HasCloudSave && resumePanel != null)
         {
             ShowResumePanel();
@@ -117,14 +132,12 @@ public class AuthUIController : MonoBehaviour
 
     private void OnResumeClicked()
     {
-        // PlayerDataApplier in Board scene will apply the cloud save
         PlayerPrefs.SetInt("ResumeCloudSave", 1);
         LoadNextScene();
     }
 
     private void OnNewGameClicked()
     {
-        // Signal board scene to ignore cloud save and use fresh defaults
         PlayerPrefs.SetInt("ResumeCloudSave", 0);
         if (resumePanel != null) resumePanel.SetActive(false);
         LoadNextScene();

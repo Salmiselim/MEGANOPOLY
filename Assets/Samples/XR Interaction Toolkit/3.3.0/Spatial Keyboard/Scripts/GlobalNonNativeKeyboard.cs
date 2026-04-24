@@ -120,8 +120,39 @@ namespace UnityEngine.XR.Interaction.Toolkit.Samples.SpatialKeyboard
 
             if (m_KeyboardPrefab != null)
             {
-                keyboard = Instantiate(m_KeyboardPrefab, m_PlayerRoot).GetComponent<XRKeyboard>();
-                keyboard.gameObject.SetActive(false);
+                var keyboardObj = Instantiate(m_KeyboardPrefab, m_PlayerRoot);
+                keyboard = keyboardObj.GetComponent<XRKeyboard>();
+                
+                // 1. Force the XR Keyboard Canvas to WorldSpace and attach the Camera.
+                var keyboardCanvas = keyboardObj.GetComponent<Canvas>();
+                if (keyboardCanvas == null) keyboardCanvas = keyboardObj.GetComponentInChildren<Canvas>();
+
+                if (keyboardCanvas != null)
+                {
+                    keyboardCanvas.renderMode = RenderMode.WorldSpace;
+                    keyboardCanvas.worldCamera = m_CameraTransform != null ? m_CameraTransform.GetComponent<Camera>() : Camera.main;
+                }
+                
+                // 2. Restore the original scale of the prefab instead of hardcoding 0.001. 
+                // If the prefab natively uses Vector3.one but acts as a Canvas, we give it a safe 0.002 fallback.
+                Vector3 originalScale = m_KeyboardPrefab.transform.localScale;
+                if (originalScale == Vector3.one && keyboardObj.GetComponent<Canvas>() != null)
+                {
+                     keyboardObj.transform.localScale = new Vector3(0.002f, 0.002f, 0.002f);
+                }
+                else
+                {
+                     keyboardObj.transform.localScale = originalScale;
+                }
+                
+                // 3. Disable the root Image component if it exists so it doesn't block vision.
+                var rootImage = keyboardObj.GetComponent<UnityEngine.UI.Image>();
+                if (rootImage != null)
+                {
+                    rootImage.enabled = false;
+                }
+
+                keyboardObj.SetActive(false);
             }
         }
 
@@ -212,23 +243,45 @@ namespace UnityEngine.XR.Interaction.Toolkit.Samples.SpatialKeyboard
 
         void PositionKeyboard(Transform target)
         {
+            // UPDATE CAMERA REFERENCE: Camera.main can change in a networked game
+            if (target == null && Camera.main != null) 
+                target = Camera.main.transform;
+                
+            if (target == null) return;
+
+            // Force a comfortable VR reading/typing distance if the offset is zero or too far
+            Vector3 offset = m_KeyboardOffset;
+            if (offset == Vector3.zero || offset.z > 1.5f) 
+            {
+                offset = new Vector3(0f, -0.3f, 0.6f); // 0.6m in front, 0.3m down
+            }
+            
             var position = target.position +
-                target.right * m_KeyboardOffset.x +
-                target.forward * m_KeyboardOffset.z +
-                Vector3.up * m_KeyboardOffset.y;
+                target.right * offset.x +
+                target.forward * offset.z +
+                target.up * offset.y; 
+                
             keyboard.transform.position = position;
-            FaceKeyboardAtTarget(m_CameraTransform);
+            FaceKeyboardAtTarget(target);
         }
 
         void FaceKeyboardAtTarget(Transform target)
         {
+            if (target == null) return;
+            
             var forward = (keyboard.transform.position - target.position).normalized;
             BurstMathUtility.OrthogonalLookRotation(forward, Vector3.up, out var newTarget);
-            keyboard.transform.rotation = newTarget;
+            
+            // INVERT the forward vector so the keyboard faces the camera instead of facing away from it
+            keyboard.transform.rotation = newTarget * Quaternion.Euler(0, 180, 0);
         }
 
         bool IsKeyboardOutOfView()
         {
+            // UPDATE CAMERA REFERENCE (network fallback)
+            if (m_CameraTransform == null && Camera.main != null)
+                m_CameraTransform = Camera.main.transform;
+                
             if (m_CameraTransform == null || keyboard == null)
             {
                 Debug.LogWarning("Camera or keyboard reference is null. Unable to determine if keyboard is out of view.", this);
