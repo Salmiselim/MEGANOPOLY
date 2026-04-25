@@ -539,13 +539,38 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: fb41ac4c2674ce847b47aa0b352d2f62, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::SimpleDiceController
+  ShowTopMostFoldoutHeaderGroup: 1
   diceNumber: 1
   throwForce: 100
-  rollKey: 32
   showDebugLogs: 1
   OnDiceRolled:
     m_PersistentCalls:
       m_Calls: []
+--- !u!114 &111085011
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 111084991}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d5a57f767e5e46a458fc5d3c628d0cbb, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Unity.Netcode.Runtime::Unity.Netcode.NetworkObject
+  GlobalObjectIdHash: 3825897981
+  InScenePlacedSourceGlobalObjectIdHash: 0
+  DeferredDespawnTick: 0
+  Ownership: 1
+  AlwaysReplicateAsRoot: 0
+  SynchronizeTransform: 1
+  ActiveSceneSynchronization: 0
+  SceneMigrationSynchronization: 0
+  SpawnWithObservers: 1
+  DontDestroyWithOwner: 0
+  AutoObjectParentSync: 1
+  SyncOwnerTransformWhenParented: 1
+  AllowOwnerToParent: 0
 --- !u!1 &116111558
 GameObject:
   m_ObjectHideFlags: 0
@@ -801,7 +826,7 @@ PrefabInstance:
     - target: {fileID: 6598815579406187037, guid: 18ddb545287c546e19cc77dc9fbb2189,
         type: 3}
       propertyPath: m_IsActive
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -3628,12 +3653,12 @@ PrefabInstance:
     - target: {fileID: -8679921383154817045, guid: 359ea79210494664c96a677c58e72fee,
         type: 3}
       propertyPath: m_LocalPosition.x
-      value: 1
+      value: 1.2162247
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: 359ea79210494664c96a677c58e72fee,
         type: 3}
       propertyPath: m_LocalPosition.y
-      value: 1
+      value: 1.164473
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: 359ea79210494664c96a677c58e72fee,
         type: 3}
@@ -3643,7 +3668,7 @@ PrefabInstance:
     - target: {fileID: -8679921383154817045, guid: 359ea79210494664c96a677c58e72fee,
         type: 3}
       propertyPath: m_LocalRotation.w
-      value: 1
+      value: 0.9999601
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: 359ea79210494664c96a677c58e72fee,
         type: 3}
@@ -3658,7 +3683,7 @@ PrefabInstance:
     - target: {fileID: -8679921383154817045, guid: 359ea79210494664c96a677c58e72fee,
         type: 3}
       propertyPath: m_LocalRotation.z
-      value: -0
+      value: 0.0089328075
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: 359ea79210494664c96a677c58e72fee,
         type: 3}
@@ -3673,7 +3698,7 @@ PrefabInstance:
     - target: {fileID: -8679921383154817045, guid: 359ea79210494664c96a677c58e72fee,
         type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
-      value: 0
+      value: 1.024
       objectReference: {fileID: 0}
     - target: {fileID: -7831507586446391541, guid: 359ea79210494664c96a677c58e72fee,
         type: 3}
@@ -5408,6 +5433,138 @@ MonoBehaviour:
   showTileNumber: 1
   showTileName: 1
   autoRename: 1
+--- !u!1 &667934873
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 667934876}
+  - component: {fileID: 667934874}
+  - component: {fileID: 667934877}
+  - component: {fileID: 667934879}
+  - component: {fileID: 667934878}
+  m_Layer: 0
+  m_Name: NetworkManager
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &667934874
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 667934873}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6960e84d07fb87f47956e7a81d71c4e6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Unity.Netcode.Runtime::Unity.Netcode.Transports.UTP.UnityTransport
+  m_ProtocolType: 0
+  m_UseWebSockets: 0
+  m_UseEncryption: 0
+  m_MaxPacketQueueSize: 128
+  m_MaxPayloadSize: 6144
+  m_HeartbeatTimeoutMS: 500
+  m_ConnectTimeoutMS: 1000
+  m_MaxConnectAttempts: 60
+  m_DisconnectTimeoutMS: 30000
+  ConnectionData:
+    Address: 127.0.0.1
+    Port: 7777
+    ServerListenAddress: 127.0.0.1
+    ClientBindPort: 0
+  DebugSimulator:
+    PacketDelayMS: 0
+    PacketJitterMS: 0
+    PacketDropRate: 0
+--- !u!4 &667934876
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 667934873}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: -7.35889, y: 6.66226, z: 36.46384}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &667934877
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 667934873}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d02e59e8bcc63f4429d390bc6115dae7, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::BasicNetworkHUD
+--- !u!114 &667934878
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 667934873}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 593a2fe42fa9d37498c96f9a383b6521, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Unity.Netcode.Runtime::Unity.Netcode.NetworkManager
+  NetworkManagerExpanded: 0
+  NetworkConfig:
+    ProtocolVersion: 0
+    NetworkTransport: {fileID: 667934874}
+    PlayerPrefab: {fileID: 0}
+    Prefabs:
+      NetworkPrefabsLists:
+      - {fileID: 11400000, guid: 68bb4d54328f3ac4e90fa205408a0ebb, type: 2}
+    TickRate: 30
+    ClientConnectionBufferTimeout: 10
+    ConnectionApproval: 0
+    ConnectionData: 
+    EnableTimeResync: 0
+    TimeResyncInterval: 30
+    EnsureNetworkVariableLengthSafety: 0
+    EnableSceneManagement: 1
+    ForceSamePrefabs: 1
+    RecycleNetworkIds: 1
+    NetworkIdRecycleDelay: 120
+    RpcHashSize: 0
+    LoadSceneTimeOut: 120
+    SpawnTimeout: 10
+    EnableNetworkLogs: 1
+    NetworkTopology: 0
+    UseCMBService: 0
+    AutoSpawnPlayerPrefabClientSide: 1
+    NetworkMessageMetrics: 1
+    NetworkProfilingMetrics: 1
+    OldPrefabList: []
+  RunInBackground: 1
+  LogLevel: 1
+--- !u!114 &667934879
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 667934873}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a6fd89dc549847f4096c58273ff2e979, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Unity.Netcode.Runtime::Unity.Netcode.Transports.SinglePlayer.SinglePlayerTransport
 --- !u!1 &676146282
 GameObject:
   m_ObjectHideFlags: 0
@@ -11294,10 +11451,13 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1853007513}
+  - component: {fileID: 1853007517}
   - component: {fileID: 1853007512}
   - component: {fileID: 1853007514}
   - component: {fileID: 1853007516}
   - component: {fileID: 1853007515}
+  - component: {fileID: 1853007518}
+  - component: {fileID: 1853007519}
   m_Layer: 0
   m_Name: _GameManagers
   m_TagString: Untagged
@@ -11317,7 +11477,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: acbe6291b623f7c4e82daf6b12f7e208, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::GameManager
-  numberOfPlayers: 1
+  ShowTopMostFoldoutHeaderGroup: 1
+  numberOfPlayers: 4
   startingMoney: 1500
   goBonus: 200
   boardManager: {fileID: 390211867}
@@ -11333,16 +11494,16 @@ MonoBehaviour:
   - {fileID: 0}
   - {fileID: 0}
   playerSpacing: 10
-  manualSpawnOffset: {x: -95.5, y: 1.7, z: -41.9}
+  manualSpawnOffset: {x: 0, y: 0, z: 0}
   playerColors:
   - {r: 1, g: 0, b: 0, a: 1}
   - {r: 0, g: 0, b: 1, a: 1}
   - {r: 0, g: 1, b: 0, a: 1}
   - {r: 1, g: 0.92156863, b: 0.015686275, a: 1}
   playerNames:
-  - selim
-  - aymen
-  - oumayma
+  - Player 1
+  - Player 2
+  - Player 3
   - Player 4
   enableDebugCheats: 1
   cheatKey_GiveMonopoly: 282
@@ -11399,6 +11560,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: bcd27aec426f3c141a14531b63d4ef1f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::VRCanvasDiagnostic
+  autoFixCanvases: 1
+  autoAddTrackedRaycaster: 1
+  autoRemoveStandaloneInput: 1
+  runDiagnosticAfterFix: 1
 --- !u!114 &1853007516
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -11411,6 +11576,57 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 84aea3cffbd7475428e4a8db5dbbc493, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::VRCameraProvider
+--- !u!114 &1853007517
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1853007511}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d5a57f767e5e46a458fc5d3c628d0cbb, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Unity.Netcode.Runtime::Unity.Netcode.NetworkObject
+  GlobalObjectIdHash: 613864966
+  InScenePlacedSourceGlobalObjectIdHash: 0
+  DeferredDespawnTick: 0
+  Ownership: 1
+  AlwaysReplicateAsRoot: 0
+  SynchronizeTransform: 1
+  ActiveSceneSynchronization: 0
+  SceneMigrationSynchronization: 0
+  SpawnWithObservers: 1
+  DontDestroyWithOwner: 0
+  AutoObjectParentSync: 1
+  SyncOwnerTransformWhenParented: 1
+  AllowOwnerToParent: 0
+--- !u!114 &1853007518
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1853007511}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d4a53dd774ff55e49897ccc91c8b3bd8, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::NetworkBootstrapper
+  minPlayersToStart: 2
+  autoStartAt: 4
+--- !u!114 &1853007519
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1853007511}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 637f6207d877c31438bbdc400c11ce5a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::PlayerDataApplier
 --- !u!1 &1880529407
 GameObject:
   m_ObjectHideFlags: 0
@@ -13052,6 +13268,10 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 363815424715659034, guid: 2f192de3dbf358c4cb49e75758c96917,
         type: 3}
       insertIndex: -1
+      addedObject: {fileID: 7266616075930270882}
+    - targetCorrespondingSourceObject: {fileID: 363815424715659034, guid: 2f192de3dbf358c4cb49e75758c96917,
+        type: 3}
+      insertIndex: -1
       addedObject: {fileID: 7266616075930270876}
   m_SourcePrefab: {fileID: 100100000, guid: 2f192de3dbf358c4cb49e75758c96917, type: 3}
 --- !u!1 &4370663759207920665 stripped
@@ -13093,13 +13313,38 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: fb41ac4c2674ce847b47aa0b352d2f62, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::SimpleDiceController
+  ShowTopMostFoldoutHeaderGroup: 1
   diceNumber: 2
   throwForce: 100
-  rollKey: 32
   showDebugLogs: 1
   OnDiceRolled:
     m_PersistentCalls:
       m_Calls: []
+--- !u!114 &7266616075930270882
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4370663759207920665}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d5a57f767e5e46a458fc5d3c628d0cbb, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Unity.Netcode.Runtime::Unity.Netcode.NetworkObject
+  GlobalObjectIdHash: 3775608545
+  InScenePlacedSourceGlobalObjectIdHash: 0
+  DeferredDespawnTick: 0
+  Ownership: 1
+  AlwaysReplicateAsRoot: 0
+  SynchronizeTransform: 1
+  ActiveSceneSynchronization: 0
+  SceneMigrationSynchronization: 0
+  SpawnWithObservers: 1
+  DontDestroyWithOwner: 0
+  AutoObjectParentSync: 1
+  SyncOwnerTransformWhenParented: 1
+  AllowOwnerToParent: 0
 --- !u!1001 &8577103386519858908
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -13205,6 +13450,10 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 858268456299599850, guid: d568354e0043b9b4884cbf315b603ce9,
         type: 3}
       insertIndex: -1
+      addedObject: {fileID: 111085011}
+    - targetCorrespondingSourceObject: {fileID: 858268456299599850, guid: d568354e0043b9b4884cbf315b603ce9,
+        type: 3}
+      insertIndex: -1
       addedObject: {fileID: 111085005}
   m_SourcePrefab: {fileID: 100100000, guid: d568354e0043b9b4884cbf315b603ce9, type: 3}
 --- !u!1660057539 &9223372036854775807
@@ -13231,3 +13480,4 @@ SceneRoots:
   - {fileID: 1620854070}
   - {fileID: 1458161039}
   - {fileID: 1816166348}
+  - {fileID: 667934876}

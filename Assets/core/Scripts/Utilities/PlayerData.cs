@@ -8,6 +8,7 @@ using UnityEngine;
 public class PlayerData
 {
     [Header("Identity")]
+    public string unityPlayerId;
     public int playerId;               // Unique ID (0-3)
     public string playerName;          // Display name
     public Color playerColor;          // Visual color theme
