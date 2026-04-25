@@ -116,7 +116,17 @@ public class VivoxVoiceManager : MonoBehaviour
             // 2. Sign in anonymously (Vivox requires a valid UGS auth token)
             if (!AuthenticationService.Instance.IsSignedIn)
             {
-                await AuthenticationService.Instance.SignInAnonymouslyAsync();
+                try
+                {
+                    await AuthenticationService.Instance.SignInAnonymouslyAsync();
+                }
+                catch (AuthenticationException ex) when (ex.Message.Contains("already signing in") || ex.ErrorCode == 10002)
+                {
+                    // Another script is mid sign-in — wait for it to finish
+                    Debug.Log("[Vivox] Sign-in already in progress by another script, waiting...");
+                    while (!AuthenticationService.Instance.IsSignedIn)
+                        await Task.Delay(50);
+                }
                 Debug.Log($"[Vivox] Signed in. Player ID: {AuthenticationService.Instance.PlayerId}");
             }
 
@@ -145,7 +155,7 @@ public class VivoxVoiceManager : MonoBehaviour
 
         try
         {
-            await VivoxService.Instance.JoinGroupChannelAsync(channelName, ChatCapability.AudioOnly);
+            await VivoxService.Instance.JoinGroupChannelAsync(channelName.Trim(), ChatCapability.AudioOnly);
             _isInChannel = true;
             Debug.Log($"[Vivox] Joined channel: {channelName}");
 
