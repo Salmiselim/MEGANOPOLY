@@ -27,6 +27,9 @@ namespace RockPaperScissors
         [Header("Match Settings")]
         [SerializeField] private int totalRounds = 3;
 
+        [Header("Hand Gesture Input")]
+        [SerializeField] private HandGestureInputBridge handGestureBridge;
+
         public enum Choice
         {
             None = -1,
@@ -101,6 +104,12 @@ namespace RockPaperScissors
                 if (!_winsByClientId.ContainsKey(clientId))
                     _winsByClientId[clientId] = 0;
             }
+        }
+
+        /// <summary>Called by HandGestureInputBridge when player holds a hand gesture.</summary>
+        public void SubmitChoiceFromHand(Choice myChoice)
+        {
+            OnChoiceSelected(myChoice);
         }
 
         private void OnChoiceSelected(Choice myChoice)
@@ -260,6 +269,8 @@ namespace RockPaperScissors
         {
             ResetUI();
             SetButtonsInteractable(true);
+            if (handGestureBridge != null)
+                handGestureBridge.OnRoundReset();
         }
 
         [ClientRpc]

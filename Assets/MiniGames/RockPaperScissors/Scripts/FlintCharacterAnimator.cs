@@ -9,10 +9,11 @@ namespace RockPaperScissors
     ///
     /// SETUP:
     /// 1. Attach this script to the Flint character GameObject in the RPS scene
-    /// 2. Assign the Animator, HandShapeDetector, and the player Transform in the Inspector
-    /// 3. In the Animator Controller make sure these Int parameters exist:
-    ///      "State"   → 0=Idle, 1=Walk  (Base Layer)
-    ///      "Gesture" → 0=None, 1=Rock, 2=Paper, 3=Scissors  (Hand Layer)
+    /// 2. Assign the Animator and HandShapeDetector in the Inspector
+    /// 3. Player Root = assign the XR Origin GameObject (NOT the Camera/Head)
+    /// 4. In the Animator Controller add these Int parameters:
+    ///      "State"   → 0=Idle, 1=Walk
+    ///      "Gesture" → 0=None, 1=Rock, 2=Paper, 3=Scissors
     /// </summary>
     public class FlintCharacterAnimator : MonoBehaviour
     {
@@ -20,41 +21,55 @@ namespace RockPaperScissors
         [Tooltip("The Animator on the Flint character")]
         [SerializeField] private Animator animator;
 
-        [Tooltip("The HandShapeDetector in the scene (on the GameManager or XR Rig)")]
+        [Tooltip("The HandShapeDetector in the scene")]
         [SerializeField] private HandShapeDetector handDetector;
 
-        [Tooltip("The player Transform — used to detect if player is walking")]
-        [SerializeField] private Transform playerTransform;
+        [Tooltip("XR Origin root GameObject — NOT the Camera or Head. " +
+                 "This only moves when the player physically walks, not when they look around.")]
+        [SerializeField] private Transform playerRoot;
 
         [Header("Walk Settings")]
-        [Tooltip("Minimum speed before switching to Walk animation")]
+        [Tooltip("Minimum speed (m/s) before switching to Walk animation")]
         [SerializeField] private float walkThreshold = 0.05f;
 
-        // ── Animator parameter names ──────────────────────────────────────────
+        // ── Animator parameter hashes ─────────────────────────────────────────
         private static readonly int ParamState   = Animator.StringToHash("State");
         private static readonly int ParamGesture = Animator.StringToHash("Gesture");
 
-        // ── State ─────────────────────────────────────────────────────────────
-        private Vector3 _lastPosition;
-
-        // ── Gesture int values ────────────────────────────────────────────────
+        // ── State values ──────────────────────────────────────────────────────
+        private const int STATE_IDLE      = 0;
+        private const int STATE_WALK      = 1;
         private const int GESTURE_NONE     = 0;
         private const int GESTURE_ROCK     = 1;
         private const int GESTURE_PAPER    = 2;
         private const int GESTURE_SCISSORS = 3;
 
-        // ── State int values ──────────────────────────────────────────────────
-        private const int STATE_IDLE = 0;
-        private const int STATE_WALK = 1;
+        // ── Runtime ───────────────────────────────────────────────────────────
+        private Vector3 _lastRootPosition;
+        private bool _hasStateParam;
+        private bool _hasGestureParam;
+        private int _lastGesture = -1;
 
         // ─────────────────────────────────────────────────────────────────────
         private void Start()
         {
-            if (playerTransform != null)
-                _lastPosition = playerTransform.position;
-
             if (animator == null)
                 animator = GetComponent<Animator>();
+
+            // Check which parameters actually exist in the Animator Controller
+            // so we don't spam errors every frame if they're missing
+            _hasStateParam   = HasAnimatorParam("State");
+            _hasGestureParam = HasAnimatorParam("Gesture");
+
+            if (!_hasStateParam)
+                Debug.LogWarning("[FlintAnimator] Animator Controller is missing 'State' Int parameter. " +
+                                 "Add it in the Animator window.");
+            if (!_hasGestureParam)
+                Debug.LogWarning("[FlintAnimator] Animator Controller is missing 'Gesture' Int parameter. " +
+                                 "Add it in the Animator window (Hand Layer).");
+
+            if (playerRoot != null)
+                _lastRootPosition = playerRoot.position;
         }
 
         private void Update()
@@ -63,30 +78,33 @@ namespace RockPaperScissors
             UpdateGestureState();
         }
 
-        // ── Movement (Base Layer) ─────────────────────────────────────────────
+        // ── Movement — uses XR Origin root so head rotation doesn't trigger walk ──
 
         private void UpdateMovementState()
         {
-            if (playerTransform == null || animator == null) return;
+            if (!_hasStateParam || animator == null || playerRoot == null) return;
 
-            float speed = Vector3.Distance(playerTransform.position, _lastPosition) / Time.deltaTime;
-            _lastPosition = playerTransform.position;
+            // Only use X and Z — ignore Y so crouching/jumping doesn't trigger walk
+            Vector3 currentXZ = new Vector3(playerRoot.position.x, 0f, playerRoot.position.z);
+            Vector3 lastXZ    = new Vector3(_lastRootPosition.x,   0f, _lastRootPosition.z);
+
+            float speed = Vector3.Distance(currentXZ, lastXZ) / Time.deltaTime;
+            _lastRootPosition = playerRoot.position;
 
             int state = speed > walkThreshold ? STATE_WALK : STATE_IDLE;
             animator.SetInteger(ParamState, state);
         }
 
-        // ── Gesture (Hand Layer) ──────────────────────────────────────────────
+        // ── Gesture — mirrors real-time hand shape onto character ─────────────
 
         private void UpdateGestureState()
         {
-            if (animator == null) return;
+            if (!_hasGestureParam || animator == null) return;
 
             int gesture = GESTURE_NONE;
 
             if (handDetector != null)
             {
-                // Use right hand gesture — change to LeftHandShape if needed
                 switch (handDetector.RightHandShape)
                 {
                     case HandShapeDetector.HandShape.Rock:     gesture = GESTURE_ROCK;     break;
@@ -96,45 +114,43 @@ namespace RockPaperScissors
                 }
             }
 
-            animator.SetInteger(ParamGesture, gesture);
-
-            // Debug log when gesture changes
-            int current = animator.GetInteger(ParamGesture);
-            if (current != gesture)
-                Debug.Log($"[FlintAnimator] Gesture changed to: {gesture}");
+            // Only set when changed — avoids unnecessary Animator calls every frame
+            if (gesture != _lastGesture)
+            {
+                animator.SetInteger(ParamGesture, gesture);
+                _lastGesture = gesture;
+                Debug.Log($"[FlintAnimator] Gesture → {gesture} ({(HandShapeDetector.HandShape)(gesture == 0 ? 0 : gesture)})");
+            }
         }
 
-        // ── Public API (called by buttons / game manager) ─────────────────────
+        // ── Public API ────────────────────────────────────────────────────────
 
-        /// <summary>Force a specific gesture — used when player picks Rock/Paper/Scissors via button.</summary>
+        /// <summary>Force a specific gesture (0=None 1=Rock 2=Paper 3=Scissors).
+        /// Called by HandGestureInputBridge.</summary>
         public void SetGesture(int gestureId)
         {
-            if (animator != null)
-                animator.SetInteger(ParamGesture, gestureId);
+            if (!_hasGestureParam || animator == null) return;
+            if (gestureId == _lastGesture) return;
+            animator.SetInteger(ParamGesture, gestureId);
+            _lastGesture = gestureId;
         }
 
-        /// <summary>Trigger Victory animation on the Base Layer.</summary>
-        public void PlayVictory()
-        {
-            if (animator != null)
-                animator.SetInteger(ParamState, 2);  // 2 = Victory
-        }
-
-        /// <summary>Trigger Defeated animation on the Base Layer.</summary>
-        public void PlayDefeated()
-        {
-            if (animator != null)
-                animator.SetInteger(ParamState, 3);  // 3 = Defeated
-        }
-
-        /// <summary>Return to Idle.</summary>
+        public void PlayVictory()  { if (_hasStateParam && animator) animator.SetInteger(ParamState, 2); }
+        public void PlayDefeated() { if (_hasStateParam && animator) animator.SetInteger(ParamState, 3); }
         public void PlayIdle()
         {
-            if (animator != null)
-            {
-                animator.SetInteger(ParamState, STATE_IDLE);
-                animator.SetInteger(ParamGesture, GESTURE_NONE);
-            }
+            if (_hasStateParam   && animator) animator.SetInteger(ParamState,   STATE_IDLE);
+            if (_hasGestureParam && animator) animator.SetInteger(ParamGesture, GESTURE_NONE);
+        }
+
+        // ── Helpers ───────────────────────────────────────────────────────────
+
+        private bool HasAnimatorParam(string paramName)
+        {
+            if (animator == null) return false;
+            foreach (AnimatorControllerParameter p in animator.parameters)
+                if (p.name == paramName) return true;
+            return false;
         }
     }
 }
