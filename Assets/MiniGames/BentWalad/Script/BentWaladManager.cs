@@ -4,6 +4,7 @@ using TMPro;
 using UnityEngine;
 using System.Collections;
 using Unity.Netcode;
+using UnityEngine.Networking;
 
 public class BentWaladManager : NetworkBehaviour
 {
@@ -25,6 +26,7 @@ public class BentWaladManager : NetworkBehaviour
 
     [Header("Game")]
     public string letters = "abcdefghijklmnopqrstuvwxyz";
+    public string csvURL; 
     public float introDuration = 3f;
 
     private NetworkVariable<char> currentLetter = new NetworkVariable<char>('a');
@@ -38,7 +40,7 @@ public class BentWaladManager : NetworkBehaviour
 
     void Start()
     {
-        LoadData();
+        StartCoroutine(LoadDataCoroutine());
         foreach (var t in introTimerTexts) if (t) t.gameObject.SetActive(false);
         foreach (var p in resultsPanels) if (p) p.SetActive(false);
         for (int i = 0; i < playerBoards.Length; i++) 
@@ -83,12 +85,45 @@ public class BentWaladManager : NetworkBehaviour
         }
     }
 
-    void LoadData()
+    IEnumerator LoadDataCoroutine()
+    {
+        if (!string.IsNullOrEmpty(csvURL))
+        {
+            Debug.Log($"BentWalad: Attempting to fetch CSV from {csvURL}");
+            using (UnityWebRequest webRequest = UnityWebRequest.Get(csvURL))
+            {
+                yield return webRequest.SendWebRequest();
+
+                if (webRequest.result == UnityWebRequest.Result.Success)
+                {
+                    Debug.Log("BentWalad: Successfully loaded CSV from URL.");
+                    ParseCSV(webRequest.downloadHandler.text);
+                    yield break;
+                }
+                else
+                {
+                    Debug.LogWarning($"BentWalad: Failed to load CSV from URL ({webRequest.error}). Falling back to local Resources.");
+                }
+            }
+        }
+
+        LoadLocalData();
+    }
+
+    void LoadLocalData()
     {
         TextAsset csv = Resources.Load<TextAsset>("BentWaladData");
-        if (csv == null) { Debug.LogError("Missing BentWaladData in Resources!"); return; }
+        if (csv == null) 
+        { 
+            Debug.LogError("Missing BentWaladData in Resources!"); 
+            return; 
+        }
+        ParseCSV(csv.text);
+    }
 
-        string[] lines = csv.text.Split(new[] { '\r', '\n' }, System.StringSplitOptions.RemoveEmptyEntries);
+    void ParseCSV(string csvText)
+    {
+        string[] lines = csvText.Split(new[] { '\r', '\n' }, System.StringSplitOptions.RemoveEmptyEntries);
         int entryCount = 0;
         for (int i = 1; i < lines.Length; i++) // Skip header
         {

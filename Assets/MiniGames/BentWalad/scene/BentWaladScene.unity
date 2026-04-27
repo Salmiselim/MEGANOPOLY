@@ -15192,6 +15192,7 @@ MonoBehaviour:
   - {fileID: 810452384}
   - {fileID: 1837619743}
   letters: abcdefghijklmnopqrstuvwxyz
+  csvURL: https://meganopoly-bentwalad.onrender.com/BentWaladData.csv
   introDuration: 3
 --- !u!82 &2107777647
 AudioSource:
