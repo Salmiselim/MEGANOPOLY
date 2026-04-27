@@ -9,7 +9,7 @@ using TMPro;
 public class VRKeyboardSpawner : MonoBehaviour
 {
     [Header("Keyboard Offset (relative to input field)")]
-    [SerializeField] private Vector3 keyboardOffset = new Vector3(0f, -0.35f, 0f);
+    [SerializeField] private Vector3 keyboardOffset = new Vector3(0f, -0.45f, 0f);
 
     [Header("Keyboard Scale")]
     [SerializeField] private float keyboardScale = 1f;
@@ -75,9 +75,14 @@ public class VRKeyboardSpawner : MonoBehaviour
         if (EventSystem.current != null &&
             EventSystem.current.currentSelectedGameObject != null)
         {
-            var field = EventSystem.current.currentSelectedGameObject
-                            .GetComponent<TMP_InputField>();
-            if (field != null) return; // another field was focused — keep keyboard
+            GameObject sel = EventSystem.current.currentSelectedGameObject;
+
+            // A TMP_InputField gained focus — keep keyboard open
+            if (sel.GetComponent<TMP_InputField>() != null) return;
+
+            // A keyboard button was clicked — keep keyboard open
+            // (clicking a Button deselects the field, but we should not close)
+            if (_keyboard != null && sel.transform.IsChildOf(_keyboard.transform)) return;
         }
         _keyboard.gameObject.SetActive(false);
     }
@@ -88,13 +93,8 @@ public class VRKeyboardSpawner : MonoBehaviour
         Vector3 fieldWorldPos = field.transform.position;
         _keyboard.transform.position = fieldWorldPos + keyboardOffset;
 
-        // Face the camera
-        if (Camera.main != null)
-        {
-            Vector3 lookDir = _keyboard.transform.position - Camera.main.transform.position;
-            lookDir.y = 0f;
-            if (lookDir != Vector3.zero)
-                _keyboard.transform.rotation = Quaternion.LookRotation(lookDir);
-        }
+        // Match the input field's rotation so the keyboard is coplanar with the canvas wall
+        // (avoids the keyboard clipping into the wall behind it)
+        _keyboard.transform.rotation = field.transform.rotation;
     }
 }

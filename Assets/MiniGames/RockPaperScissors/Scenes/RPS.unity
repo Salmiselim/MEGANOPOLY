@@ -270,6 +270,7 @@ GameObject:
   - component: {fileID: 157180296}
   - component: {fileID: 157180298}
   - component: {fileID: 157180297}
+  - component: {fileID: 157180299}
   m_Layer: 0
   m_Name: RPS_GameManager
   m_TagString: Untagged
@@ -389,6 +390,20 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::RockPaperScissors.HandShapeDetector
   leftHandText: {fileID: 1147120182}
   rightHandText: {fileID: 230858624}
+--- !u!114 &157180299
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 157180291}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 49f1d973a5204b747bd32f34be3910bf, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::VRKeyboardSpawner
+  keyboardOffset: {x: 0, y: -0.35, z: 0}
+  keyboardScale: 1
 --- !u!1001 &163148847
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -1652,7 +1667,7 @@ MonoBehaviour:
   micStatusText: {fileID: 829626535}
   pushToTalkKey: 1
   useXRButton: 1
-  startMuted: 0
+  startMuted: 1
 --- !u!4 &508190714
 Transform:
   m_ObjectHideFlags: 0
@@ -2626,6 +2641,7 @@ GameObject:
   - component: {fileID: 785115685}
   - component: {fileID: 785115684}
   - component: {fileID: 785115683}
+  - component: {fileID: 785115686}
   m_Layer: 5
   m_Name: JoinCodeInput
   m_TagString: Untagged
@@ -2792,6 +2808,18 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 785115681}
   m_CullTransparentMesh: 1
+--- !u!114 &785115686
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 785115681}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8c336cebf835f734d9aa639bbb60f38c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::XRKeyboardBridge
 --- !u!1 &829626533
 GameObject:
   m_ObjectHideFlags: 0
