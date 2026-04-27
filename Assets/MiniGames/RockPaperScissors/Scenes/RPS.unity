@@ -2096,6 +2096,7 @@ GameObject:
   - component: {fileID: 649291719}
   - component: {fileID: 649291718}
   - component: {fileID: 649291722}
+  - component: {fileID: 649291723}
   m_Layer: 5
   m_Name: RPS_buttons_Canvas
   m_TagString: Untagged
@@ -2173,19 +2174,19 @@ RectTransform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 649291717}
-  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0.27000272}
-  m_LocalScale: {x: 0.0005999999, y: 0.0006, z: 0.0005999999}
+  m_LocalRotation: {x: -0, y: -0.8788244, z: -0, w: 0.47714537}
+  m_LocalPosition: {x: 0, y: 0, z: 0.818}
+  m_LocalScale: {x: 0.0006, y: 0.0006, z: 0.0006}
   m_ConstrainProportionsScale: 1
   m_Children:
   - {fileID: 1530354099}
   - {fileID: 1297000210}
   - {fileID: 775425218}
-  m_Father: {fileID: 1705861046}
+  m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 0, y: 0}
-  m_AnchoredPosition: {x: 0.016008586, y: 0.024}
+  m_AnchoredPosition: {x: 0.23900002, y: 1.094}
   m_SizeDelta: {x: 1205.5, y: 584.25}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &649291722
@@ -2207,6 +2208,33 @@ MonoBehaviour:
     serializedVersion: 2
     m_Bits: 4294967295
   m_RaycastTriggerInteraction: 1
+--- !u!114 &649291723
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 649291717}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1a2d7d89889b4d94fa1f8d6fe49788e8, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Unity.XR.Interaction.Toolkit::UnityEngine.XR.Interaction.Toolkit.UI.LazyFollow
+  m_Target: {fileID: 1705861046}
+  m_TargetOffset: {x: 0, y: 0, z: 0.5}
+  m_FollowInLocalSpace: 0
+  m_ApplyTargetInLocalSpace: 0
+  m_MovementSpeed: 6
+  m_MovementSpeedVariancePercentage: 0.25
+  m_SnapOnEnable: 1
+  m_PositionFollowMode: 1
+  m_MinDistanceAllowed: 0.01
+  m_MaxDistanceAllowed: 0.3
+  m_TimeUntilThresholdReachesMaxDistance: 3
+  m_RotationFollowMode: 1
+  m_MinAngleAllowed: 0.1
+  m_MaxAngleAllowed: 5
+  m_TimeUntilThresholdReachesMaxAngle: 3
 --- !u!1 &663457248
 GameObject:
   m_ObjectHideFlags: 0
@@ -3516,7 +3544,7 @@ PrefabInstance:
     - target: {fileID: 6004791412109405586, guid: db58f4ba5ffb1374a83ce73fdd5675a4,
         type: 3}
       propertyPath: m_LocalPosition.y
-      value: 0
+      value: -0.244
       objectReference: {fileID: 0}
     - target: {fileID: 6004791412109405586, guid: db58f4ba5ffb1374a83ce73fdd5675a4,
         type: 3}
@@ -5009,6 +5037,7 @@ GameObject:
   - component: {fileID: 1494172236}
   - component: {fileID: 1494172235}
   - component: {fileID: 1494172239}
+  - component: {fileID: 1494172240}
   m_Layer: 5
   m_Name: OverlayCanvas
   m_TagString: Untagged
@@ -5086,9 +5115,9 @@ RectTransform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1494172234}
-  m_LocalRotation: {x: -0, y: 0.0025352833, z: -0, w: 0.99999684}
-  m_LocalPosition: {x: 0, y: 0, z: 0.639}
-  m_LocalScale: {x: 0.001, y: 0.001, z: 0.001}
+  m_LocalRotation: {x: -0, y: -0.8776119, z: -0, w: 0.4793719}
+  m_LocalPosition: {x: 0, y: 0, z: 0.818}
+  m_LocalScale: {x: 0.0010000005, y: 0.001, z: 0.0010000005}
   m_ConstrainProportionsScale: 1
   m_Children:
   - {fileID: 319429631}
@@ -5099,11 +5128,11 @@ RectTransform:
   - {fileID: 875985056}
   - {fileID: 300137596}
   - {fileID: 1615331609}
-  m_Father: {fileID: 1705861046}
+  m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0.291, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 0, y: 0}
-  m_AnchoredPosition: {x: -0.021, y: 0.083}
+  m_AnchoredPosition: {x: 0.239, y: 1.094}
   m_SizeDelta: {x: 569.50006, y: 465.25}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1494172239
@@ -5125,6 +5154,33 @@ MonoBehaviour:
     serializedVersion: 2
     m_Bits: 4294967295
   m_RaycastTriggerInteraction: 1
+--- !u!114 &1494172240
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1494172234}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1a2d7d89889b4d94fa1f8d6fe49788e8, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Unity.XR.Interaction.Toolkit::UnityEngine.XR.Interaction.Toolkit.UI.LazyFollow
+  m_Target: {fileID: 1705861046}
+  m_TargetOffset: {x: 0, y: 0, z: 0.5}
+  m_FollowInLocalSpace: 0
+  m_ApplyTargetInLocalSpace: 0
+  m_MovementSpeed: 6
+  m_MovementSpeedVariancePercentage: 0.25
+  m_SnapOnEnable: 1
+  m_PositionFollowMode: 1
+  m_MinDistanceAllowed: 0.01
+  m_MaxDistanceAllowed: 0.3
+  m_TimeUntilThresholdReachesMaxDistance: 3
+  m_RotationFollowMode: 1
+  m_MinAngleAllowed: 0.1
+  m_MaxAngleAllowed: 5
+  m_TimeUntilThresholdReachesMaxAngle: 3
 --- !u!1 &1497026208
 GameObject:
   m_ObjectHideFlags: 0
@@ -6107,14 +6163,6 @@ PrefabInstance:
         type: 3}
       insertIndex: -1
       addedObject: {fileID: 163148848}
-    - targetCorrespondingSourceObject: {fileID: 657184242118504721, guid: d6878e1999eb4b44a9f5a263af86c185,
-        type: 3}
-      insertIndex: -1
-      addedObject: {fileID: 1494172238}
-    - targetCorrespondingSourceObject: {fileID: 657184242118504721, guid: d6878e1999eb4b44a9f5a263af86c185,
-        type: 3}
-      insertIndex: -1
-      addedObject: {fileID: 649291721}
     m_AddedComponents:
     - targetCorrespondingSourceObject: {fileID: 2218496723442559054, guid: d6878e1999eb4b44a9f5a263af86c185,
         type: 3}
@@ -6936,6 +6984,8 @@ SceneRoots:
   - {fileID: 690874236}
   - {fileID: 157180293}
   - {fileID: 613021367}
+  - {fileID: 1494172238}
+  - {fileID: 649291721}
   - {fileID: 1497026209}
   - {fileID: 1141935033}
   - {fileID: 380252118}
