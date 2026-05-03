@@ -419,12 +419,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7262177ac927ac145b41ca612b208c37, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::RockPaperScissors.RPSSoundManager
-  matchWinClip: {fileID: 0}
-  matchDefeatClip: {fileID: 0}
-  matchTieClip: {fileID: 0}
-  roundWinClip: {fileID: 0}
+  matchWinClip: {fileID: 8300000, guid: 7620a3f0460938549b0ddd55eb115b3d, type: 3}
+  matchDefeatClip: {fileID: 8300000, guid: e76a9ecf85894f448bf5b9d850dc0ed3, type: 3}
+  matchTieClip: {fileID: 8300000, guid: 0558eacf3661c604ea51bd0b302116d0, type: 3}
+  roundWinClip: {fileID: 8300000, guid: 645b19d8813635d44adbbfdb225aee6f, type: 3}
   roundLoseClip: {fileID: 8300000, guid: b8c4029f28d64354e9a27b8a4ee12fd5, type: 3}
-  roundTieClip: {fileID: 0}
+  roundTieClip: {fileID: 8300000, guid: 5349cceed176bc04598431cc6ca43d9b, type: 3}
   holdTickClip: {fileID: 0}
   gestureConfirmClip: {fileID: 0}
   roundVolume: 0.7
