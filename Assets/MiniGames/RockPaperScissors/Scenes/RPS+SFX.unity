@@ -271,6 +271,8 @@ GameObject:
   - component: {fileID: 157180298}
   - component: {fileID: 157180297}
   - component: {fileID: 157180299}
+  - component: {fileID: 157180301}
+  - component: {fileID: 157180300}
   m_Layer: 0
   m_Name: RPS_GameManager
   m_TagString: Untagged
@@ -305,7 +307,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d5a57f767e5e46a458fc5d3c628d0cbb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Unity.Netcode.Runtime::Unity.Netcode.NetworkObject
-  GlobalObjectIdHash: 2348296596
+  GlobalObjectIdHash: 945300902
   InScenePlacedSourceGlobalObjectIdHash: 0
   DeferredDespawnTick: 0
   Ownership: 1
@@ -342,6 +344,7 @@ MonoBehaviour:
   backgroundVideo: {fileID: 1141935035}
   totalRounds: 3
   handGestureBridge: {fileID: 157180297}
+  soundManager: {fileID: 157180300}
 --- !u!114 &157180296
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -404,6 +407,126 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::VRKeyboardSpawner
   keyboardOffset: {x: 0, y: -0.35, z: 0}
   keyboardScale: 1
+--- !u!114 &157180300
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 157180291}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7262177ac927ac145b41ca612b208c37, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::RockPaperScissors.RPSSoundManager
+  matchWinClip: {fileID: 0}
+  matchDefeatClip: {fileID: 0}
+  matchTieClip: {fileID: 0}
+  roundWinClip: {fileID: 0}
+  roundLoseClip: {fileID: 8300000, guid: b8c4029f28d64354e9a27b8a4ee12fd5, type: 3}
+  roundTieClip: {fileID: 0}
+  holdTickClip: {fileID: 0}
+  gestureConfirmClip: {fileID: 0}
+  roundVolume: 0.7
+  matchVolume: 1
+  uiVolume: 0.5
+--- !u!82 &157180301
+AudioSource:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 157180291}
+  m_Enabled: 1
+  serializedVersion: 4
+  OutputAudioMixerGroup: {fileID: 0}
+  m_audioClip: {fileID: 0}
+  m_Resource: {fileID: 0}
+  m_PlayOnAwake: 0
+  m_Volume: 1
+  m_Pitch: 1
+  Loop: 0
+  Mute: 0
+  Spatialize: 0
+  SpatializePostEffects: 0
+  Priority: 128
+  DopplerLevel: 1
+  MinDistance: 1
+  MaxDistance: 500
+  Pan2D: 0
+  rolloffMode: 0
+  BypassEffects: 0
+  BypassListenerEffects: 0
+  BypassReverbZones: 0
+  rolloffCustomCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 1
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    - serializedVersion: 3
+      time: 1
+      value: 0
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  panLevelCustomCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 0
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  spreadCustomCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 0
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  reverbZoneMixCustomCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 1
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
 --- !u!1001 &163148847
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -1700,7 +1823,7 @@ PrefabInstance:
     - target: {fileID: 8135023674665499069, guid: 58d0a4ac86f2348deb02f3880c71378e,
         type: 3}
       propertyPath: m_IsActive
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 8518324294302271954, guid: 58d0a4ac86f2348deb02f3880c71378e,
         type: 3}
@@ -2377,7 +2500,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!114 &690874234
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -5608,22 +5731,22 @@ PrefabInstance:
     - target: {fileID: 5776210204937225324, guid: be0c86f67bf3f46659373b3776d9ecbb,
         type: 3}
       propertyPath: m_AnchorMax.y
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 5776210204937225324, guid: be0c86f67bf3f46659373b3776d9ecbb,
         type: 3}
       propertyPath: m_AnchorMin.y
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 5776210204937225324, guid: be0c86f67bf3f46659373b3776d9ecbb,
         type: 3}
       propertyPath: m_AnchoredPosition.x
-      value: 200
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 5776210204937225324, guid: be0c86f67bf3f46659373b3776d9ecbb,
         type: 3}
       propertyPath: m_AnchoredPosition.y
-      value: -720
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 8640641445779114434, guid: be0c86f67bf3f46659373b3776d9ecbb,
         type: 3}
@@ -5633,7 +5756,7 @@ PrefabInstance:
     - target: {fileID: 8640641445779114434, guid: be0c86f67bf3f46659373b3776d9ecbb,
         type: 3}
       propertyPath: m_IsActive
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []

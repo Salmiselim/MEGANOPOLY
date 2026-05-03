@@ -30,6 +30,9 @@ namespace RockPaperScissors
         [Header("Hand Gesture Input")]
         [SerializeField] private HandGestureInputBridge handGestureBridge;
 
+        [Header("Sound")]
+        [SerializeField] private RPSSoundManager soundManager;
+
         public enum Choice
         {
             None = -1,
@@ -234,16 +237,19 @@ namespace RockPaperScissors
                 {
                     resultText.text = header + "It's a TIE!";
                     resultText.color = Color.yellow;
+                    if (!matchOver) soundManager?.PlayRoundResult(false, true);
                 }
                 else if (winnerId == myId)
                 {
                     resultText.text = header + "YOU WIN!";
                     resultText.color = Color.green;
+                    if (!matchOver) soundManager?.PlayRoundResult(true, false);
                 }
                 else
                 {
                     resultText.text = header + "OPPONENT WINS!";
                     resultText.color = Color.red;
+                    if (!matchOver) soundManager?.PlayRoundResult(false, false);
                 }
 
                 if (matchOver)
@@ -291,16 +297,19 @@ namespace RockPaperScissors
                 {
                     resultText.text = $"FINAL: {myWins} - {oppWins}\nIT'S A TIE!";
                     resultText.color = Color.yellow;
+                    soundManager?.PlayMatchResult(false, true);
                 }
                 else if (myWins > oppWins)
                 {
                     resultText.text = $"FINAL: {myWins} - {oppWins}\nYOU WIN THE MATCH!";
                     resultText.color = Color.green;
+                    soundManager?.PlayMatchResult(true, false);
                 }
                 else
                 {
                     resultText.text = $"FINAL: {myWins} - {oppWins}\nYOU LOSE THE MATCH!";
                     resultText.color = Color.red;
+                    soundManager?.PlayMatchResult(false, false);
                 }
             }
         }
