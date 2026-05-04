@@ -1,13 +1,9 @@
-using UnityEngine;
-using UnityEngine.Events;
+﻿using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.XR.Interaction.Toolkit.UI;
+using Unity.Netcode;
 
-/// <summary>
-/// Shown when a player lands on a Railroad/Station tile.
-/// Receives only primitive/string data � no Assembly-CSharp types.
-/// </summary>
-public class TrainMenuUI : MonoBehaviour
+public class TrainMenuUI : NetworkBehaviour
 {
     public static TrainMenuUI Instance { get; private set; }
 
@@ -27,166 +23,222 @@ public class TrainMenuUI : MonoBehaviour
 
     [Header("Display Settings")]
     [SerializeField] private float distanceFromPlayer = 1.5f;
-    [SerializeField] private float heightAbovePlayer  = 1.2f;
-    [SerializeField] private float canvasWorldScale   = 0.002f;
+    [SerializeField] private float heightAbovePlayer = 1.2f;
+    [SerializeField] private float canvasWorldScale = 0.002f;
 
-    private string  _fromName;
-    private string  _toName;
-    private int     _fare;
-    private int     _playerMoney;
-    private Vector3 _playerPosition;
-    private bool  _isShowing;
-  private Canvas  _canvas;
+    // Cached for ServerRpc
+    private int _playerIndex;
+    private int _fromTileIndex;
+    private int _toTileIndex;
+    private int _fare;
+    private int _playerMoney;
+    private bool _isShowing;
 
-    /// <summary>true = took train, false = passed</summary>
-    public UnityEvent<bool> OnDecision = new UnityEvent<bool>();
+    private Canvas _canvas;
+
+    // ── Lifecycle ─────────────────────────────────────────────────────────────
 
     private void Awake()
     {
-    if (Instance == null) Instance = this;
+        if (Instance == null) Instance = this;
         else { Destroy(gameObject); return; }
 
-      _canvas = GetComponent<Canvas>();
+        _canvas = GetComponent<Canvas>();
         if (_canvas != null) _canvas.renderMode = RenderMode.WorldSpace;
 
-        GraphicRaycaster old = GetComponent<GraphicRaycaster>();
-    if (old != null) DestroyImmediate(old);
-  if (GetComponent<TrackedDeviceGraphicRaycaster>() == null)
-   gameObject.AddComponent<TrackedDeviceGraphicRaycaster>();
+        var old = GetComponent<GraphicRaycaster>();
+        if (old != null) DestroyImmediate(old);
+        if (GetComponent<TrackedDeviceGraphicRaycaster>() == null)
+            gameObject.AddComponent<TrackedDeviceGraphicRaycaster>();
 
-    transform.localScale = Vector3.one * canvasWorldScale;
+        transform.localScale = Vector3.one * canvasWorldScale;
 
         if (menuPanel != null) menuPanel.SetActive(false);
-  if (takeTrain  != null) takeTrain.onClick.AddListener(OnTakeTrainClicked);
+        if (takeTrain != null) takeTrain.onClick.AddListener(OnTakeTrainClicked);
         if (passButton != null) passButton.onClick.AddListener(OnPassClicked);
-  EnsureImage(takeTrain);
-EnsureImage(passButton);
+
+        EnsureImg(takeTrain);
+        EnsureImg(passButton);
     }
 
-    private void Start()
-    {
-        if (_canvas != null && Camera.main != null)
-  _canvas.worldCamera = Camera.main;
-    }
+    private void Start() => TryAssignCamera();
 
     private void Update()
     {
-        if (_canvas != null && _canvas.worldCamera == null && Camera.main != null)
-      _canvas.worldCamera = Camera.main;
-
+        if (_canvas != null && _canvas.worldCamera == null) TryAssignCamera();
         if (!_isShowing) return;
-        FaceCamera();
-
-      if (Input.GetKeyDown(KeyCode.T)) OnTakeTrainClicked();
-   if (Input.GetKeyDown(KeyCode.P) || Input.GetKeyDown(KeyCode.Escape)) OnPassClicked();
+        if (Input.GetKeyDown(KeyCode.T)) OnTakeTrainClicked();
+        if (Input.GetKeyDown(KeyCode.P) || Input.GetKeyDown(KeyCode.Escape)) OnPassClicked();
+        PositionCanvas();
     }
 
-    // ?? Public API � only primitives, no Assembly-CSharp types ??????????????
-
-    public void ShowTrainMenu(string fromName, string toName, int fare,
-          int playerMoney, Vector3 playerWorldPos)
+    private void TryAssignCamera()
     {
-        _fromName       = fromName;
-   _toName         = toName;
-        _fare           = fare;
-        _playerMoney    = playerMoney;
-        _playerPosition = playerWorldPos;
-      _isShowing      = true;
+        if (_canvas == null) return;
+        Camera cam = VRCameraProvider.Camera;
+        if (cam != null) _canvas.worldCamera = cam;
+    }
 
-        if (_canvas != null && Camera.main != null)
-         _canvas.worldCamera = Camera.main;
+    // ── SERVER entry point ────────────────────────────────────────────────────
 
+    public void ShowTrainMenu(PlayerData player, TileData fromStation, TileData destTile, int fare)
+    {
+        if (!IsServer) return;
+        if (player == null || fromStation == null || destTile == null) return;
+
+        ulong target = ClientIdForPlayer(player.playerId);
+
+        ShowTrainMenuClientRpc(
+            player.playerId,
+            fromStation.tileIndex,
+            destTile.tileIndex,
+            fromStation.tileName,
+            destTile.tileName,
+            fare,
+            player.money,
+            new ClientRpcParams
+            {
+                Send = new ClientRpcSendParams { TargetClientIds = new[] { target } }
+            });
+    }
+
+    // ── CLIENT receive ────────────────────────────────────────────────────────
+
+    [ClientRpc]
+    private void ShowTrainMenuClientRpc(int playerIndex, int fromTileIndex, int toTileIndex,
+        string fromName, string toName, int fare, int playerMoney,
+        ClientRpcParams rpcParams = default)
+    {
+        _playerIndex = playerIndex;
+        _fromTileIndex = fromTileIndex;
+        _toTileIndex = toTileIndex;
+        _fare = fare;
+        _playerMoney = playerMoney;
+        _isShowing = true;
+
+        if (titleText != null) titleText.text = "TRAIN STATION";
+        if (fromText != null) fromText.text = $"From: {fromName}";
+        if (toText != null) toText.text = $"To:   {toName}";
+        if (fareText != null) fareText.text = $"Ticket: {fare} DT";
+        if (balanceText != null) balanceText.text = $"Balance: {playerMoney} DT";
+
+        if (takeTrain != null)
+        {
+            bool canAfford = playerMoney >= fare;
+            takeTrain.interactable = canAfford;
+            var lbl = takeTrain.GetComponentInChildren<Text>();
+            if (lbl != null) lbl.text = canAfford ? $"Take Train  ({fare} DT)" : "Can't Afford";
+        }
+        if (passButton != null)
+        {
+            var lbl = passButton.GetComponentInChildren<Text>();
+            if (lbl != null) lbl.text = "Pass (Stay)";
+        }
+
+        TryAssignCamera();
         PositionCanvas();
-        UpdateTexts();
         if (menuPanel != null) menuPanel.SetActive(true);
+        Debug.Log($"[TrainMenuUI] {fromName} → {toName}  fare={fare} DT");
+    }
 
-        Debug.Log($"[TrainMenuUI] {fromName} ? {toName}  fare={fare} DT");
+    // ── Buttons → ServerRpc ───────────────────────────────────────────────────
+
+    private void OnTakeTrainClicked()
+    {
+        if (!_isShowing) return;
+        CloseLocal();
+        TrainDecisionServerRpc(_playerIndex, _fromTileIndex, _toTileIndex, _fare, true);
+    }
+
+    private void OnPassClicked()
+    {
+        if (!_isShowing) return;
+        CloseLocal();
+        TrainDecisionServerRpc(_playerIndex, _fromTileIndex, _toTileIndex, _fare, false);
+    }
+
+    [Rpc(SendTo.Server, InvokePermission = RpcInvokePermission.Everyone)]
+    private void TrainDecisionServerRpc(int playerIndex, int fromTile, int toTile, int fare, bool tookTrain)
+    {
+        PlayerData[] all = CompleteGameManager.Instance?.GetAllPlayers();
+        if (all == null || playerIndex < 0 || playerIndex >= all.Length)
+        {
+            CompleteGameManager.Instance?.OnTrainMenuClosed(playerIndex, fromTile, toTile, false, fare);
+            return;
+        }
+
+        PlayerData rider = all[playerIndex];
+
+        if (tookTrain && fare > 0)
+        {
+            TileData station = Object.FindFirstObjectByType<BoardManager>()?.GetTile(fromTile);
+            if (station != null && station.IsOwned() && station.ownerId != rider.playerId)
+            {
+                int ownerIdx = station.ownerId;
+                if (ownerIdx >= 0 && ownerIdx < all.Length && all[ownerIdx] != null)
+                {
+                    all[ownerIdx].AddMoney(fare);
+                    _ = CloudSaveManager.Instance?.SaveProfileOnlyAsync(all[ownerIdx]);
+                }
+            }
+            rider.RemoveMoney(fare);
+            _ = CloudSaveManager.Instance?.SaveProfileOnlyAsync(rider);
+        }
+
+        if (tookTrain)
+        {
+            rider.currentTileIndex = toTile;
+            var bm = Object.FindFirstObjectByType<BoardManager>();
+            rider.movementController?.TeleportToTile(toTile, bm?.allTiles);
+        }
+
+        Debug.Log($"[Server] Train decision: player={playerIndex} tookTrain={tookTrain} fare={fare}");
+        CompleteGameManager.Instance?.OnTrainMenuClosed(playerIndex, fromTile, toTile, tookTrain, fare);
+    }
+
+    // ── Helpers ───────────────────────────────────────────────────────────────
+
+    private void CloseLocal()
+    {
+        _isShowing = false;
+        if (menuPanel != null) menuPanel.SetActive(false);
+    }
+
+    private void PositionCanvas()
+    {
+        Camera cam = VRCameraProvider.Camera;
+        if (cam == null) return;
+
+        PlayerData[] all = CompleteGameManager.Instance?.GetAllPlayers();
+        PlayerData p = (all != null && _playerIndex >= 0 && _playerIndex < all.Length)
+                            ? all[_playerIndex] : null;
+
+        Vector3 forward = cam.transform.forward;
+        forward.y = 0f;
+        if (forward.sqrMagnitude < 0.001f) forward = cam.transform.forward;
+        forward.Normalize();
+
+        Vector3 origin = p?.avatarTransform != null ? p.avatarTransform.position : cam.transform.position;
+        transform.position = origin + forward * distanceFromPlayer + Vector3.up * heightAbovePlayer;
+        transform.LookAt(cam.transform);
+        transform.Rotate(0f, 180f, 0f);
+    }
+
+    private ulong ClientIdForPlayer(int playerIndex)
+    {
+        var ids = NetworkManager.Singleton.ConnectedClientsIds;
+        if (playerIndex >= 0 && playerIndex < ids.Count) return ids[playerIndex];
+        return NetworkManager.ServerClientId;
     }
 
     public bool IsShowing() => _isShowing;
 
-    // ?? Buttons ???????????????????????????????????????????????????????????????
-
-    private void OnTakeTrainClicked()
-    {
-  if (!_isShowing) return;
-        _isShowing = false;
-        if (menuPanel != null) menuPanel.SetActive(false);
-        Debug.Log($"[TrainMenuUI] Player takes train to {_toName}");
-        OnDecision?.Invoke(true);
-    }
-
-  private void OnPassClicked()
-  {
-        if (!_isShowing) return;
-        _isShowing = false;
-        if (menuPanel != null) menuPanel.SetActive(false);
-     Debug.Log($"[TrainMenuUI] Player passes at {_fromName}");
- OnDecision?.Invoke(false);
-    }
-
-    // ?? Texts ?????????????????????????????????????????????????????????????????
-
-    private void UpdateTexts()
-    {
-      if (titleText   != null) titleText.text   = "TRAIN STATION";
-  if (fromText    != null) fromText.text    = $"From: {_fromName}";
-        if (toText      != null) toText.text  = $"To:   {_toName}";
-    if (fareText    != null) fareText.text    = $"Ticket: {_fare} DT";
-        if (balanceText != null) balanceText.text = $"Balance: {_playerMoney} DT";
-
-        if (takeTrain != null)
-        {
- bool canAfford = _playerMoney >= _fare;
-     takeTrain.interactable = canAfford;
- Text lbl = takeTrain.GetComponentInChildren<Text>();
-          if (lbl != null)
-       lbl.text = canAfford ? $"Take Train  ({_fare} DT)" : "Can't Afford";
-        }
-
-     if (passButton != null)
-        {
-      Text lbl = passButton.GetComponentInChildren<Text>();
-    if (lbl != null) lbl.text = "Pass (Stay)";
-     }
-    }
-
-    // ?? Positioning ???????????????????????????????????????????????????????????
-
-    private void PositionCanvas()
-    {
-        Camera cam = Camera.main;
-     if (cam == null) return;
-
-        Vector3 forward = cam.transform.forward;
-    forward.y = 0f;
-   if (forward.sqrMagnitude < 0.001f) forward = Vector3.forward;
-        forward.Normalize();
-
-        transform.position = _playerPosition + forward * distanceFromPlayer
-           + Vector3.up * heightAbovePlayer;
-        FaceCamera();
-    }
-
-    private void FaceCamera()
-    {
-        Camera cam = Camera.main;
-        if (cam == null) return;
-        Vector3 dir = transform.position - cam.transform.position;
-      if (dir.sqrMagnitude > 0.001f)
-   transform.rotation = Quaternion.LookRotation(dir.normalized, Vector3.up);
-  }
-
-    private static void EnsureImage(Button btn)
+    private static void EnsureImg(Button btn)
     {
         if (btn == null) return;
         if (btn.targetGraphic is Image) return;
-        Image img = btn.GetComponent<Image>();
-  if (img == null)
-        {
-     img = btn.gameObject.AddComponent<Image>();
-       img.color = new Color(1f, 1f, 1f, 0f);
-      }
+        Image img = btn.GetComponent<Image>() ?? btn.gameObject.AddComponent<Image>();
+        img.color = new Color(1f, 1f, 1f, 0f);
         img.raycastTarget = true;
         btn.targetGraphic = img;
     }

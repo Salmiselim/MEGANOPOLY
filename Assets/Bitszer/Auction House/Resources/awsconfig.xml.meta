@@ -1,0 +1,14 @@
+fileFormatVersion: 2
+guid: 94524f11967c25f4bb619a234d7395a0
+TextScriptImporter:
+  externalObjects: {}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 96615
+  packageName: Auction House
+  packageVersion: 2.0
+  assetPath: Assets/Bitszer/Auction House/Resources/awsconfig.xml
+  uploadId: 494590

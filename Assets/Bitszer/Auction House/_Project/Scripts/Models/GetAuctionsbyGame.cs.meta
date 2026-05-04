@@ -1,0 +1,18 @@
+fileFormatVersion: 2
+guid: 09babb82912eec04bafdc375ffc6dcfa
+MonoImporter:
+  externalObjects: {}
+  serializedVersion: 2
+  defaultReferences: []
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 96615
+  packageName: Auction House
+  packageVersion: 2.0
+  assetPath: Assets/Bitszer/Auction House/_Project/Scripts/Models/GetAuctionsbyGame.cs
+  uploadId: 494590

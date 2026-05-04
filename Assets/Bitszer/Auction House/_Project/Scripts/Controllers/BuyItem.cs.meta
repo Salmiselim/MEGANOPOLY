@@ -1,0 +1,18 @@
+fileFormatVersion: 2
+guid: f8b24cac0d77b4a47b41b7a16b0a4225
+MonoImporter:
+  externalObjects: {}
+  serializedVersion: 2
+  defaultReferences: []
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 96615
+  packageName: Auction House
+  packageVersion: 2.0
+  assetPath: Assets/Bitszer/Auction House/_Project/Scripts/Controllers/BuyItem.cs
+  uploadId: 494590

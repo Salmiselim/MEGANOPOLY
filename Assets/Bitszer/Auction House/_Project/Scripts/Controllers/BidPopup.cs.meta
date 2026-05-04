@@ -1,0 +1,18 @@
+fileFormatVersion: 2
+guid: 6f017e9694e570e4fb61d11dae27fe9e
+MonoImporter:
+  externalObjects: {}
+  serializedVersion: 2
+  defaultReferences: []
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 96615
+  packageName: Auction House
+  packageVersion: 2.0
+  assetPath: Assets/Bitszer/Auction House/_Project/Scripts/Controllers/BidPopup.cs
+  uploadId: 494590

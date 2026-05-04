@@ -1,9 +1,9 @@
-using UnityEngine;
-using UnityEngine.Events;
+﻿using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.XR.Interaction.Toolkit.UI;
+using Unity.Netcode;
 
-public class RentMenuUI : MonoBehaviour
+public class RentMenuUI : NetworkBehaviour
 {
     public static RentMenuUI Instance { get; private set; }
 
@@ -12,7 +12,7 @@ public class RentMenuUI : MonoBehaviour
 
     [Header("Buttons")]
     [SerializeField] private Button payButton;
-    [SerializeField] private Button playMinigameButton;   // NEW
+    [SerializeField] private Button playMinigameButton;
 
     [Header("Info Texts")]
     [SerializeField] private Text propertyNameText;
@@ -25,25 +25,26 @@ public class RentMenuUI : MonoBehaviour
     [SerializeField] private float heightAbovePlayer = 1.2f;
     [SerializeField] private float canvasWorldScale = 0.002f;
 
-    private PlayerData currentPlayer;
-    private TileData currentProperty;           
-    private string ownerName;
-    private int rentAmount;
-    private bool isShowing = false;
-    private Canvas canvas;
+    // Cached indices sent from server
+    private int _payerIndex;
+    private int _ownerIndex;
+    private int _tileIndex;
+    private int _rentAmount;
+    private bool _isShowing;
 
-    public UnityEvent<int> OnRentPaid = new UnityEvent<int>();
-    public UnityEvent OnPlayMinigame = new UnityEvent();  // NEW
+    private Canvas _canvas;
+
+    // ── Lifecycle ─────────────────────────────────────────────────────────────
 
     private void Awake()
     {
         if (Instance == null) Instance = this;
         else { Destroy(gameObject); return; }
 
-        canvas = GetComponent<Canvas>();
-        if (canvas != null) canvas.renderMode = RenderMode.WorldSpace;
+        _canvas = GetComponent<Canvas>();
+        if (_canvas != null) _canvas.renderMode = RenderMode.WorldSpace;
 
-        GraphicRaycaster old = GetComponent<GraphicRaycaster>();
+        var old = GetComponent<GraphicRaycaster>();
         if (old != null) Destroy(old);
         if (GetComponent<TrackedDeviceGraphicRaycaster>() == null)
             gameObject.AddComponent<TrackedDeviceGraphicRaycaster>();
@@ -52,135 +53,196 @@ public class RentMenuUI : MonoBehaviour
 
         if (menuPanel != null) menuPanel.SetActive(false);
         if (payButton != null) payButton.onClick.AddListener(OnPayClicked);
+        if (playMinigameButton != null) playMinigameButton.onClick.AddListener(OnPlayMinigameClicked);
 
-        if (playMinigameButton != null)                    // NEW
-            playMinigameButton.onClick.AddListener(OnPlayMinigameClicked);
-        EnsureImageOnButton(payButton);
-        EnsureImageOnButton(playMinigameButton);   // NEW
+        EnsureImg(payButton);
+        EnsureImg(playMinigameButton);
     }
 
     private void Start() => TryAssignCamera();
 
     private void Update()
     {
-        if (canvas != null && canvas.worldCamera == null) TryAssignCamera();
-        if (!isShowing) return;
-
-        if (Input.GetKeyDown(KeyCode.Return) || Input.GetKeyDown(KeyCode.P))
-            OnPayClicked();
-
-        FaceCamera();
+        if (_canvas != null && _canvas.worldCamera == null) TryAssignCamera();
+        if (!_isShowing) return;
+        if (Input.GetKeyDown(KeyCode.Return) || Input.GetKeyDown(KeyCode.P)) OnPayClicked();
+        PositionCanvas();
     }
 
     private void TryAssignCamera()
     {
-        if (canvas == null) return;
+        if (_canvas == null) return;
         Camera cam = VRCameraProvider.Camera;
-        if (cam != null) canvas.worldCamera = cam;
+        if (cam != null) _canvas.worldCamera = cam;
     }
 
-    private static void EnsureImageOnButton(Button btn)
+    // ── SERVER entry point ────────────────────────────────────────────────────
+
+    public void ShowRentMenu(PlayerData payer, TileData property, PlayerData owner)
     {
-        if (btn == null) return;
-        if (btn.targetGraphic is Image) return;
-        Image img = btn.GetComponent<Image>();
-        if (img == null)
+        if (!IsServer) return;
+        if (payer == null || property == null || owner == null) return;
+
+        int rent = property.GetCurrentRent();
+        ulong target = ClientIdForPlayer(payer.playerId);
+
+        ShowRentMenuClientRpc(
+            payer.playerId,
+            owner.playerId,
+            property.tileIndex,
+            rent,
+            payer.money,
+            owner.playerName,
+            new ClientRpcParams
+            {
+                Send = new ClientRpcSendParams { TargetClientIds = new[] { target } }
+            });
+    }
+
+    // ── CLIENT receive ────────────────────────────────────────────────────────
+
+    [ClientRpc]
+    private void ShowRentMenuClientRpc(int payerIndex, int ownerIndex, int tileIndex,
+        int rentAmount, int payerMoney, string ownerName,
+        ClientRpcParams rpcParams = default)
+    {
+        _payerIndex = payerIndex;
+        _ownerIndex = ownerIndex;
+        _tileIndex = tileIndex;
+        _rentAmount = rentAmount;
+        _isShowing = true;
+
+        TileData tile = Object.FindFirstObjectByType<BoardManager>()?.GetTile(tileIndex);
+
+        if (propertyNameText != null) propertyNameText.text = tile?.tileName ?? $"Tile {tileIndex}";
+        if (ownerNameText != null) ownerNameText.text = $"Owner: {ownerName}";
+        if (rentAmountText != null) rentAmountText.text = $"Rent: {rentAmount} DT";
+        if (balanceText != null) balanceText.text = $"Your Balance: {payerMoney} DT";
+
+        if (payButton != null)
         {
-            img = btn.gameObject.AddComponent<Image>();
-            img.color = new Color(1f, 1f, 1f, 0f);
+            payButton.interactable = payerMoney >= rentAmount;
+            var lbl = payButton.GetComponentInChildren<Text>();
+            if (lbl != null) lbl.text = $"Pay {rentAmount} DT";
         }
-        img.raycastTarget = true;
-        btn.targetGraphic = img;
-    }
 
-    public void ShowRentMenu(PlayerData player, TileData property, PlayerData owner)
-    {
-        if (player == null || property == null || owner == null) return;
-
-        currentPlayer = player;
-        currentProperty = property;
-        ownerName = owner.playerName;
-        rentAmount = property.GetCurrentRent();
-        isShowing = true;
+        if (playMinigameButton != null)
+            playMinigameButton.gameObject.SetActive(payerMoney < rentAmount);
 
         TryAssignCamera();
-        MoveCanvasToPlayer();
+        PositionCanvas();
         if (menuPanel != null) menuPanel.SetActive(true);
-        UpdateTexts();
-        Debug.Log($"[RentMenuUI] Open: {player.playerName} owes {rentAmount} DT to {ownerName} for {property.tileName}");
+        Debug.Log($"[RentMenuUI] Player {payerIndex} owes {rentAmount} DT");
     }
 
-    public bool IsShowing() => isShowing;
+    // ── Buttons → ServerRpc ───────────────────────────────────────────────────
 
-    private void MoveCanvasToPlayer()
+    private void OnPayClicked()
+    {
+        if (!_isShowing) return;
+        CloseLocal();
+        PayRentServerRpc(_payerIndex, _ownerIndex, _rentAmount);
+    }
+
+    private void OnPlayMinigameClicked()
+    {
+        if (!_isShowing) return;
+        CloseLocal();
+        RequestMinigameServerRpc(_payerIndex, _tileIndex, _rentAmount);
+    }
+
+    [Rpc(SendTo.Server, InvokePermission = RpcInvokePermission.Everyone)]
+    private void PayRentServerRpc(int payerIndex, int ownerIndex, int amount)
+    {
+        PlayerData payer = CompleteGameManager.Instance?.GetServerPlayer(payerIndex);
+        PlayerData owner = CompleteGameManager.Instance?.GetServerPlayer(ownerIndex);
+
+        if (payer == null || owner == null)
+        {
+            CompleteGameManager.Instance?.OnRentMenuClosed();
+            return;
+        }
+
+        if (payer.RemoveMoney(amount))
+        {
+            owner.AddMoney(amount);
+            Debug.Log($"[Server] Rent paid: {payer.playerName} → {owner.playerName} {amount} DT");
+            _ = CloudSaveManager.Instance?.SaveProfileOnlyAsync(payer);
+            _ = CloudSaveManager.Instance?.SaveProfileOnlyAsync(owner);
+        }
+        else
+        {
+            Debug.LogWarning($"[Server] {payer.playerName} can't afford {amount} DT — minigame fallback");
+            TileData tile = Object.FindFirstObjectByType<BoardManager>()?.GetTile(_tileIndex);
+            if (tile != null)
+                CompleteGameManager.Instance?.TriggerMinigameChallenge(payer, tile, 0, amount);
+            return; // minigame ends the turn via OnMinigameEnded
+        }
+
+        CompleteGameManager.Instance?.OnRentMenuClosed();
+    }
+
+    [Rpc(SendTo.Server, InvokePermission = RpcInvokePermission.Everyone)]
+    private void RequestMinigameServerRpc(int payerIndex, int tileIndex, int prizeAmount)
+    {
+        PlayerData payer = CompleteGameManager.Instance?.GetServerPlayer(payerIndex);
+        TileData tile = Object.FindFirstObjectByType<BoardManager>()?.GetTile(tileIndex);
+
+        if (payer == null || tile == null)
+        {
+            CompleteGameManager.Instance?.OnRentMenuClosed();
+            return;
+        }
+
+        Debug.Log($"[Server] {payer.playerName} chose minigame instead of rent on {tile.tileName}");
+        CompleteGameManager.Instance?.TriggerMinigameChallenge(payer, tile, 0, prizeAmount);
+        // Turn continues via CompleteGameManager.OnMinigameEnded
+    }
+
+    // ── Helpers ───────────────────────────────────────────────────────────────
+
+    private void CloseLocal()
+    {
+        _isShowing = false;
+        if (menuPanel != null) menuPanel.SetActive(false);
+    }
+
+    private void PositionCanvas()
     {
         Camera cam = VRCameraProvider.Camera;
         if (cam == null) return;
+
+        PlayerData[] all = CompleteGameManager.Instance?.GetAllPlayers();
+        PlayerData p = (all != null && _payerIndex >= 0 && _payerIndex < all.Length)
+                            ? all[_payerIndex] : null;
 
         Vector3 forward = cam.transform.forward;
         forward.y = 0f;
         if (forward.sqrMagnitude < 0.001f) forward = cam.transform.forward;
         forward.Normalize();
 
-        Vector3 origin = currentPlayer.avatarTransform != null
-            ? currentPlayer.avatarTransform.position
-            : cam.transform.position;
-
+        Vector3 origin = p?.avatarTransform != null ? p.avatarTransform.position : cam.transform.position;
         transform.position = origin + forward * distanceFromPlayer + Vector3.up * heightAbovePlayer;
-        FaceCamera();
-    }
-
-    private void FaceCamera()
-    {
-        Camera cam = VRCameraProvider.Camera;
-        if (cam == null) return;
         transform.LookAt(cam.transform);
         transform.Rotate(0f, 180f, 0f);
     }
 
-    private void UpdateTexts()
+    private ulong ClientIdForPlayer(int playerIndex)
     {
-        if (propertyNameText != null)
-            propertyNameText.text = currentProperty.tileName;
-
-        if (ownerNameText != null)
-            ownerNameText.text = $"Owner: {ownerName}";
-
-        if (rentAmountText != null)
-            rentAmountText.text = $"Rent: {rentAmount} DT";
-
-        if (balanceText != null)
-            balanceText.text = $"Your Balance: {currentPlayer.money} DT";
-
-        if (payButton != null)
-        {
-            payButton.interactable = true;
-            Text lbl = payButton.GetComponentInChildren<Text>();
-            if (lbl != null)
-                lbl.text = $"Pay {rentAmount} DT";
-        }
+        var ids = NetworkManager.Singleton.ConnectedClientsIds;
+        if (playerIndex >= 0 && playerIndex < ids.Count) return ids[playerIndex];
+        return NetworkManager.ServerClientId;
     }
 
-    private void OnPayClicked()
+    public bool IsShowing() => _isShowing;
+
+    private static void EnsureImg(Button btn)
     {
-        if (!isShowing) return;
-
-        isShowing = false;
-        if (menuPanel != null) menuPanel.SetActive(false);
-
-        Debug.Log($"[RentMenuUI] {currentPlayer.playerName} pays {rentAmount} DT rent for {currentProperty.tileName}");
-        OnRentPaid?.Invoke(rentAmount);
-    }
-
-    private void OnPlayMinigameClicked()
-    {
-        if (!isShowing) return;
-
-        // Close this UI, then let GameManager handle starting the minigame
-        isShowing = false;
-        if (menuPanel != null) menuPanel.SetActive(false);
-
-        Debug.Log("[RentMenuUI] Play Minigame clicked");
-        OnPlayMinigame.Invoke();
+        if (btn == null) return;
+        if (btn.targetGraphic is Image) return;
+        Image img = btn.GetComponent<Image>() ?? btn.gameObject.AddComponent<Image>();
+        img.color = new Color(1f, 1f, 1f, 0f);
+        img.raycastTarget = true;
+        btn.targetGraphic = img;
     }
 }

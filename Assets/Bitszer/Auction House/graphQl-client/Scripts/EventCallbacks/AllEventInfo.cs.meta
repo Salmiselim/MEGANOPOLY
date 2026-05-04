@@ -1,0 +1,18 @@
+fileFormatVersion: 2
+guid: fc79693e55923d04ba34f1f874db8a71
+MonoImporter:
+  externalObjects: {}
+  serializedVersion: 2
+  defaultReferences: []
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 96615
+  packageName: Auction House
+  packageVersion: 2.0
+  assetPath: Assets/Bitszer/Auction House/graphQl-client/Scripts/EventCallbacks/AllEventInfo.cs
+  uploadId: 494590

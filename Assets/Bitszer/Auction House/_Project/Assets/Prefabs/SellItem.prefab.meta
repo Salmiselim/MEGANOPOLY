@@ -1,0 +1,14 @@
+fileFormatVersion: 2
+guid: 1975f4bfab9578c4c9ad2802473a60d1
+PrefabImporter:
+  externalObjects: {}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 96615
+  packageName: Auction House
+  packageVersion: 2.0
+  assetPath: Assets/Bitszer/Auction House/_Project/Assets/Prefabs/SellItem.prefab
+  uploadId: 494590

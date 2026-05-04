@@ -826,7 +826,7 @@ PrefabInstance:
     - target: {fileID: 6598815579406187037, guid: 18ddb545287c546e19cc77dc9fbb2189,
         type: 3}
       propertyPath: m_IsActive
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -8938,6 +8938,7 @@ GameObject:
   - component: {fileID: 1458161038}
   - component: {fileID: 1458161037}
   - component: {fileID: 1458161036}
+  - component: {fileID: 1458161041}
   - component: {fileID: 1458161040}
   m_Layer: 5
   m_Name: TrainMenuUI
@@ -9043,6 +9044,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2d27dbc61522cb54bb605b083edddc2a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::TrainMenuUI
+  ShowTopMostFoldoutHeaderGroup: 1
   menuPanel: {fileID: 1038524862}
   takeTrain: {fileID: 181595763}
   passButton: {fileID: 942703741}
@@ -9054,9 +9056,31 @@ MonoBehaviour:
   distanceFromPlayer: 1.5
   heightAbovePlayer: 1.2
   canvasWorldScale: 0.002
-  OnDecision:
-    m_PersistentCalls:
-      m_Calls: []
+--- !u!114 &1458161041
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1458161035}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d5a57f767e5e46a458fc5d3c628d0cbb, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Unity.Netcode.Runtime::Unity.Netcode.NetworkObject
+  GlobalObjectIdHash: 3884573199
+  InScenePlacedSourceGlobalObjectIdHash: 0
+  DeferredDespawnTick: 0
+  Ownership: 1
+  AlwaysReplicateAsRoot: 0
+  SynchronizeTransform: 1
+  ActiveSceneSynchronization: 0
+  SceneMigrationSynchronization: 0
+  SpawnWithObservers: 1
+  DontDestroyWithOwner: 0
+  AutoObjectParentSync: 1
+  SyncOwnerTransformWhenParented: 1
+  AllowOwnerToParent: 0
 --- !u!1 &1481434639
 GameObject:
   m_ObjectHideFlags: 0
@@ -9900,6 +9924,7 @@ GameObject:
   - component: {fileID: 1620854069}
   - component: {fileID: 1620854068}
   - component: {fileID: 1620854067}
+  - component: {fileID: 1620854071}
   - component: {fileID: 1620854066}
   m_Layer: 5
   m_Name: RentMenuUI
@@ -9920,6 +9945,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e6c8466b7a7ea19418e9e045a3916876, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::RentMenuUI
+  ShowTopMostFoldoutHeaderGroup: 1
   menuPanel: {fileID: 350737317}
   payButton: {fileID: 656451339}
   playMinigameButton: {fileID: 709380951}
@@ -9930,12 +9956,6 @@ MonoBehaviour:
   distanceFromPlayer: 1.5
   heightAbovePlayer: 1.2
   canvasWorldScale: 0.002
-  OnRentPaid:
-    m_PersistentCalls:
-      m_Calls: []
-  OnPlayMinigame:
-    m_PersistentCalls:
-      m_Calls: []
 --- !u!114 &1620854067
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -10021,6 +10041,31 @@ RectTransform:
   m_AnchoredPosition: {x: 415.2525, y: 482.2025}
   m_SizeDelta: {x: 1083.5, y: 636.25}
   m_Pivot: {x: 0.5, y: 0.5}
+--- !u!114 &1620854071
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1620854065}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d5a57f767e5e46a458fc5d3c628d0cbb, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Unity.Netcode.Runtime::Unity.Netcode.NetworkObject
+  GlobalObjectIdHash: 420853822
+  InScenePlacedSourceGlobalObjectIdHash: 0
+  DeferredDespawnTick: 0
+  Ownership: 1
+  AlwaysReplicateAsRoot: 0
+  SynchronizeTransform: 1
+  ActiveSceneSynchronization: 0
+  SceneMigrationSynchronization: 0
+  SpawnWithObservers: 1
+  DontDestroyWithOwner: 0
+  AutoObjectParentSync: 1
+  SyncOwnerTransformWhenParented: 1
+  AllowOwnerToParent: 0
 --- !u!1 &1622458509
 GameObject:
   m_ObjectHideFlags: 0
@@ -11124,6 +11169,7 @@ GameObject:
   - component: {fileID: 1798952976}
   - component: {fileID: 1798952975}
   - component: {fileID: 1798952974}
+  - component: {fileID: 1798952978}
   - component: {fileID: 1798952973}
   - component: {fileID: 1798952972}
   m_Layer: 5
@@ -11157,6 +11203,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 72a5531e71dee1147979c86add08c16e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::BuildingMenuUI
+  ShowTopMostFoldoutHeaderGroup: 1
   menuPanel: {fileID: 1588708145}
   buyHouseButton: {fileID: 832720839}
   buyHotelButton: {fileID: 1558522689}
@@ -11169,9 +11216,6 @@ MonoBehaviour:
   distanceFromPlayer: 1.5
   heightAbovePlayer: 1.2
   canvasWorldScale: 0.002
-  OnMenuClosed:
-    m_PersistentCalls:
-      m_Calls: []
 --- !u!114 &1798952974
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -11257,6 +11301,31 @@ RectTransform:
   m_AnchoredPosition: {x: 528.83, y: 318.125}
   m_SizeDelta: {x: 1083.5, y: 636.25}
   m_Pivot: {x: 0.5, y: 0.5}
+--- !u!114 &1798952978
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1798952971}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d5a57f767e5e46a458fc5d3c628d0cbb, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Unity.Netcode.Runtime::Unity.Netcode.NetworkObject
+  GlobalObjectIdHash: 650717645
+  InScenePlacedSourceGlobalObjectIdHash: 0
+  DeferredDespawnTick: 0
+  Ownership: 1
+  AlwaysReplicateAsRoot: 0
+  SynchronizeTransform: 1
+  ActiveSceneSynchronization: 0
+  SceneMigrationSynchronization: 0
+  SpawnWithObservers: 1
+  DontDestroyWithOwner: 0
+  AutoObjectParentSync: 1
+  SyncOwnerTransformWhenParented: 1
+  AllowOwnerToParent: 0
 --- !u!1 &1816166347
 GameObject:
   m_ObjectHideFlags: 0
@@ -12066,6 +12135,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 247ac2d2aef9f7a4081cadb46cfd9bff, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PropertyCardUI
+  ShowTopMostFoldoutHeaderGroup: 1
   flyDuration: 0.5
   cardDisplayHeight: 2
   cardDistanceFromPlayer: 3
@@ -12103,9 +12173,6 @@ MonoBehaviour:
   priceText: {fileID: 2019641083}
   canvasWorldScale: 0.002
   boardManager: {fileID: 390211867}
-  OnPurchaseDecision:
-    m_PersistentCalls:
-      m_Calls: []
 --- !u!4 &1953542462
 Transform:
   m_ObjectHideFlags: 0

@@ -1,0 +1,14 @@
+fileFormatVersion: 2
+guid: 0d2812de464f1d8478eacd60e16d8794
+DefaultImporter:
+  externalObjects: {}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 96615
+  packageName: Auction House
+  packageVersion: 2.0
+  assetPath: Assets/Bitszer/Auction House/graphQl-client/Demo/Users/userExample.unity
+  uploadId: 494590

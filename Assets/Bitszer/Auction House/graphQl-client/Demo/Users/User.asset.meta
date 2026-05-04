@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: 537a8277c6f2ef741ade457d1325eed0
+NativeFormatImporter:
+  externalObjects: {}
+  mainObjectFileID: 11400000
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 96615
+  packageName: Auction House
+  packageVersion: 2.0
+  assetPath: Assets/Bitszer/Auction House/graphQl-client/Demo/Users/User.asset
+  uploadId: 494590

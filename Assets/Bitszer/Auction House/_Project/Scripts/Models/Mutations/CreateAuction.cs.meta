@@ -1,0 +1,18 @@
+fileFormatVersion: 2
+guid: c777e22d847a25649b4e31f3cee91861
+MonoImporter:
+  externalObjects: {}
+  serializedVersion: 2
+  defaultReferences: []
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 96615
+  packageName: Auction House
+  packageVersion: 2.0
+  assetPath: Assets/Bitszer/Auction House/_Project/Scripts/Models/Mutations/CreateAuction.cs
+  uploadId: 494590

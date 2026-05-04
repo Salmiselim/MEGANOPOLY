@@ -1,0 +1,19 @@
+fileFormatVersion: 2
+guid: fc0cee1222b285b409e1daf964e1d8a9
+timeCreated: 1502459663
+licenseType: Store
+MonoImporter:
+  serializedVersion: 2
+  defaultReferences: []
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 96615
+  packageName: Auction House
+  packageVersion: 2.0
+  assetPath: Assets/Bitszer/Auction House/graphQl-client/Scripts/Core/HttpHandler.cs
+  uploadId: 494590

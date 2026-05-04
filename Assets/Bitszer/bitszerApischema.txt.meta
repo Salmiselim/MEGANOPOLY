@@ -1,0 +1,14 @@
+fileFormatVersion: 2
+guid: 2d43875933c968443ba3c94655d4b8b8
+TextScriptImporter:
+  externalObjects: {}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 96615
+  packageName: Auction House
+  packageVersion: 2.0
+  assetPath: Assets/Bitszer/bitszerApischema.txt
+  uploadId: 494590

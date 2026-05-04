@@ -81,7 +81,6 @@ public class CompleteGameManager : NetworkBehaviour
 
     public override void OnNetworkSpawn()
     {
-        // ── SERVER ──────────────────────────────────────────────────────────
         if (IsServer)
         {
             NetworkManager.Singleton.OnClientConnectedCallback += OnClientConnected;
@@ -89,7 +88,7 @@ public class CompleteGameManager : NetworkBehaviour
             return;
         }
 
-        // ── CLIENT: auth guard ───────────────────────────────────────────────
+        // Client: auth guard
         if (AuthManager.Instance == null || !AuthManager.Instance.IsSignedIn)
         {
             Debug.LogError("[Client] Not authenticated! Redirecting to Auth scene.");
@@ -104,10 +103,11 @@ public class CompleteGameManager : NetworkBehaviour
         Debug.Log($"[Client] Auth guard passed. Registered as '{username}' (PlayerId: {playerId})");
     }
 
-    // ── Auth registration (client → server) ───────────────────────────────────
+    // ── Auth registration ─────────────────────────────────────────────────────
 
     [ServerRpc(RequireOwnership = false)]
-    public void RegisterAuthNameServerRpc(string username, string unityPlayerId, ulong clientId, ServerRpcParams rpcParams = default)
+    public void RegisterAuthNameServerRpc(string username, string unityPlayerId, ulong clientId,
+        ServerRpcParams rpcParams = default)
     {
         clientAuthNames[clientId] = username;
         clientUnityPlayerIds[clientId] = unityPlayerId;
@@ -154,9 +154,9 @@ public class CompleteGameManager : NetworkBehaviour
         {
             ulong ownerClientId = (i < clients.Count) ? clients[i] : NetworkManager.ServerClientId;
             string authName = clientAuthNames.TryGetValue(ownerClientId, out string n)
-                                    ? n : (i < playerNames.Length ? playerNames[i] : $"Player {i + 1}");
+                                        ? n : (i < playerNames.Length ? playerNames[i] : $"Player {i + 1}");
             string unityPlayerId = clientUnityPlayerIds.TryGetValue(ownerClientId, out string pid)
-                                    ? pid : ownerClientId.ToString();
+                                        ? pid : ownerClientId.ToString();
 
             players[i] = new PlayerData(i, authName, playerColors[i]);
             players[i].money = startingMoney;
@@ -230,7 +230,7 @@ public class CompleteGameManager : NetworkBehaviour
             return manualSpawnPoints[playerIndex].transform.position;
 
         TileData goTile = boardManager.GetTile(0);
-        if (goTile == null) { Debug.LogError("❌ GO tile not found!"); return Vector3.zero; }
+        if (goTile == null) { Debug.LogError("GO tile not found!"); return Vector3.zero; }
         return goTile.worldPosition + manualSpawnOffset + Vector3.right * (playerIndex * playerSpacing);
     }
 
@@ -244,30 +244,36 @@ public class CompleteGameManager : NetworkBehaviour
         {
             System.Array.Sort(found, (a, b) => a.diceNumber.CompareTo(b.diceNumber));
             dice = new SimpleDiceController[2] { found[0], found[1] };
-            Debug.Log($"✓ Auto-found {found.Length} dice");
+            Debug.Log($"Auto-found {found.Length} dice");
         }
-        else Debug.LogWarning($"⚠️ Only found {found.Length} dice, need 2");
+        else Debug.LogWarning($"Only found {found.Length} dice, need 2");
     }
 
     private void AutoFindSpawnPoints()
     {
         if (!useManualSpawnPoints) return;
-        if (manualSpawnPoints != null && manualSpawnPoints.Length >= numberOfPlayers && manualSpawnPoints[0] != null) return;
+        if (manualSpawnPoints != null && manualSpawnPoints.Length >= numberOfPlayers &&
+            manualSpawnPoints[0] != null) return;
+
         PlayerSpawnPoint[] found = FindObjectsOfType<PlayerSpawnPoint>();
         if (found.Length >= numberOfPlayers)
         {
             System.Array.Sort(found, (a, b) => a.playerIndex.CompareTo(b.playerIndex));
             manualSpawnPoints = new PlayerSpawnPoint[numberOfPlayers];
             for (int i = 0; i < numberOfPlayers; i++) manualSpawnPoints[i] = found[i];
-            Debug.Log($"✓ Auto-found {found.Length} spawn points");
+            Debug.Log($"Auto-found {found.Length} spawn points");
         }
-        else { Debug.LogWarning($"⚠️ Only {found.Length} spawn points, using procedural"); useManualSpawnPoints = false; }
+        else
+        {
+            Debug.LogWarning($"Only {found.Length} spawn points, using procedural");
+            useManualSpawnPoints = false;
+        }
     }
 
     private void SetupDiceEvents()
     {
-        if (dice[0] != null) { dice[0].OnDiceRolled.AddListener(OnDice1Rolled); Debug.Log("✓ Dice 1 connected"); }
-        if (dice[1] != null) { dice[1].OnDiceRolled.AddListener(OnDice2Rolled); Debug.Log("✓ Dice 2 connected"); }
+        if (dice[0] != null) { dice[0].OnDiceRolled.AddListener(OnDice1Rolled); Debug.Log("Dice 1 connected"); }
+        if (dice[1] != null) { dice[1].OnDiceRolled.AddListener(OnDice2Rolled); Debug.Log("Dice 2 connected"); }
     }
 
     // ── Game flow ─────────────────────────────────────────────────────────────
@@ -275,7 +281,7 @@ public class CompleteGameManager : NetworkBehaviour
     private void StartGame()
     {
         currentGameState = GameState.Playing;
-        Debug.Log("\n═══════════════════════════════════\n       🎮 GAME STARTED!\n═══════════════════════════════════\n");
+        Debug.Log("\n═══════════════════════════════════\n       GAME STARTED!\n═══════════════════════════════════\n");
         OnGameStarted?.Invoke();
         StartTurn(0);
     }
@@ -284,12 +290,15 @@ public class CompleteGameManager : NetworkBehaviour
     {
         currentPlayerIndex = playerIndex;
         if (currentPlayerIndex < 0 || currentPlayerIndex >= players.Length)
-        { Debug.LogError($"Invalid player index: {currentPlayerIndex}"); return; }
+        {
+            Debug.LogError($"Invalid player index: {currentPlayerIndex}");
+            return;
+        }
 
         PlayerData p = players[currentPlayerIndex];
         p.currentState = PlayerState.WaitingToRoll;
 
-        Debug.Log($"\n── {p.playerName}'s TURN  💰{p.money} DT  📍{boardManager.GetTile(p.currentTileIndex)?.tileName ?? "?"} ──");
+        Debug.Log($"\n── {p.playerName}'s TURN  {p.money} DT  {boardManager.GetTile(p.currentTileIndex)?.tileName ?? "?"} ──");
 
         OnTurnChanged?.Invoke(currentPlayerIndex);
         NotifyTurnClientRpc(currentPlayerIndex);
@@ -310,12 +319,12 @@ public class CompleteGameManager : NetworkBehaviour
         if (player.jailTurnsRemaining > 0)
         {
             player.jailTurnsRemaining--;
-            Debug.Log($"🔒 {player.playerName} in Jail. {player.jailTurnsRemaining} turn(s) left.");
+            Debug.Log($"{player.playerName} in Jail. {player.jailTurnsRemaining} turn(s) left.");
             EndTurn();
             return;
         }
         player.ReleaseFromJail();
-        Debug.Log($"🔓 {player.playerName} released from Jail!");
+        Debug.Log($"{player.playerName} released from Jail!");
         EnableDiceForPlayer();
     }
 
@@ -346,36 +355,60 @@ public class CompleteGameManager : NetworkBehaviour
         if (dice[1] != null) dice[1].RollDice();
     }
 
-    private void OnDice1Rolled(int value) { if (!waitingForDiceRoll) return; dice1Result = value; dice1HasResult = true; Debug.Log($"🎲 Die 1: {value}"); CheckBothDice(); }
-    private void OnDice2Rolled(int value) { if (!waitingForDiceRoll) return; dice2Result = value; dice2HasResult = true; Debug.Log($"🎲 Die 2: {value}"); CheckBothDice(); }
+    private void OnDice1Rolled(int value)
+    {
+        if (!waitingForDiceRoll) return;
+        dice1Result = value; dice1HasResult = true;
+        Debug.Log($"Die 1: {value}");
+        CheckBothDice();
+    }
+
+    private void OnDice2Rolled(int value)
+    {
+        if (!waitingForDiceRoll) return;
+        dice2Result = value; dice2HasResult = true;
+        Debug.Log($"Die 2: {value}");
+        CheckBothDice();
+    }
 
     private void CheckBothDice()
     {
         if (!dice1HasResult || !dice2HasResult) return;
         waitingForDiceRoll = false;
         int total = dice1Result + dice2Result;
-        Debug.Log($"\n🎲🎲 {dice1Result} + {dice2Result} = {total}\n");
+        Debug.Log($"\n{dice1Result} + {dice2Result} = {total}\n");
         StartCoroutine(HandlePlayerMove(total));
     }
 
     private IEnumerator HandlePlayerMove(int spaces)
     {
         if (currentPlayerIndex < 0 || currentPlayerIndex >= players.Length)
-        { Debug.LogError($"Invalid player index during move: {currentPlayerIndex}"); yield break; }
+        {
+            Debug.LogError($"Invalid player index during move: {currentPlayerIndex}");
+            yield break;
+        }
 
         PlayerData p = players[currentPlayerIndex];
         p.currentState = PlayerState.Rolling;
         yield return new WaitForSeconds(0.5f);
 
-        if (p.movementController == null) { Debug.LogError("❌ No movement controller!"); EndTurn(); yield break; }
+        if (p.movementController == null)
+        {
+            Debug.LogError("No movement controller!");
+            EndTurn();
+            yield break;
+        }
 
         p.movementController.MoveByDiceRoll(spaces, boardManager.allTiles);
 
         float timeout = 20f, elapsed = 0f;
         while (p.movementController.IsMoving() && elapsed < timeout)
-        { elapsed += Time.deltaTime; yield return null; }
+        {
+            elapsed += Time.deltaTime;
+            yield return null;
+        }
 
-        if (elapsed >= timeout) Debug.LogError("❌ Movement timeout!");
+        if (elapsed >= timeout) Debug.LogError("Movement timeout!");
         yield return new WaitForSeconds(0.5f);
         HandleTileLanding(p);
     }
@@ -383,12 +416,21 @@ public class CompleteGameManager : NetworkBehaviour
     private void HandleTileLanding(PlayerData player)
     {
         if (player.currentTileIndex < 0 || player.currentTileIndex >= 40)
-        { Debug.LogError($"Invalid tile index: {player.currentTileIndex}"); EndTurn(); return; }
+        {
+            Debug.LogError($"Invalid tile index: {player.currentTileIndex}");
+            EndTurn();
+            return;
+        }
 
         TileData tile = boardManager.GetTile(player.currentTileIndex);
-        if (tile == null) { Debug.LogError($"Tile {player.currentTileIndex} is null!"); EndTurn(); return; }
+        if (tile == null)
+        {
+            Debug.LogError($"Tile {player.currentTileIndex} is null!");
+            EndTurn();
+            return;
+        }
 
-        Debug.Log($"\n📍 Landed on: {tile.tileName} ({tile.tileType})");
+        Debug.Log($"\nLanded on: {tile.tileName} ({tile.tileType})");
         player.currentState = PlayerState.OnTile;
 
         switch (tile.tileType)
@@ -397,16 +439,18 @@ public class CompleteGameManager : NetworkBehaviour
             case TileType.Railroad: HandleRailroad(player, tile); break;
             case TileType.Tax:
                 player.RemoveMoney(tile.baseRent);
-                Debug.Log($"💸 Paid ${tile.baseRent} tax");
+                Debug.Log($"Paid {tile.baseRent} DT tax");
                 EndTurn();
                 break;
             case TileType.GoToJail:
                 player.SendToJail();
                 player.movementController?.TeleportToTile(10, boardManager.allTiles);
-                Debug.Log($"🔒 {player.playerName} sent to Jail.");
+                Debug.Log($"{player.playerName} sent to Jail.");
                 EndTurn();
                 break;
-            default: EndTurn(); break;
+            default:
+                EndTurn();
+                break;
         }
     }
 
@@ -423,10 +467,12 @@ public class CompleteGameManager : NetworkBehaviour
         if (!station.IsOwned()) return 50;
         if (station.ownerId == rider.playerId) return 0;
         PlayerData owner = null;
-        foreach (var p in allPlayers) if (p != null && p.playerId == station.ownerId) { owner = p; break; }
+        foreach (var p in allPlayers)
+            if (p != null && p.playerId == station.ownerId) { owner = p; break; }
         if (owner == null) return 50;
         int cnt = 0;
-        foreach (var t in owner.ownedProperties) if (t.tileType == TileType.Railroad) cnt++;
+        foreach (var t in owner.ownedProperties)
+            if (t.tileType == TileType.Railroad) cnt++;
         return new[] { 0, 25, 50, 100, 200 }[Mathf.Clamp(cnt, 0, 4)];
     }
 
@@ -434,6 +480,7 @@ public class CompleteGameManager : NetworkBehaviour
     {
         int destIndex = GetTrainDestination(station.tileIndex);
         if (destIndex < 0) { EndTurn(); return; }
+
         TileData destTile = boardManager.GetTile(destIndex);
         if (destTile == null) { EndTurn(); return; }
 
@@ -442,132 +489,188 @@ public class CompleteGameManager : NetworkBehaviour
             TileMarker marker = boardManager.GetTileMarker(station.tileIndex);
             if (PropertyCardUI.Instance != null && marker?.propertyCard != null)
             {
-                PropertyCardUI.Instance.OnPurchaseDecision.RemoveAllListeners();
-                PropertyCardUI.Instance.OnPurchaseDecision.AddListener((bought) =>
-                {
-                    if (bought) PropertyManager.Instance?.TryBuyProperty(player, station);
-                    ShowTrainChoice(player, station, destTile);
-                });
+                TileData dest = destTile;
                 PropertyCardUI.Instance.ShowPropertyCard(player, station, marker);
+                StartCoroutine(WaitForPropertyCardThenShowTrain(player, station, dest));
                 return;
             }
         }
+
         ShowTrainChoice(player, station, destTile);
+    }
+
+    private IEnumerator WaitForPropertyCardThenShowTrain(PlayerData player, TileData station, TileData dest)
+    {
+        float timeout = 60f, elapsed = 0f;
+        while (PropertyCardUI.Instance != null && PropertyCardUI.Instance.IsShowing() && elapsed < timeout)
+        {
+            elapsed += Time.deltaTime;
+            yield return null;
+        }
+        ShowTrainChoice(player, station, dest);
     }
 
     private void ShowTrainChoice(PlayerData player, TileData station, TileData destTile)
     {
         if (TrainMenuUI.Instance == null) { EndTurn(); return; }
         int fare = CalculateTrainFare(station, player, players);
-        Vector3 pos = player.avatarTransform != null ? player.avatarTransform.position
-                    : (Camera.main != null ? Camera.main.transform.position : Vector3.zero);
-
-        TrainMenuUI.Instance.OnDecision.RemoveAllListeners();
-        TrainMenuUI.Instance.OnDecision.AddListener((took) =>
-        {
-            if (took && fare > 0)
-            {
-                if (station.IsOwned() && station.ownerId != player.playerId
-                    && station.ownerId >= 0 && station.ownerId < players.Length)
-                    players[station.ownerId].AddMoney(fare);
-                player.RemoveMoney(fare);
-            }
-            if (took)
-            {
-                player.currentTileIndex = destTile.tileIndex;
-                player.movementController?.TeleportToTile(destTile.tileIndex, boardManager.allTiles);
-            }
-            EndTurn();
-        });
-        TrainMenuUI.Instance.ShowTrainMenu(station.tileName, destTile.tileName, fare, player.money, pos);
+        TrainMenuUI.Instance.ShowTrainMenu(player, station, destTile, fare);
     }
 
     // ── Property ──────────────────────────────────────────────────────────────
 
     private void HandleProperty(PlayerData player, TileData property)
     {
-        if (ShouldTriggerMinigame(property))
-        {
-            int type = property.propertyColor switch
-            {
-                PropertyColor.Brown => 0,
-                PropertyColor.LightBlue => 1,
-                PropertyColor.Pink => 2,
-                PropertyColor.Orange => 3,
-                PropertyColor.Red => 4,
-                PropertyColor.Yellow => 5,
-                PropertyColor.Green => 6,
-                PropertyColor.DarkBlue => 7,
-                _ => 0
-            };
-            TriggerMinigameChallenge(player, property, type, Mathf.Max(100, property.purchasePrice / 2));
-            return;
-        }
-
+        // ── Unowned: always show the buy card UI first.
+        // The "Play Minigame" button inside PropertyCardUI calls
+        // RequestMinigameServerRpc when the player clicks it.
         if (!property.IsOwned())
         {
             TileMarker marker = boardManager.GetTileMarker(property.tileIndex);
             if (PropertyCardUI.Instance != null && marker?.propertyCard != null)
             {
-                PropertyCardUI.Instance.OnPurchaseDecision.RemoveAllListeners();
-                PropertyCardUI.Instance.OnPurchaseDecision.AddListener((bought) =>
-                {
-                    if (bought)
-                    {
-                        PropertyManager.Instance?.TryBuyProperty(player, property);
-                        // ── Cloud save: properties changed ────────────────
-                        _ = CloudSaveManager.Instance?.SavePropertiesOnlyAsync(player);
-                    }
-                    EndTurn();
-                });
                 PropertyCardUI.Instance.ShowPropertyCard(player, property, marker);
                 return;
             }
-            Debug.LogWarning("⚠️ PropertyCardUI not set up — auto-passing");
+
+            // PropertyCardUI not available — just end turn
+            Debug.LogWarning("[GameManager] PropertyCardUI not set up — auto-passing");
+            EndTurn();
+            return;
         }
-        else if (property.ownerId == player.playerId)
+
+        // ── Owned by this player: show building menu
+        if (property.ownerId == player.playerId)
         {
             if (BuildingMenuUI.Instance != null)
             {
-                BuildingMenuUI.Instance.OnMenuClosed.RemoveAllListeners();
-                BuildingMenuUI.Instance.OnMenuClosed.AddListener(EndTurn);
                 BuildingMenuUI.Instance.ShowBuildingMenu(player, property);
                 return;
             }
         }
+        // ── Owned by another player: show rent menu
         else if (property.ownerId >= 0 && property.ownerId < players.Length)
         {
             PlayerData owner = players[property.ownerId];
-            int rent = property.GetCurrentRent();
             if (RentMenuUI.Instance != null)
             {
-                RentMenuUI.Instance.OnRentPaid.RemoveAllListeners();
-                RentMenuUI.Instance.OnRentPaid.AddListener((paid) =>
-                {
-                    if (player.RemoveMoney(paid)) owner.AddMoney(paid);
-                    else Debug.LogWarning($"⚠️ {player.playerName} can't afford {paid} DT rent!");
-                    EndTurn();
-                });
                 RentMenuUI.Instance.ShowRentMenu(player, property, owner);
                 return;
             }
-            if (player.RemoveMoney(rent)) { owner.AddMoney(rent); Debug.Log($"💸 Paid {rent} DT rent"); }
+
+            // Fallback: no UI
+            int rent = property.GetCurrentRent();
+            if (player.RemoveMoney(rent))
+            {
+                owner.AddMoney(rent);
+                Debug.Log($"Paid {rent} DT rent (no UI fallback)");
+            }
         }
+
         EndTurn();
     }
 
-    private bool ShouldTriggerMinigame(TileData property) => !property.IsOwned();
+    // ── Minigame: triggered ONLY by button click from PropertyCardUI ──────────
+
+    /// <summary>
+    /// Called by PropertyCardUI's "Play Minigame" button via ServerRpc.
+    /// Only the server executes the actual minigame launch.
+    /// </summary>
+    public void RequestMinigameFromUI(int playerIndex, int tileIndex)
+    {
+        if (!IsServer) return;
+
+        PlayerData player = GetServerPlayer(playerIndex);
+        TileData property = boardManager?.GetTile(tileIndex);
+
+        if (player == null || property == null)
+        {
+            Debug.LogError($"[GameManager] RequestMinigameFromUI: invalid player {playerIndex} or tile {tileIndex}");
+            EndTurn();
+            return;
+        }
+
+        int minigameType = property.propertyColor switch
+        {
+            PropertyColor.Brown => 0,
+            PropertyColor.LightBlue => 1,
+            PropertyColor.Pink => 2,
+            PropertyColor.Orange => 3,
+            PropertyColor.Red => 4,
+            PropertyColor.Yellow => 5,
+            PropertyColor.Green => 6,
+            PropertyColor.DarkBlue => 7,
+            _ => 0
+        };
+
+        int prize = Mathf.Max(100, property.purchasePrice / 2);
+
+        Debug.Log($"[GameManager] Minigame requested by player {playerIndex} on tile {tileIndex} — type {minigameType}, prize {prize}");
+        TriggerMinigameChallenge(player, property, minigameType, prize);
+    }
+
+    /// <summary>
+    /// ServerRpc wrapper so clients can request a minigame via the button.
+    /// </summary>
+    [ServerRpc(RequireOwnership = false)]
+    public void RequestMinigameServerRpc(int playerIndex, int tileIndex)
+    {
+        RequestMinigameFromUI(playerIndex, tileIndex);
+    }
+
+    // ── UI Callbacks (called by each UI's ServerRpc) ──────────────────────────
+
+    /// <summary>Called by RentMenuUI after rent is paid or declined.</summary>
+    public void OnRentMenuClosed()
+    {
+        if (!IsServer) return;
+        EndTurn();
+    }
+
+    /// <summary>
+    /// Called by PropertyCardUI after buy, pass, or minigame button.
+    /// If the player chose to play a minigame, bought=false and
+    /// RequestMinigameServerRpc will have already been called by the UI —
+    /// so we only end the turn here when NOT launching a minigame.
+    /// </summary>
+    public void OnPropertyCardClosed(int playerIndex, int tileIndex, bool bought, bool launchedMinigame = false)
+    {
+        if (!IsServer) return;
+        Debug.Log($"[Server] PropertyCard closed: player={playerIndex} tile={tileIndex} bought={bought} minigame={launchedMinigame}");
+
+        // If a minigame was launched the turn ends via OnMinigameEnded, not here
+        if (!launchedMinigame)
+            EndTurn();
+    }
+
+    /// <summary>Called by BuildingMenuUI after the player closes the build menu.</summary>
+    public void OnBuildingMenuClosed()
+    {
+        if (!IsServer) return;
+        EndTurn();
+    }
+
+    /// <summary>Called by TrainMenuUI after the player's take/pass decision.</summary>
+    public void OnTrainMenuClosed(int playerIndex, int fromTile, int toTile, bool tookTrain, int fare)
+    {
+        if (!IsServer) return;
+        Debug.Log($"[Server] Train closed: player={playerIndex} tookTrain={tookTrain} fare={fare}");
+        EndTurn();
+    }
 
     // ── Helpers ───────────────────────────────────────────────────────────────
 
     private void OnPlayerLandedOnTile(PlayerData player, TileData tile)
-    { if (player != null && tile != null) Debug.Log($"📍 {player.playerName} → {tile.tileName}"); }
+    {
+        if (player != null && tile != null)
+            Debug.Log($"{player.playerName} → {tile.tileName}");
+    }
 
     private void HandlePassGO(PlayerData player)
     {
         if (player == null) return;
         player.AddMoney(goBonus);
-        Debug.Log($"💵 {player.playerName} passed GO! +${goBonus}");
+        Debug.Log($"{player.playerName} passed GO! +{goBonus} DT");
     }
 
     private void EndTurn()
@@ -576,12 +679,10 @@ public class CompleteGameManager : NetworkBehaviour
         {
             PlayerData p = players[currentPlayerIndex];
             p.currentState = PlayerState.Idle;
-
-            // ── Cloud save: quick-save profile after every turn ───────────
             _ = CloudSaveManager.Instance?.SaveProfileOnlyAsync(p);
         }
 
-        Debug.Log("✓ Turn ended\n");
+        Debug.Log("Turn ended\n");
         StartCoroutine(NextPlayerTurn());
     }
 
@@ -608,15 +709,26 @@ public class CompleteGameManager : NetworkBehaviour
         return null;
     }
 
+    public PlayerData GetServerPlayer(int index)
+    {
+        if (players == null || index < 0 || index >= players.Length) return null;
+        return players[index];
+    }
+
     public void PauseGame() { isGamePaused = true; Time.timeScale = 0f; }
     public void ResumeGame() { isGamePaused = false; Time.timeScale = 1f; }
 
     // ── Minigame ──────────────────────────────────────────────────────────────
 
-    public void TriggerMinigameChallenge(PlayerData player, TileData property, int minigameType = 0, int prizeAmount = 200)
+    public void TriggerMinigameChallenge(PlayerData player, TileData property,
+        int minigameType = 0, int prizeAmount = 200)
     {
         if (minigameOrchestrator == null)
-        { Debug.LogError("[GameManager] MinigameOrchestrator not found!"); EndTurn(); return; }
+        {
+            Debug.LogError("[GameManager] MinigameOrchestrator not found!");
+            EndTurn();
+            return;
+        }
         minigameOrchestrator.StartMinigame(minigameType, property.tileName, player, prizeAmount);
     }
 
@@ -626,8 +738,6 @@ public class CompleteGameManager : NetworkBehaviour
         {
             players[winnerId].AddMoney(prizeAmount);
             Debug.Log($"[GameManager] Minigame winner: {players[winnerId].playerName} won {prizeAmount} DT");
-
-            // ── Cloud save: money changed from minigame ───────────────────
             _ = CloudSaveManager.Instance?.SaveProfileOnlyAsync(players[winnerId]);
         }
         EndTurn();
@@ -659,9 +769,11 @@ public class CompleteGameManager : NetworkBehaviour
             List<TileData> group = boardManager.GetTilesByColor(color);
             if (group == null || group.Count == 0) continue;
             bool blocked = false;
-            foreach (var t in group) if (t.ownerId >= 0 && t.ownerId != player.playerId) { blocked = true; break; }
+            foreach (var t in group)
+                if (t.ownerId >= 0 && t.ownerId != player.playerId) { blocked = true; break; }
             if (blocked) continue;
-            foreach (var t in group) if (!player.ownedPropertyIndices.Contains(t.tileIndex)) player.AddProperty(t);
+            foreach (var t in group)
+                if (!player.ownedPropertyIndices.Contains(t.tileIndex)) player.AddProperty(t);
             Debug.Log($"[CHEAT F1] {player.playerName} got MONOPOLY on {color}!");
             return;
         }
@@ -671,22 +783,27 @@ public class CompleteGameManager : NetworkBehaviour
     private void Cheat_OpenBuildingMenu()
     {
         PlayerData player = players[currentPlayerIndex];
-        if (player.ownedProperties.Count == 0) { Debug.LogWarning("[CHEAT F2] No properties — press F1 first."); return; }
-        waitingForDiceRoll = false; StopAllCoroutines();
+        if (player.ownedProperties.Count == 0)
+        {
+            Debug.LogWarning("[CHEAT F2] No properties — press F1 first.");
+            return;
+        }
+        waitingForDiceRoll = false;
+        StopAllCoroutines();
         TileData target = player.ownedProperties[0];
         player.currentTileIndex = target.tileIndex;
         player.movementController?.TeleportToTile(target.tileIndex, boardManager.allTiles);
         if (BuildingMenuUI.Instance != null)
-        {
-            BuildingMenuUI.Instance.OnMenuClosed.RemoveAllListeners();
-            BuildingMenuUI.Instance.OnMenuClosed.AddListener(EndTurn);
             BuildingMenuUI.Instance.ShowBuildingMenu(player, target);
-        }
-        else Debug.LogError("[CHEAT F2] BuildingMenuUI.Instance is null!");
+        else
+            Debug.LogError("[CHEAT F2] BuildingMenuUI.Instance is null!");
     }
 
     private void Cheat_GiveMoney()
-    { players[currentPlayerIndex].AddMoney(5000); Debug.Log("[CHEAT F3] +5000 DT"); }
+    {
+        players[currentPlayerIndex].AddMoney(5000);
+        Debug.Log("[CHEAT F3] +5000 DT");
+    }
 
     private void Cheat_TestRent()
     {
@@ -694,6 +811,7 @@ public class CompleteGameManager : NetworkBehaviour
         int otherIdx = (currentPlayerIndex + 1) % numberOfPlayers;
         PlayerData other = players[otherIdx];
         TileData first = null;
+
         foreach (var tile in boardManager.allTiles)
         {
             if (tile.tileType != TileType.Property || tile.ownerId == player.playerId) continue;
@@ -701,7 +819,9 @@ public class CompleteGameManager : NetworkBehaviour
             if (first == null) first = tile;
         }
         if (first == null) { Debug.LogWarning("[CHEAT F4] No property tiles found."); return; }
-        waitingForDiceRoll = false; StopAllCoroutines();
+
+        waitingForDiceRoll = false;
+        StopAllCoroutines();
         player.currentTileIndex = first.tileIndex;
         player.movementController?.TeleportToTile(first.tileIndex, boardManager.allTiles);
         HandleProperty(player, first);
@@ -712,7 +832,13 @@ public class CompleteGameManager : NetworkBehaviour
         PlayerData player = players[currentPlayerIndex];
         int bought = 0;
         foreach (var tile in boardManager.allTiles)
-        { if (tile.tileType == TileType.Property && !tile.IsOwned()) { player.AddProperty(tile); bought++; } }
+        {
+            if (tile.tileType == TileType.Property && !tile.IsOwned())
+            {
+                player.AddProperty(tile);
+                bought++;
+            }
+        }
         player.AddMoney(99999);
         Debug.Log($"[CHEAT F5] Bought {bought} properties + 99999 DT");
     }
@@ -720,7 +846,8 @@ public class CompleteGameManager : NetworkBehaviour
     private void Cheat_TestTrain_Station()
     {
         PlayerData player = players[currentPlayerIndex];
-        waitingForDiceRoll = false; StopAllCoroutines();
+        waitingForDiceRoll = false;
+        StopAllCoroutines();
         player.currentTileIndex = 5;
         player.movementController?.TeleportToTile(5, boardManager.allTiles);
         TileData station = boardManager.GetTile(5);
@@ -731,7 +858,8 @@ public class CompleteGameManager : NetworkBehaviour
     private void Cheat_TestMinigame()
     {
         PlayerData player = players[currentPlayerIndex];
-        waitingForDiceRoll = false; StopAllCoroutines();
+        waitingForDiceRoll = false;
+        StopAllCoroutines();
         TileData dummy = new TileData(99, "Orange Test Tile", TileType.Property, Vector3.zero);
         dummy.propertyColor = PropertyColor.Orange;
         dummy.purchasePrice = 200;

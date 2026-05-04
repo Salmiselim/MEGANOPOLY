@@ -1,0 +1,18 @@
+fileFormatVersion: 2
+guid: 3be4bb28621ed8e40a42ccc0b5932535
+MonoImporter:
+  externalObjects: {}
+  serializedVersion: 2
+  defaultReferences: []
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 96615
+  packageName: Auction House
+  packageVersion: 2.0
+  assetPath: Assets/Bitszer/Auction House/graphQl-client/Scripts/Core/Introspection.cs
+  uploadId: 494590
