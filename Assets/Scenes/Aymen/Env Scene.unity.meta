@@ -1,5 +1,9 @@
 fileFormatVersion: 2
+<<<<<<<< HEAD:Assets/Scenes/Aymen/Env Scene.unity.meta
 guid: 48366e0c25558434f83c1e481a2ad66e
+========
+guid: 4fcb7f73d3838fb42a2645e7f3a39db6
+>>>>>>>> origin/merge2:Assets/MiniGames/Biss/Scenes/Park.unity.meta
 DefaultImporter:
   externalObjects: {}
   userData: 

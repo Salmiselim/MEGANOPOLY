@@ -67,6 +67,8 @@ sysinfo.txt
 mono_crash.*
 
 # Builds
+/[Rr]elay[Bb]uilds/
+/Relay_test_BackUpThisFolder_ButDontShipItWithYourGame/
 *.apk
 *.aab
 *.unitypackage
@@ -97,3 +99,10 @@ InitTestScene*.unity*
 
 # Auto-generated scenes by play mode tests
 /[Aa]ssets/[Ii]nit[Tt]est[Ss]cene*.unity*
+
+# Claude Code internal worktrees and session data
+.claude/worktrees/
+.claude/
+
+# Unity crash recovery files
+Assets/_Recovery/
