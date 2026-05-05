@@ -3550,15 +3550,38 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 689c9cf8b3660d040941f05801a2e1a7, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::BentWaladManager
-  letterText: {fileID: 593047947}
-  introTimerText: {fileID: 38415336}
-  winnerText: {fileID: 1445149406}
-  resultsPanel: {fileID: 525766746}
+  ShowTopMostFoldoutHeaderGroup: 1
+  letterTexts:
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  introTimerTexts:
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  winnerTexts:
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  resultsPanels:
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
   bgmSource: {fileID: 0}
   bgmClip: {fileID: 0}
   playerBoards:
   - {fileID: 565615051}
+  playerSpawnPoints:
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
   letters: abcdefghijklmnopqrstuvwxyz
+  csvURL: 
   introDuration: 3
 --- !u!1 &2134163061 stripped
 GameObject:

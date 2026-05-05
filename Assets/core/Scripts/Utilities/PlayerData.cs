@@ -94,6 +94,12 @@ public class PlayerData
             ownedProperties.Add(property);
             property.SetOwner(playerId);
             Debug.Log($"{playerName} now owns {property.tileName}");
+            
+            // Trigger First Property achievement
+            if (AchievementManager.Instance != null && ownedProperties.Count == 1 && playerId == 0)
+            {
+                AchievementManager.Instance.UnlockAchievement("first_property");
+            }
         }
     }
     
@@ -117,6 +123,12 @@ public class PlayerData
         currentState = PlayerState.InJail;
         currentTileIndex = 10; // Jail tile
         Debug.Log($"{playerName} sent to jail! Waiting {jailTurnsRemaining} turns.");
+
+        // Trigger Jailbird achievement
+        if (AchievementManager.Instance != null && playerId == 0)
+        {
+            AchievementManager.Instance.UnlockAchievement("jailbird");
+        }
     }
     
     /// <summary>

@@ -23,7 +23,7 @@ public class PlayerInputBoard : MonoBehaviour
     [Tooltip("Can be a UI Button or a 3D XR Interactable object")]
     [SerializeField] private GameObject redButton; 
 
-    [SerializeField] private Transform keyboardParent; // Optional: Only if using my KeyboardButton script
+    [SerializeField] private Transform keyboardParent;
     [SerializeField] private int playerIndex;
 
     [Header("Audio")]
@@ -41,16 +41,15 @@ public class PlayerInputBoard : MonoBehaviour
         manager = FindObjectOfType<BentWaladManager>();
     }
 
-    public void Init()
+    public void Init(int index)
     {
-        // Explicitly map fields to array for easier indexing
+        this.playerIndex = index;
         fieldTexts[0] = boyField;
         fieldTexts[1] = girlField;
         fieldTexts[2] = objectField;
         fieldTexts[3] = foodField;
         fieldTexts[4] = countryField;
 
-        // Setup fields
         for (int i = 0; i < 5; i++)
         {
             if (fieldTexts[i] == null) { Debug.LogError($"Field {i} is not assigned on Player {playerIndex} board!"); continue; }
@@ -58,17 +57,15 @@ public class PlayerInputBoard : MonoBehaviour
             fieldTexts[i].text = "";
             
             var btn = fieldTexts[i].GetComponent<Button>(); 
-            int index = i; // Closure
-            if (btn) btn.onClick.AddListener(() => SetCurrentCategory((Category)index));
+            int capturedIndex = i; 
+            if (btn) btn.onClick.AddListener(() => SetCurrentCategory((Category)capturedIndex));
         }
         
-        SetCurrentCategory(Category.BoysName); // Default
+        SetCurrentCategory(Category.BoysName); 
 
-        // Controls
         if (backspaceBtn) backspaceBtn.onClick.AddListener(Backspace);
         if (clearBtn) clearBtn.onClick.AddListener(ClearCurrent);
         
-        // Setup Red Button (Handles both UI Button and 3D XR Interactable)
         if (redButton != null)
         {
             var uiBtn = redButton.GetComponent<Button>();
@@ -81,17 +78,7 @@ public class PlayerInputBoard : MonoBehaviour
 
     private void OnRedButtonXRSelect(SelectEnterEventArgs args)
     {
-        // Check if the interactor belongs to the correct player
-        var identifier = args.interactorObject.transform.GetComponentInParent<PlayerIdentifier>();
-        if (identifier != null && identifier.playerIndex == playerIndex)
-        {
-            TrySubmit();
-        }
-        else if (identifier == null)
-        {
-            // If no identifier system is found, allow it (for testing/simplicity)
-            TrySubmit();
-        }
+        TrySubmit();
     }
 
     public void AppendLetter(char letter)
@@ -125,7 +112,6 @@ public class PlayerInputBoard : MonoBehaviour
     {
         if (manager.GameEnded) return;
 
-        // Collect current text from fields
         string[] currentWords = new string[5];
 
         if (sfxSource != null && buttonSfx != null)
@@ -138,12 +124,12 @@ public class PlayerInputBoard : MonoBehaviour
             currentWords[i] = GetTextFromField(fieldTexts[i]);
         }
 
-        // "the first to input all his words makes the game end"
         bool allFilled = currentWords.All(w => !string.IsNullOrEmpty(w?.Trim()));
         
         if (allFilled)
         {
-            manager.OnPlayerSubmit(playerIndex, currentWords);
+            // Trigger the global end game sequence instead of just submitting local words
+            manager.EndRoundServerRpc();
         }
         else
         {
@@ -151,11 +137,20 @@ public class PlayerInputBoard : MonoBehaviour
         }
     }
 
+    public void SendMyWordsToServer()
+    {
+        string[] currentWords = new string[5];
+        for (int i = 0; i < 5; i++)
+        {
+            currentWords[i] = GetTextFromField(fieldTexts[i]);
+        }
+        manager.ReportWordsServerRpc(playerIndex, currentWords[0], currentWords[1], currentWords[2], currentWords[3], currentWords[4]);
+    }
+
     private string GetTextFromField(TMP_Text field)
     {
         if (field == null) return "";
         
-        // Check if this text component is part of an InputField (common in user hierarchy)
         var inputField = field.GetComponentInParent<TMP_InputField>();
         if (inputField != null) return inputField.text;
         

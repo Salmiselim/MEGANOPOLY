@@ -2,13 +2,14 @@ using System.Collections;
 using UnityEngine;
 using UnityEngine.XR.Interaction.Toolkit;
 using UnityEngine.XR.Interaction.Toolkit.Interactables;
+using Unity.Netcode;
 
-public class PlayerBread : MonoBehaviour
+public class PlayerBread : NetworkBehaviour
 {
     [SerializeField] private XRGrabInteractable grabInteractable;
     [SerializeField] private float pullThresholdDistance = 0.3f; // World-space metres
     [SerializeField] private int playerIndex;
-    [SerializeField] private Transform ovenParent; // Drag oven transform here for relative pos
+    [SerializeField] private Transform ovenParent;
 
     [Header("Audio")]
     [SerializeField] private AudioSource sfxSource;
@@ -24,8 +25,12 @@ public class PlayerBread : MonoBehaviour
         manager = FindObjectOfType<KhobzManager>();
         if (grabInteractable == null) grabInteractable = GetComponent<XRGrabInteractable>();
         if (ovenParent == null) ovenParent = transform.parent;
-        // Use world position for reliable cross-scale detection
         initialWorldPosition = transform.position;
+    }
+
+    public void Init(int index)
+    {
+        this.playerIndex = index;
     }
 
     void OnEnable()
@@ -42,13 +47,31 @@ public class PlayerBread : MonoBehaviour
 
     void OnSelectEntered(SelectEnterEventArgs args)
     {
+        if (NetworkManager.Singleton != null)
+        {
+            int myClientId = (int)NetworkManager.Singleton.LocalClientId;
+            int myAssignedIndex = myClientId % 4;
+
+            if (playerIndex != myAssignedIndex)
+            {
+                // Force drop by temporarily disabling the interactable so opposing players can't steal bread
+                grabInteractable.enabled = false;
+                Invoke(nameof(ReenableGrab), 0.5f);
+                return;
+            }
+        }
+
         isGrabbed = true;
         hasPulled = false;
     }
 
+    void ReenableGrab()
+    {
+        if (grabInteractable != null) grabInteractable.enabled = true;
+    }
+
     void Update()
     {
-        // Check distance in world space while grabbed so detection happens in real-time
         if (isGrabbed && !hasPulled)
         {
             float distancePulled = Vector3.Distance(transform.position, initialWorldPosition);
@@ -56,7 +79,9 @@ public class PlayerBread : MonoBehaviour
             {
                 hasPulled = true;
                 if (manager != null)
-                    manager.RegisterPull(playerIndex, manager.GetCurrentGameTime());
+                {
+                    manager.RegisterPullServerRpc(playerIndex, manager.GetCurrentGameTime());
+                }
 
                 if (sfxSource != null && pullSfx != null)
                 {
@@ -75,7 +100,6 @@ public class PlayerBread : MonoBehaviour
             isGrabbed = false;
             if (!hasPulled)
             {
-                // Snap back to original world position
                 StartCoroutine(SnapBack());
             }
         }
@@ -86,6 +110,7 @@ public class PlayerBread : MonoBehaviour
         float duration = 0.5f;
         Vector3 startPos = transform.position;
         float elapsed = 0f;
+        
         while (elapsed < duration)
         {
             elapsed += Time.deltaTime;

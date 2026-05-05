@@ -7,272 +7,367 @@ using UnityEngine.XR.Interaction.Toolkit.UI;
 namespace Ghomidha
 {
     /// <summary>
-    /// Attach this to any hiding spot object (e.g. a tree).
+    /// HidingSpot v3 — works in XR Simulator and on device.
     ///
-    /// HOW IT WORKS:
-    /// - A World Space Canvas with a transparent "HIDE" button floats in front of the object.
-    /// - When the player enters the proximity trigger, the button fades in.
-    /// - When the player leaves, the button fades out.
-    /// - Clicking the button teleports the XR Origin to the hidePosition.
+    /// HOW TELEPORT WORKS:
+    ///   Instead of moving the player root once (which the simulator fights because it
+    ///   accumulates its own XR Origin local offset), we apply a DELTA to xrOriginTransform
+    ///   every frame to keep Camera.main X/Z pinned to hidePosition.
+    ///   This wins the battle against the locomotion system regardless of hierarchy.
     ///
     /// SETUP:
-    /// 1. Place this script on the hiding object (e.g. Tree).
-    /// 2. Add a Sphere Collider set to Is Trigger — this is the proximity zone.
-    /// 3. Set hidePosition: an empty child GameObject placed BEHIND the tree.
-    /// 4. The script auto-creates the UI button canvas at runtime — no manual UI needed.
-    ///    OR assign an existing canvas/button if you want full visual control.
+    ///   1. Add this to your hiding object root.
+    ///   2. Create an empty child (e.g. HidePosition_Table) at eye level or floor — anywhere
+    ///      you want the CAMERA to be when hiding. Drag it into Hide Position.
+    ///   3. HIDE / EXIT buttons auto-created at runtime.
     /// </summary>
     public class HidingSpot : MonoBehaviour
     {
-        // ── Inspector ────────────────────────────────────────────────────
+        // ── Inspector ─────────────────────────────────────────────────────
         [Header("Hiding Position")]
-        [Tooltip("Empty child GO placed where the player will teleport to (e.g. behind the tree)")]
+        [Tooltip("The camera will be pinned to this transform's X/Z while hiding.")]
         [SerializeField] private Transform hidePosition;
 
-        [Header("Button Appearance")]
-        [Tooltip("Button background color (semi-transparent)")]
-        [SerializeField] private Color buttonColor = new Color(0f, 0f, 0f, 0.55f);
-
-        [Tooltip("Text shown on the button")]
-        [SerializeField] private string buttonText = "👁  HIDE";
-
-        [Tooltip("How fast the button fades in/out")]
-        [SerializeField] private float fadeDuration = 0.25f;
-
-        [Tooltip("Fixed height (Y-axis) for the button so it's comfortable to click")]
-        [SerializeField] private float buttonHeight = 1.3f;
-
-        [Header("Proximity")]
-        [Tooltip("Trigger collider radius — player must be within this range to see the button")]
+        [Header("Button Settings")]
         [SerializeField] private float proximityRadius = 2.5f;
+        [SerializeField] private float buttonHeight    = 1.3f;
+        [SerializeField] private float fadeDuration    = 0.25f;
 
-        // ── Runtime references ───────────────────────────────────────────
-        private Canvas buttonCanvas;
-        private CanvasGroup canvasGroup;
-        private Button hideButton;
-        private Transform xrOriginTransform;   // the XR Origin root (what we actually move)
+        // ── Global state ──────────────────────────────────────────────────
+        public static bool IsHiding { get; private set; } = false;
+        private static HidingSpot s_activeSpot = null;
 
-        private bool playerInRange = false;
-        private float targetAlpha = 0f;
+        /// <summary>True while a player is actively hiding at this spot. Used by the seeker.</summary>
+        public bool OccupiedByPlayer { get; private set; } = false;
 
-        // ── Lifecycle ────────────────────────────────────────────────────
+        // ── Private refs ──────────────────────────────────────────────────
+        private Transform playerRoot;           // topmost ancestor of XROrigin
+        private Transform xrOriginTf;           // the XROrigin transform itself
+        private bool      playerInRange = false;
+
+        // Cameras/locking
+        private bool    locked = false;
+
+        // Saved state for EXIT restore
+        private Vector3    savedPlayerPos;
+        private Quaternion savedPlayerRot;
+        private Vector3    savedXROriginLocalPos;
+        private Quaternion savedXROriginLocalRot;
+
+        // Buttons
+        private Canvas hideCvs; private CanvasGroup hideCvg; private float hideAlpha;
+        private Canvas exitCvs; private CanvasGroup exitCvg; private float exitAlpha;
+        private float  hideBtnCooldown = 0f;  // delay before HIDE button is clickable
+
+        // ── Lifecycle ──────────────────────────────────────────────────────
         private void Start()
         {
-            FindXROrigin();
-            BuildButtonUI();
-            EnsureProximityCollider();
+            FindRefs();
+            BuildButtons();
+            AddProximityCollider();
         }
 
         private void Update()
         {
-            // Smooth fade
-            if (canvasGroup == null) return;
-            canvasGroup.alpha = Mathf.MoveTowards(
-                canvasGroup.alpha, targetAlpha, Time.deltaTime / fadeDuration);
+            FadeCvg(hideCvg, hideAlpha);
+            FadeCvg(exitCvg, exitAlpha);
+            if (hideBtnCooldown > 0f) hideBtnCooldown -= Time.deltaTime;
 
-            // Always face the player camera
-            if (playerInRange && Camera.main != null)
+            // ── Per-frame position lock ──────────────────────────────────
+            // We correct xrOriginTf every frame so Camera.main X/Z stays at hidePosition X/Z.
+            // This defeats any locomotion or simulator system that tries to fight our teleport.
+            if (locked && s_activeSpot == this && Camera.main != null && xrOriginTf != null)
             {
-                buttonCanvas.transform.LookAt(Camera.main.transform);
-                buttonCanvas.transform.Rotate(0f, 180f, 0f); // flip to face camera
+                float errX = hidePosition.position.x - Camera.main.transform.position.x;
+                float errY = hidePosition.position.y - Camera.main.transform.position.y;
+                float errZ = hidePosition.position.z - Camera.main.transform.position.z;
+                xrOriginTf.position += new Vector3(errX, errY, errZ);
+            }
+
+            // Button facing
+            if (playerInRange && hideCvs != null && Camera.main != null)
+            {
+                hideCvs.transform.LookAt(Camera.main.transform);
+                hideCvs.transform.Rotate(0f, 180f, 0f);
+            }
+            if (locked && s_activeSpot == this && exitCvs != null && Camera.main != null)
+            {
+                // Keep exit button glued very close to player every frame
+                Vector3 camFwd = Camera.main.transform.forward;
+                Vector3 btnPos = Camera.main.transform.position + camFwd * 0.5f;
+                exitCvs.transform.position = btnPos;
+                exitCvs.transform.localScale = Vector3.one * 0.002f;
+                exitCvs.transform.LookAt(Camera.main.transform);
+                exitCvs.transform.Rotate(0f, 180f, 0f);
             }
         }
 
-        // ── Trigger Detection ────────────────────────────────────────────
+        private void LateUpdate()
+        {
+            // HIDE button only becomes interactable after the cooldown (prevents auto-fire on walk-in)
+            bool hideReady = hideCvg != null && hideCvg.alpha > 0.5f && hideBtnCooldown <= 0f;
+            SetInteractable(hideCvg, hideReady);
+            SetInteractable(exitCvg, exitCvg != null && exitCvg.alpha > 0.5f);
+        }
+
+        // ── Trigger ────────────────────────────────────────────────────────
         private void OnTriggerEnter(Collider other)
         {
-            if (!IsPlayerCollider(other) || playerInRange) return;
-            
+            if (!IsPlayer(other) || playerInRange || IsHiding) return;
             playerInRange = true;
-            targetAlpha = 1f;
+            hideAlpha = 1f;
+            hideBtnCooldown = 1.5f;   // player must be in range 1.5s before button is clickable
 
-            // Use hidePosition as the anchor (avoids FBX pivot being far from the mesh)
-            Vector3 spotPos = hidePosition != null ? hidePosition.position : transform.position;
-            Vector3 playerPos = Camera.main != null ? Camera.main.transform.position : other.transform.position;
-            
-            // Place button halfway between the player and the hiding spot
-            Vector3 halfwayPoint = Vector3.Lerp(spotPos, playerPos, 0.5f);
-            
-            // Override Y so the button is at a comfortable clicking height
-            halfwayPoint.y = spotPos.y + buttonHeight;
+            Vector3 spot = hidePosition != null ? hidePosition.position : transform.position;
+            Vector3 cam  = Camera.main  != null ? Camera.main.transform.position : other.transform.position;
+            Vector3 mid  = Vector3.Lerp(spot, cam, 0.5f);
+            mid.y = spot.y + buttonHeight;
 
-            // Unparent the canvas while active so it stays frozen in world space
-            if (buttonCanvas != null)
+            if (hideCvs != null)
             {
-                buttonCanvas.transform.SetParent(null);
-                buttonCanvas.transform.position = halfwayPoint;
-                // Force world scale back — object's large scale would otherwise inflate the button
-                buttonCanvas.transform.localScale = Vector3.one * 0.004f;
+                // Place 0.5m in front of camera at eye level — close and easy to click
+                Vector3 camFwd = Camera.main != null ? Camera.main.transform.forward : Vector3.forward;
+                Vector3 camPos = Camera.main != null ? Camera.main.transform.position : other.transform.position;
+                camFwd.y = 0f;
+                if (camFwd.sqrMagnitude < 0.001f) camFwd = Vector3.forward;
+                Vector3 btnPos = camPos + camFwd.normalized * 0.5f;
+                btnPos.y = camPos.y;  // eye level
+
+                hideCvs.transform.SetParent(null);
+                hideCvs.transform.position   = btnPos;
+                hideCvs.transform.localScale = Vector3.one * 0.002f;
             }
         }
 
         private void OnTriggerExit(Collider other)
         {
-            if (!IsPlayerCollider(other)) return;
+            if (!IsPlayer(other)) return;
             playerInRange = false;
-            targetAlpha = 0f;
-
-            // Re-parent to keep the hierarchy clean when hidden
-            if (buttonCanvas != null)
-            {
-                buttonCanvas.transform.SetParent(transform);
-            }
+            hideAlpha = 0f;
+            if (hideCvs != null) hideCvs.transform.SetParent(transform);
         }
 
-        // ── Hide Action ──────────────────────────────────────────────────
-        private void OnHideButtonClicked()
+        // ── HIDE ───────────────────────────────────────────────────────────
+        private void OnHideClicked()
         {
-            if (xrOriginTransform == null || hidePosition == null)
-            {
-                Debug.LogWarning("[HidingSpot] Missing XR Origin or hidePosition!");
-                return;
-            }
+            if (IsHiding || hidePosition == null || xrOriginTf == null) return;
 
-            // Account for the horizontal gap between the Camera and the XR Origin root.
-            // Without this, the XR Origin moves to hidePosition but the camera (head) is still
-            // offset by however far the player has drifted in the play space — causing 1-2m error.
-            Vector3 camOffset = Vector3.zero;
+            // Save full state for restore
+            savedPlayerPos          = playerRoot != null ? playerRoot.position          : Vector3.zero;
+            savedPlayerRot          = playerRoot != null ? playerRoot.rotation          : Quaternion.identity;
+            savedXROriginLocalPos   = xrOriginTf.localPosition;
+            savedXROriginLocalRot   = xrOriginTf.localRotation;
+
+            // Initial teleport: move xrOriginTf by the error delta so camera lands at hidePosition X/Z
             if (Camera.main != null)
             {
-                camOffset.x = Camera.main.transform.position.x - xrOriginTransform.position.x;
-                camOffset.z = Camera.main.transform.position.z - xrOriginTransform.position.z;
+                float dx = hidePosition.position.x - Camera.main.transform.position.x;
+                float dz = hidePosition.position.z - Camera.main.transform.position.z;
+                xrOriginTf.position += new Vector3(dx, 0f, dz);
             }
 
-            // Move XR Origin so the CAMERA lands exactly at hidePosition X/Z
-            xrOriginTransform.position = new Vector3(
-                hidePosition.position.x - camOffset.x,
-                xrOriginTransform.position.y,           // Y frozen — player keeps own height
-                hidePosition.position.z - camOffset.z);
-            xrOriginTransform.rotation = hidePosition.rotation;
+            // Apply Y rotation (facing direction from hidePosition)
+            float yaw = hidePosition.eulerAngles.y;
+            if (playerRoot != null)
+                playerRoot.rotation = Quaternion.Euler(0f, yaw, 0f);
+            else
+                xrOriginTf.rotation = Quaternion.Euler(0f, yaw, 0f);
 
-            // Hide the button after teleporting
-            targetAlpha = 0f;
+            // Activate per-frame lock
+            locked             = true;
+            IsHiding           = true;
+            OccupiedByPlayer   = true;
+            s_activeSpot       = this;
+
+            // Swap buttons
+            hideAlpha     = 0f;
             playerInRange = false;
+            if (hideCvs != null) hideCvs.transform.SetParent(transform);
+            PlaceExitButton();
+            exitAlpha = 1f;
 
-            Debug.Log($"[HidingSpot] Player hid behind '{gameObject.name}'");
+            Debug.Log($"[HidingSpot v3] Hiding at '{gameObject.name}'. Camera should be at hidePos X/Z.");
         }
 
-        // ── UI Builder ───────────────────────────────────────────────────
-        private void BuildButtonUI()
+        // ── EXIT ───────────────────────────────────────────────────────────
+        private void OnExitClicked()
         {
-            // Create the World Space Canvas
-            GameObject canvasGO = new GameObject($"HideButton_Canvas_{gameObject.name}");
-            canvasGO.transform.SetParent(transform);
-            // Position near hidePosition (not the pivot which may be far from the mesh)
-            Vector3 initPos = hidePosition != null ? hidePosition.position + Vector3.up * buttonHeight : transform.position + Vector3.up * buttonHeight;
-            canvasGO.transform.position = initPos;
-            canvasGO.transform.localScale = Vector3.one * 0.004f;
+            if (!IsHiding || s_activeSpot != this) return;
 
-            buttonCanvas = canvasGO.AddComponent<Canvas>();
-            buttonCanvas.renderMode = RenderMode.WorldSpace;
-            buttonCanvas.worldCamera = Camera.main;
+            locked             = false;
+            IsHiding           = false;
+            OccupiedByPlayer   = false;
+            s_activeSpot       = null;
 
-            canvasGO.AddComponent<UnityEngine.UI.CanvasScaler>();
-            // TrackedDeviceGraphicRaycaster is required for XR ray interactors to click UI
-            canvasGO.AddComponent<TrackedDeviceGraphicRaycaster>();
-
-            canvasGroup = canvasGO.AddComponent<CanvasGroup>();
-            canvasGroup.alpha = 0f;               // start invisible
-            canvasGroup.interactable = false;     // only interactable when visible
-            canvasGroup.blocksRaycasts = false;
-
-            // Background image (button panel)
-            GameObject panelGO = new GameObject("Panel");
-            panelGO.transform.SetParent(canvasGO.transform, false);
-            RectTransform panelRect = panelGO.AddComponent<RectTransform>();
-            panelRect.sizeDelta = new Vector2(200f, 70f);
-            Image panelImage = panelGO.AddComponent<Image>();
-            panelImage.color = buttonColor;
-
-            // The actual Button component
-            hideButton = panelGO.AddComponent<Button>();
-
-            // Button hover tint
-            ColorBlock colors = hideButton.colors;
-            colors.normalColor = Color.white;
-            colors.highlightedColor = new Color(0.8f, 1f, 0.8f, 1f);
-            colors.pressedColor = new Color(0.5f, 1f, 0.5f, 1f);
-            hideButton.colors = colors;
-
-            hideButton.onClick.AddListener(OnHideButtonClicked);
-
-            // Label
-            GameObject labelGO = new GameObject("Label");
-            labelGO.transform.SetParent(panelGO.transform, false);
-            RectTransform labelRect = labelGO.AddComponent<RectTransform>();
-            labelRect.anchorMin = Vector2.zero;
-            labelRect.anchorMax = Vector2.one;
-            labelRect.offsetMin = labelRect.offsetMax = Vector2.zero;
-
-            TextMeshProUGUI label = labelGO.AddComponent<TextMeshProUGUI>();
-            label.text = buttonText;
-            label.fontSize = 28f;
-            label.fontStyle = FontStyles.Bold;
-            label.color = Color.white;
-            label.alignment = TextAlignmentOptions.Center;
-        }
-
-        private void EnsureProximityCollider()
-        {
-            // Auto-add a sphere trigger if none exists
-            SphereCollider[] cols = GetComponents<SphereCollider>();
-            bool hasTrigger = false;
-            foreach (var c in cols) if (c.isTrigger) { hasTrigger = true; break; }
-
-            if (!hasTrigger)
+            // Restore to pre-hide state
+            if (playerRoot != null)
             {
-                SphereCollider sc = gameObject.AddComponent<SphereCollider>();
-                sc.isTrigger = true;
-                // Scale radius to world space (object may have large FBX scale)
-                float worldScale = Mathf.Max(transform.lossyScale.x, 0.001f);
-                sc.radius = proximityRadius / worldScale;
-
-                // Center the trigger on the hidePosition so the proximity zone
-                // is exactly where the player needs to stand
-                if (hidePosition != null)
-                    sc.center = transform.InverseTransformPoint(hidePosition.position);
-
-                Debug.Log("[HidingSpot] Auto-added SphereCollider trigger centered on hidePosition.");
+                playerRoot.position = savedPlayerPos;
+                playerRoot.rotation = savedPlayerRot;
             }
+            xrOriginTf.localPosition = savedXROriginLocalPos;
+            xrOriginTf.localRotation = savedXROriginLocalRot;
+
+            exitAlpha = 0f;
+            if (exitCvs != null) exitCvs.transform.SetParent(transform);
+
+            Debug.Log($"[HidingSpot v3] Exited '{gameObject.name}'. Restored pre-hide position.");
         }
 
-        private void FindXROrigin()
+        // ── Seeker API ─────────────────────────────────────────────────────
+        /// <summary>
+        /// Called by SeekerController when this spot is tagged.
+        /// Forces the hider back to their pre-hide position and clears the spot.
+        /// </summary>
+        public void Reveal()
+        {
+            if (!OccupiedByPlayer) return;
+            Debug.Log($"[HidingSpot] Spot '{gameObject.name}' revealed by seeker!");
+            OnExitClicked();   // reuse exact same restore logic
+        }
+
+        // ── Exit button placement ──────────────────────────────────────────
+        private void PlaceExitButton()
+        {
+            if (exitCvs == null || hidePosition == null) return;
+
+            // Place in front of hidePosition at eye level — camera may not have settled yet
+            // so we use hidePosition as the anchor, not Camera.main
+            Vector3 fwd = hidePosition.forward;
+            fwd.y = 0f;
+            if (fwd.sqrMagnitude < 0.001f) fwd = Vector3.forward;
+
+            Vector3 pos = hidePosition.position + fwd.normalized * 0.6f;
+            // Use camera Y for eye-level placement (hidePosition.y may be at floor level)
+            pos.y = Camera.main != null ? Camera.main.transform.position.y : hidePosition.position.y + 1.5f;
+
+            exitCvs.transform.SetParent(null);
+            exitCvs.transform.position   = pos;
+            exitCvs.transform.localScale = Vector3.one * 0.004f;
+        }
+
+        // ── Find refs ──────────────────────────────────────────────────────
+        private void FindRefs()
         {
             XROrigin origin = FindFirstObjectByType<XROrigin>();
-            if (origin != null)
-                xrOriginTransform = origin.transform;
-            else
-                Debug.LogWarning("[HidingSpot] No XROrigin found in scene!");
+            if (origin == null) { Debug.LogWarning("[HidingSpot] No XROrigin!"); return; }
+
+            xrOriginTf = origin.transform;
+
+            // Walk to topmost parent
+            Transform root = xrOriginTf;
+            while (root.parent != null) root = root.parent;
+            playerRoot = root;
+
+            Debug.Log($"[HidingSpot v3] XROrigin='{xrOriginTf.name}'  PlayerRoot='{playerRoot.name}'");
         }
 
-        private bool IsPlayerCollider(Collider other)
+        // ── Helpers ────────────────────────────────────────────────────────
+        private bool IsPlayer(Collider c)
+            => c.CompareTag("Player") || c.GetComponentInParent<XROrigin>() != null;
+
+        private void FadeCvg(CanvasGroup g, float target)
         {
-            // Match anything tagged Player, or with XROrigin component in parent
-            return other.CompareTag("Player") ||
-                   other.GetComponentInParent<XROrigin>() != null;
+            if (g != null)
+                g.alpha = Mathf.MoveTowards(g.alpha, target, Time.deltaTime / fadeDuration);
         }
 
-        // ── Enables button interactability when visible ──────────────────
-        private void LateUpdate()
+        private void SetInteractable(CanvasGroup g, bool v)
         {
-            if (canvasGroup == null) return;
-            bool visible = canvasGroup.alpha > 0.5f;
-            canvasGroup.interactable = visible;
-            canvasGroup.blocksRaycasts = visible;
+            if (g == null) return;
+            g.interactable = v; g.blocksRaycasts = v;
         }
 
+        // ── Collider ───────────────────────────────────────────────────────
+        private void AddProximityCollider()
+        {
+            foreach (var c in GetComponents<SphereCollider>())
+                if (c.isTrigger) return;
+
+            SphereCollider sc = gameObject.AddComponent<SphereCollider>();
+            sc.isTrigger = true;
+            sc.radius    = proximityRadius / Mathf.Max(transform.lossyScale.x, 0.001f);
+            if (hidePosition != null)
+                sc.center = transform.InverseTransformPoint(hidePosition.position);
+        }
+
+        // ── UI ─────────────────────────────────────────────────────────────
+        private void BuildButtons()
+        {
+            Vector3 init = hidePosition != null
+                ? hidePosition.position + Vector3.up * buttonHeight
+                : transform.position    + Vector3.up * buttonHeight;
+
+            hideCvs = MakeCvs($"Hide_{name}", init, out hideCvg);
+            MakePanel(hideCvs.gameObject, new Color(0.05f, 0.05f, 0.05f, 0.8f), "[ HIDE ]")
+                .onClick.AddListener(OnHideClicked);
+
+            exitCvs = MakeCvs($"Exit_{name}", init, out exitCvg);
+            MakePanel(exitCvs.gameObject, new Color(0.55f, 0.05f, 0.05f, 0.8f), "[ EXIT ]")
+                .onClick.AddListener(OnExitClicked);
+        }
+
+        private Canvas MakeCvs(string n, Vector3 pos, out CanvasGroup cvg)
+        {
+            var go = new GameObject(n);
+            go.transform.SetParent(transform);
+            go.transform.position   = pos;
+            go.transform.localScale = Vector3.one * 0.004f;
+
+            var cv       = go.AddComponent<Canvas>();
+            cv.renderMode  = RenderMode.WorldSpace;
+            cv.worldCamera = Camera.main;
+            go.AddComponent<UnityEngine.UI.CanvasScaler>();
+            go.AddComponent<TrackedDeviceGraphicRaycaster>();
+
+            cvg                = go.AddComponent<CanvasGroup>();
+            cvg.alpha          = 0f;
+            cvg.interactable   = false;
+            cvg.blocksRaycasts = false;
+            return cv;
+        }
+
+        private Button MakePanel(GameObject cvs, Color col, string lbl)
+        {
+            var p = new GameObject("Panel");
+            p.transform.SetParent(cvs.transform, false);
+            var rt = p.AddComponent<RectTransform>();
+            // Exit button is smaller so it fits in tight hiding spaces
+            bool isExit = lbl == "[ EXIT ]";
+            rt.sizeDelta = isExit ? new Vector2(140f, 50f) : new Vector2(220f, 70f);
+            p.AddComponent<Image>().color = col;
+
+            var btn = p.AddComponent<Button>();
+            var cb  = btn.colors;
+            cb.normalColor      = Color.white;
+            cb.highlightedColor = new Color(1f, 1f, 0.7f);
+            cb.pressedColor     = new Color(0.6f, 1f, 0.6f);
+            btn.colors = cb;
+
+            var lgo = new GameObject("Label");
+            lgo.transform.SetParent(p.transform, false);
+            var lr = lgo.AddComponent<RectTransform>();
+            lr.anchorMin = Vector2.zero; lr.anchorMax = Vector2.one;
+            lr.offsetMin = lr.offsetMax = Vector2.zero;
+            var tmp       = lgo.AddComponent<TextMeshProUGUI>();
+            tmp.text      = lbl;
+            tmp.fontSize  = 26f;
+            tmp.fontStyle = FontStyles.Bold;
+            tmp.color     = Color.white;
+            tmp.alignment = TextAlignmentOptions.Center;
+            return btn;
+        }
+
+        // ── Gizmos ─────────────────────────────────────────────────────────
         private void OnDrawGizmosSelected()
         {
-            // Green sphere = proximity trigger — centered on hidePosition
-            Vector3 gizmoCenter = hidePosition != null ? hidePosition.position : transform.position;
-            Gizmos.color = new Color(0f, 1f, 0f, 0.2f);
-            Gizmos.DrawSphere(gizmoCenter, proximityRadius);
-
+            Vector3 c = hidePosition != null ? hidePosition.position : transform.position;
+            Gizmos.color = new Color(0f, 1f, 0f, 0.18f);
+            Gizmos.DrawSphere(c, proximityRadius);
             if (hidePosition != null)
             {
-                // Cyan dot = exact teleport landing point
                 Gizmos.color = Color.cyan;
-                Gizmos.DrawSphere(hidePosition.position, 0.15f);
+                Gizmos.DrawSphere(hidePosition.position, 0.12f);
             }
         }
     }

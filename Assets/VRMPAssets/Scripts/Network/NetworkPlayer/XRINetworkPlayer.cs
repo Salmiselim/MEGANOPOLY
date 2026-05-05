@@ -99,6 +99,9 @@ namespace XRMultiplayer
 
         [HideInInspector] public readonly NetworkVariable<bool> selfMuted = new(false, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Owner);
 
+        [Header("Lobby Ready State")]
+        public readonly NetworkVariable<bool> isReady = new NetworkVariable<bool>(false, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Owner);
+        public Action<bool> onReadyUpdated;
 
         /// <summary>
         /// Player Name Tag.
@@ -177,6 +180,7 @@ namespace XRMultiplayer
         {
             m_PlayerName.OnValueChanged += UpdatePlayerName;
             m_PlayerColor.OnValueChanged += UpdatePlayerColor;
+            isReady.OnValueChanged += UpdateReadyState;
         }
 
         ///<inheritdoc/>
@@ -184,6 +188,7 @@ namespace XRMultiplayer
         {
             m_PlayerName.OnValueChanged -= UpdatePlayerName;
             m_PlayerColor.OnValueChanged -= UpdatePlayerColor;
+            isReady.OnValueChanged -= UpdateReadyState;
         }
 
         ///<inheritdoc/>
@@ -195,7 +200,7 @@ namespace XRMultiplayer
                 {
                     m_VoicePositionCheckTimer += m_VoicePositionUpdateTime;
 
-                    if (Vector3.Distance(m_PrevHeadPos, m_HeadOrigin.position) > m_VoiceUpdatePosotionDelta)
+                    if (m_HeadOrigin != null && Vector3.Distance(m_PrevHeadPos, m_HeadOrigin.position) > m_VoiceUpdatePosotionDelta)
                     {
                         m_PrevHeadPos = m_HeadOrigin.position;
                         if (XRINetworkGameManager.Instance.positionalVoiceChat)
@@ -399,6 +404,22 @@ namespace XRMultiplayer
         void UpdatePlayerColor(Color oldColor, Color newColor)
         {
             onColorUpdated?.Invoke(newColor);
+        }
+
+        void UpdateReadyState(bool oldReady, bool newReady)
+        {
+            onReadyUpdated?.Invoke(newReady);
+        }
+
+        /// <summary>
+        /// Toggles local player's ready state
+        /// </summary>
+        public void ToggleReady()
+        {
+            if (IsOwner)
+            {
+                isReady.Value = !isReady.Value;
+            }
         }
 
         void UpdatePlayerVoiceEnergy(float current)

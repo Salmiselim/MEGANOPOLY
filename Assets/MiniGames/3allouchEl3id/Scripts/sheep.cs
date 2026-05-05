@@ -7,8 +7,10 @@ using UnityEngine.XR.Interaction.Toolkit.Interactors;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using Unity.Netcode;
+using XRMultiplayer;
 
-public class Sheep : MonoBehaviour
+public class Sheep : NetworkBehaviour
 {
     [SerializeField] private XRGrabInteractable grabInteractable;
     [SerializeField] private float holdTimeLimit = 4f; // Auto-drop after this
@@ -25,12 +27,15 @@ public class Sheep : MonoBehaviour
     [SerializeField] private Animator animator;
     [SerializeField] private string isWalkingBool = "IsWalking";
 
-    public int ownerIndex = -1;
+    public NetworkVariable<int> ownerIndex = new NetworkVariable<int>(-1, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
     public Rigidbody rb { get; private set; }
     private SheepManager manager;
     private Vector3 wanderTarget;
     private Coroutine autoDropCoroutine;
     
+    private NetworkPhysicsInteractable networkInteractable;
+    private NetworkVariable<bool> isWandering = new NetworkVariable<bool>(false);
+
     private enum SheepState { Idle, Wandering }
     private SheepState currentState = SheepState.Idle;
     private float stateTimer = 0f;
@@ -45,10 +50,19 @@ public class Sheep : MonoBehaviour
         rb.constraints = RigidbodyConstraints.FreezeRotationX | RigidbodyConstraints.FreezeRotationZ;
         
         if (grabInteractable == null) grabInteractable = GetComponent<XRGrabInteractable>();
+        networkInteractable = GetComponent<NetworkPhysicsInteractable>();
+        
         wanderTarget = transform.position;
-
         stateTimer = Random.Range(0f, 2f); // Randomize initial state timer
-        StartCoroutine(RandomBaaRoutine());
+    }
+
+    public override void OnNetworkSpawn()
+    {
+        base.OnNetworkSpawn();
+        if (IsServer)
+        {
+            StartCoroutine(RandomBaaRoutine());
+        }
     }
 
     void OnEnable()
@@ -63,29 +77,40 @@ public class Sheep : MonoBehaviour
         grabInteractable.selectExited.RemoveListener(OnReleased);
     }
 
-    public void SetOwner(int idx, Material playerMat)
+    public void SetOwnerServer(int idx, int colorIdx)
     {
-        ownerIndex = idx;
-        var renderer = GetComponentInChildren<Renderer>();
-        if (idx >= 0 && playerMat != null && renderer != null)
+        if (!IsServer) return;
+        ownerIndex.Value = idx;
+        SetColorRpc(colorIdx);
+    }
+
+    [Rpc(SendTo.Everyone)]
+    void SetColorRpc(int colorIdx)
+    {
+        if (colorIdx >= 0 && manager != null && colorIdx < manager.playerSheepMaterials.Length)
         {
-            renderer.material = playerMat; // Mark with color
-            // Optional: Add glow - e.g. sheep.transform.Find("Glow").gameObject.SetActive(true);
+            Material playerMat = manager.playerSheepMaterials[colorIdx];
+            var renderer = GetComponentInChildren<Renderer>();
+            if (renderer != null && playerMat != null)
+            {
+                renderer.material = playerMat; 
+            }
         }
         else
         {
-            // Neutral material (set in prefab)
+            // Neutral material logic here if needed
         }
     }
 
     void OnGrabbed(SelectEnterEventArgs args)
     {
-        // Get grabber playerIndex
-        var interactor = args.interactorObject as XRBaseInteractor;
-        var playerId = interactor?.transform.GetComponentInParent<PlayerIdentifier>()?.playerIndex;
-        if (playerId.HasValue && playerId.Value == ownerIndex)
+        int myClientId = -1;
+        if (NetworkManager.Singleton != null) myClientId = (int)NetworkManager.Singleton.LocalClientId;
+        int myAssignedIndex = myClientId % 4;
+
+        if (myClientId != -1 && ownerIndex.Value == myAssignedIndex)
         {
-            manager.CheckWin(playerId.Value);
+            manager.CheckWinServerRpc(myAssignedIndex);
         }
 
         // Auto-drop timer
@@ -96,9 +121,6 @@ public class Sheep : MonoBehaviour
         {
             sfxSource.PlayOneShot(pickupSfx);
         }
-
-        if (animator != null) animator.SetBool(isWalkingBool, false);
-        // Pause wander (kinematic handled by XR)
     }
 
     void OnReleased(SelectExitEventArgs args)
@@ -108,7 +130,6 @@ public class Sheep : MonoBehaviour
             StopCoroutine(autoDropCoroutine);
             autoDropCoroutine = null;
         }
-        // Wander resumes in FixedUpdate
     }
 
     IEnumerator AutoDrop()
@@ -122,10 +143,32 @@ public class Sheep : MonoBehaviour
         }
     }
 
+    void Update()
+    {
+        if (animator != null)
+        {
+            // Sync animation from NetworkVariable
+            animator.SetBool(isWalkingBool, isWandering.Value);
+        }
+    }
+
+    bool IsBeingInteracted()
+    {
+        if (grabInteractable.isSelected) return true;
+        if (networkInteractable != null && networkInteractable.isInteracting) return true;
+        return false;
+    }
+
     void FixedUpdate()
     {
-        if (grabInteractable.isSelected)
+        if (!IsServer)
         {
+            return;
+        }
+
+        if (IsBeingInteracted())
+        {
+            if (isWandering.Value) isWandering.Value = false;
             return;
         }
 
@@ -133,7 +176,7 @@ public class Sheep : MonoBehaviour
 
         if (currentState == SheepState.Idle)
         {
-            if (animator != null) animator.SetBool(isWalkingBool, false);
+            if (isWandering.Value) isWandering.Value = false;
 
             if (stateTimer <= 0f)
             {
@@ -146,7 +189,7 @@ public class Sheep : MonoBehaviour
         }
         else if (currentState == SheepState.Wandering)
         {
-            if (animator != null) animator.SetBool(isWalkingBool, true);
+            if (!isWandering.Value) isWandering.Value = true;
 
             Vector3 flatPos = new Vector3(transform.position.x, 0, transform.position.z);
             Vector3 flatTarget = new Vector3(wanderTarget.x, 0, wanderTarget.z);
@@ -155,20 +198,19 @@ public class Sheep : MonoBehaviour
             {
                 currentState = SheepState.Idle;
                 stateTimer = Random.Range(2f, 5f);
+                isWandering.Value = false;
             }
             else
             {
                 Vector3 dir = (flatTarget - flatPos).normalized;
                 
-                // Instead of adding a tiny force against friction, set the velocity directly 
-                // for consistent movement speed across different floor physics materials.
                 Vector3 targetVelocity = dir * wanderSpeed;
                 rb.linearVelocity = new Vector3(targetVelocity.x, rb.linearVelocity.y, targetVelocity.z);
 
                 if (dir != Vector3.zero)
                 {
                     Quaternion targetRot = Quaternion.LookRotation(dir);
-                    transform.rotation = Quaternion.Slerp(transform.rotation, targetRot, Time.fixedDeltaTime * 10f); // Sped up rotation slightly
+                    transform.rotation = Quaternion.Slerp(transform.rotation, targetRot, Time.fixedDeltaTime * 10f);
                 }
             }
         }
@@ -185,17 +227,22 @@ public class Sheep : MonoBehaviour
     {
         while (true)
         {
-            // Randomly wait 3 to 7 seconds
             float waitTime = Random.Range(3f, 7f);
             yield return new WaitForSeconds(waitTime);
 
-            if (gameObject.activeInHierarchy && !grabInteractable.isSelected)
+            if (gameObject.activeInHierarchy && !IsBeingInteracted())
             {
-                if (sfxSource != null && randomBaaSfx != null)
-                {
-                    sfxSource.PlayOneShot(randomBaaSfx);
-                }
+                BaaClientRpc();
             }
+        }
+    }
+
+    [Rpc(SendTo.Everyone)]
+    void BaaClientRpc()
+    {
+        if (sfxSource != null && randomBaaSfx != null)
+        {
+            sfxSource.PlayOneShot(randomBaaSfx);
         }
     }
 }

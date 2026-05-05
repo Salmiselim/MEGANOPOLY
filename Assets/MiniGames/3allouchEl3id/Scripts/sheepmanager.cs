@@ -4,9 +4,10 @@ using System.Linq;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
-using UnityEngine.XR.Interaction.Toolkit;
+using Unity.Netcode;
+using XRMultiplayer;
 
-public class SheepManager : MonoBehaviour
+public class SheepManager : NetworkBehaviour
 {
     [Header("UI")]
     public TextMeshProUGUI goalText;
@@ -19,50 +20,78 @@ public class SheepManager : MonoBehaviour
     public AudioClip bgmClip;
     public AudioClip whistleClip;
 
+    [Header("Spawn Points")]
+    public Transform[] playerSpawnPoints = new Transform[4];
+
     [Header("Game")]
-    public Sheep[] allSheep; // Drag 24 inactive sheep here
+    public Sheep[] allSheep; // Should be loaded with Sheep objects containing NetworkObjects
     public Material[] playerSheepMaterials = new Material[4]; // Red, Green, Blue, Yellow
     [Space]
     public Vector3 spawnCenter = Vector3.zero;
     public float spawnRadius = 15f;
     public float spawnHeightOffset = 0.5f;
-    public LayerMask groundLayer = 1; // Default layer for ground raycast
+    public LayerMask groundLayer = 1;
     public float introDuration = 3f;
     public float maxGameDuration = 60f; // Failsafe
 
     private float gameStartTime;
-    private bool gameEnded = false;
-    private int winnerIndex = -1;
+    private NetworkVariable<bool> gameEnded = new NetworkVariable<bool>(false);
+    private NetworkVariable<int> winnerIndex = new NetworkVariable<int>(-1);
+    
     private Coroutine introCoroutine;
     private Coroutine gameCoroutine;
+    
     private int[] playerColors = new int[4] { 0, 1, 2, 3 };
 
     void Start()
     {
         goalText.text = "Grab YOUR sheep first!";
-        introTimerText.gameObject.SetActive(true);
+        introTimerText.gameObject.SetActive(false);
         resultsPanel.SetActive(false);
-        ResetGame();
-        
-        if (bgmSource != null && bgmClip != null)
+    }
+    
+    public override void OnNetworkSpawn()
+    {
+        base.OnNetworkSpawn();
+
+        if (playerSpawnPoints != null && playerSpawnPoints.Length > 0)
         {
-            bgmSource.clip = bgmClip;
-            bgmSource.loop = true;
-            bgmSource.Play();
+            int clientId = (int)NetworkManager.Singleton.LocalClientId;
+            int spawnIndex = clientId % playerSpawnPoints.Length;
+            
+            if (playerSpawnPoints[spawnIndex] != null)
+            {
+                var xrOrigin = FindFirstObjectByType<Unity.XR.CoreUtils.XROrigin>();
+                if (xrOrigin != null)
+                {
+                    xrOrigin.transform.position = playerSpawnPoints[spawnIndex].position;
+                    xrOrigin.transform.rotation = playerSpawnPoints[spawnIndex].rotation;
+                }
+            }
         }
         
-        introCoroutine = StartCoroutine(IntroCountdown());
+        if (IsServer)
+        {
+            ResetGameServer();
+        }
     }
 
-    public void CheckWin(int playerIndex)
+    [ServerRpc(RequireOwnership = false)]
+    public void CheckWinServerRpc(int playerIndex)
     {
-        if (gameEnded) return;
-        winnerIndex = playerIndex;
-        gameEnded = true;
+        if (gameEnded.Value) return;
+        winnerIndex.Value = playerIndex;
+        gameEnded.Value = true;
+        
+        EndGameClientRpc(playerIndex);
+    }
+
+    [Rpc(SendTo.Everyone)]
+    void EndGameClientRpc(int playerIndex)
+    {
         winnerText.text = $"Player {playerIndex + 1} Wins!\n(Their sheep: {ColorToName(playerIndex)})";
         resultsPanel.SetActive(true);
         
-        // Stop specific coroutines instead of all
         if (introCoroutine != null) StopCoroutine(introCoroutine);
         if (gameCoroutine != null) StopCoroutine(gameCoroutine);
 
@@ -70,6 +99,13 @@ public class SheepManager : MonoBehaviour
         {
             bgmSource.Stop();
         }
+    }
+    
+    [Rpc(SendTo.Everyone)]
+    void TimeoutClientRpc()
+    {
+        winnerText.text = "Time's up! No winner.";
+        resultsPanel.SetActive(true);
     }
 
     string ColorToName(int idx)
@@ -79,33 +115,115 @@ public class SheepManager : MonoBehaviour
         return colorIdx switch { 0 => "Red", 1 => "Green", 2 => "Blue", 3 => "Purple", _ => "???" };
     }
 
-    IEnumerator IntroCountdown()
+    // Called by UI button or other systems locally, sent to Server
+    public void ResetGame()
+    {
+        ResetGameServerRpc();
+    }
+    
+    [ServerRpc(RequireOwnership = false)]
+    public void ResetGameServerRpc()
+    {
+        ResetGameServer();
+    }
+
+    void ResetGameServer()
+    {
+        if (!IsServer) return;
+        
+        gameEnded.Value = false;
+        winnerIndex.Value = -1;
+        
+        // Randomize player colors
+        List<int> colors = new List<int> { 0, 1, 2, 3 };
+        colors = colors.OrderBy(x => Random.value).ToList();
+        for (int i = 0; i < 4; i++) playerColors[i] = colors[i];
+        
+        SyncColorsClientRpc(playerColors[0], playerColors[1], playerColors[2], playerColors[3]);
+        
+        // Disable sheep (NGO does not forbid SetActive, but typically teleporting is safer. Doing SetActive for simplicity unless NGO complains)
+        foreach (var sheep in allSheep) 
+        {
+            sheep.gameObject.SetActive(false);
+        }
+        
+        StartIntroClientRpc();
+        
+        if (introCoroutine != null) StopCoroutine(introCoroutine);
+        if (gameCoroutine != null) StopCoroutine(gameCoroutine);
+        
+        introCoroutine = StartCoroutine(IntroCountdownServer());
+    }
+
+    [Rpc(SendTo.Everyone)]
+    void SyncColorsClientRpc(int p0, int p1, int p2, int p3)
+    {
+        playerColors[0] = p0;
+        playerColors[1] = p1;
+        playerColors[2] = p2;
+        playerColors[3] = p3;
+    }
+
+    [Rpc(SendTo.Everyone)]
+    void StartIntroClientRpc()
+    {
+        resultsPanel.SetActive(false);
+        introTimerText.gameObject.SetActive(true);
+        foreach (var sheep in allSheep) sheep.gameObject.SetActive(false);
+        
+        if (bgmSource != null && bgmClip != null)
+        {
+            bgmSource.clip = bgmClip;
+            bgmSource.loop = true;
+            bgmSource.Play();
+        }
+    }
+
+    IEnumerator IntroCountdownServer()
     {
         float elapsed = 0f;
         while (elapsed < introDuration)
         {
             elapsed += Time.deltaTime;
-            introTimerText.text = $"{elapsed:F1}";
+            UpdateIntroTimerClientRpc(elapsed);
             yield return null;
         }
-        introTimerText.gameObject.SetActive(false);
+        
+        HideIntroClientRpc();
+        
         gameStartTime = Time.time;
-        SpawnSheep();
-        gameCoroutine = StartCoroutine(GameLoop());
+        SpawnSheepServer();
+        gameCoroutine = StartCoroutine(GameLoopServer());
+    }
+    
+    [Rpc(SendTo.Everyone)]
+    void UpdateIntroTimerClientRpc(float elapsed)
+    {
+        if (!introTimerText.gameObject.activeSelf) 
+        {
+            introTimerText.gameObject.SetActive(true);
+        }
+        introTimerText.text = $"{elapsed:F1}";
+    }
+    
+    [Rpc(SendTo.Everyone)]
+    void HideIntroClientRpc()
+    {
+        introTimerText.gameObject.SetActive(false);
     }
 
-    IEnumerator GameLoop()
+    IEnumerator GameLoopServer()
     {
         yield return new WaitForSeconds(maxGameDuration);
-        if (!gameEnded)
+        if (!gameEnded.Value)
         {
-            winnerIndex = -1; // Tie/no win
-            winnerText.text = "Time's up! No winner.";
-            resultsPanel.SetActive(true);
+            winnerIndex.Value = -1; // Tie/no win
+            gameEnded.Value = true;
+            TimeoutClientRpc();
         }
     }
 
-    void SpawnSheep()
+    void SpawnSheepServer()
     {
         List<int> owners = new List<int> { 0, 1, 2, 3 };
         for (int i = 0; i < allSheep.Length - 4; i++) owners.Add(-1);
@@ -114,10 +232,10 @@ public class SheepManager : MonoBehaviour
         for (int i = 0; i < allSheep.Length; i++)
         {
             var sheep = allSheep[i];
-            sheep.gameObject.SetActive(true);
-            // Pass null material for neutral sheep (owner index -1)
-            Material mat = owners[i] >= 0 ? playerSheepMaterials[playerColors[owners[i]]] : null;
-            sheep.SetOwner(owners[i], mat);
+            
+            // ClientRpc will enable gameobject on clients
+            EnableSheepClientRpc(i);
+
             Vector3 randPos = spawnCenter + Random.insideUnitSphere * spawnRadius;
             randPos.y = 100f; // High for raycast
             if (Physics.Raycast(randPos, Vector3.down, out RaycastHit hit, 200f, groundLayer))
@@ -127,37 +245,30 @@ public class SheepManager : MonoBehaviour
             sheep.transform.position = randPos;
             sheep.rb.linearVelocity = Vector3.zero;
             sheep.rb.angularVelocity = Vector3.zero;
+            
+            int owner = owners[i];
+            int matIdx = owner >= 0 ? playerColors[owner] : -1;
+            sheep.SetOwnerServer(owner, matIdx);
         }
 
+        PlayWhistleClientRpc();
+    }
+    
+    [Rpc(SendTo.Everyone)]
+    void EnableSheepClientRpc(int sheepIndex)
+    {
+        if (sheepIndex >= 0 && sheepIndex < allSheep.Length)
+        {
+            allSheep[sheepIndex].gameObject.SetActive(true);
+        }
+    }
+
+    [Rpc(SendTo.Everyone)]
+    void PlayWhistleClientRpc()
+    {
         if (bgmSource != null && whistleClip != null)
         {
             bgmSource.PlayOneShot(whistleClip);
         }
     }
-
-    public void ResetGame()
-    {
-        gameEnded = false;
-        winnerIndex = -1;
-        
-        // Randomize player colors
-        List<int> colors = new List<int> { 0, 1, 2, 3 };
-        colors = colors.OrderBy(x => Random.value).ToList();
-        for (int i = 0; i < 4; i++) playerColors[i] = colors[i];
-        
-        // Stop specific coroutines with null checks
-        if (introCoroutine != null) StopCoroutine(introCoroutine);
-        if (gameCoroutine != null) StopCoroutine(gameCoroutine);
-        
-        introTimerText.gameObject.SetActive(false);
-        resultsPanel.SetActive(false);
-        foreach (var sheep in allSheep) sheep.gameObject.SetActive(false);
-
-        if (bgmSource != null)
-        {
-            bgmSource.Stop();
-        }
-    }
-
-    // For Monopoly: public int GetWinner() => winnerIndex;
 }
