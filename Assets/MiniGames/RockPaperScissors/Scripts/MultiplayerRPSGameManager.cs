@@ -202,6 +202,14 @@ namespace RockPaperScissors
             {
                 // Lock inputs and show final match result.
                 MatchOverClientRpc(player1, player2, p1Wins, p2Wins, totalRounds);
+
+                // Determine match winner clientId (ulong.MaxValue = tie)
+                ulong matchWinnerClientId = ulong.MaxValue;
+                if (p1Wins != p2Wins)
+                    matchWinnerClientId = (p1Wins > p2Wins) ? player1 : player2;
+
+                // Wait 5s so players read the result, then return to board
+                StartCoroutine(ReturnToBoardAfterDelay(matchWinnerClientId));
             }
             else
             {
@@ -268,6 +276,17 @@ namespace RockPaperScissors
 
             // Tell clients to reset UI
             ResetRoundClientRpc();
+        }
+
+        /// <summary>
+        /// Server-only. Waits 5s so players can read the final result,
+        /// then hands control back to MinigameOrchestrator to load the board scene.
+        /// </summary>
+        private IEnumerator ReturnToBoardAfterDelay(ulong winnerClientId)
+        {
+            yield return new WaitForSeconds(5f);
+            // winnerClientId == ulong.MaxValue means tie (no winner)
+            MinigameOrchestrator.FinishMinigame(winnerClientId, 0);
         }
 
         [ClientRpc]
