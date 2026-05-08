@@ -42,13 +42,13 @@ public class NetworkBootstrapper : MonoBehaviour
     private void Update()
     {
         if (_gameStarted) return;
-        if (!NetworkManager.Singleton.IsServer) return;
+        if (NetworkManager.Singleton == null || !NetworkManager.Singleton.IsServer) return;
 
         int count = NetworkManager.Singleton.ConnectedClientsList.Count;
         UpdateStatus(count);
 
-        // Show force-start once minimum players are present
-        _forceStartBtn.gameObject.SetActive(count >= minPlayersToStart);
+        // Show force-start as soon as you're hosting (host counts as 1)
+        _forceStartBtn.gameObject.SetActive(count >= 1);
 
         // Auto-start
         if (autoStartAt > 0 && count >= autoStartAt)

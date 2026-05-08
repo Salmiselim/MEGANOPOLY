@@ -4,6 +4,7 @@ using UnityEngine;
 using UnityEngine.Events;
 using Unity.Netcode;
 using Unity.Services.Authentication;
+using UnityEngine.InputSystem;
 
 public class CompleteGameManager : NetworkBehaviour
 {
@@ -18,6 +19,7 @@ public class CompleteGameManager : NetworkBehaviour
     [SerializeField] private BoardManager boardManager;
     [SerializeField] private GameObject playerPrefab;
     [SerializeField] private SimpleDiceController[] dice = new SimpleDiceController[2];
+    [SerializeField] private DiceControllerV2[] diceV2 = new DiceControllerV2[2];
 
     [Header("Spawn Points")]
     [SerializeField] private bool useManualSpawnPoints = true;
@@ -33,14 +35,14 @@ public class CompleteGameManager : NetworkBehaviour
 
     [Header("DEBUG")]
     [SerializeField] private bool enableDebugCheats = true;
-    [SerializeField] private KeyCode cheatKey_GiveMonopoly = KeyCode.F1;
-    [SerializeField] private KeyCode cheatKey_OpenBuildMenu = KeyCode.F2;
-    [SerializeField] private KeyCode cheatKey_GiveMoney = KeyCode.F3;
-    [SerializeField] private KeyCode cheatKey_TestRent = KeyCode.F4;
-    [SerializeField] private KeyCode cheatKey_BuyAll = KeyCode.F5;
-    [SerializeField] private KeyCode cheatKey_TestTrain = KeyCode.F6;
-    [SerializeField] private KeyCode cheatKey_TestMinigame = KeyCode.F7;
-    [SerializeField] private KeyCode cheatKey_TestMinigameRent = KeyCode.F8;
+    [SerializeField] private Key cheatKey_GiveMonopoly = Key.F1;
+    [SerializeField] private Key cheatKey_OpenBuildMenu = Key.F2;
+    [SerializeField] private Key cheatKey_GiveMoney = Key.F3;
+    [SerializeField] private Key cheatKey_TestRent = Key.F4;
+    [SerializeField] private Key cheatKey_BuyAll = Key.F5;
+    [SerializeField] private Key cheatKey_TestTrain = Key.F6;
+    [SerializeField] private Key cheatKey_TestMinigame = Key.F7;
+    [SerializeField] private Key cheatKey_TestMinigameRent = Key.F8;
 
     // ── Auth maps ─────────────────────────────────────────────────────────────
     private Dictionary<ulong, string> clientAuthNames = new Dictionary<ulong, string>();
@@ -85,6 +87,10 @@ public class CompleteGameManager : NetworkBehaviour
 
         AutoFindDice();
         AutoFindSpawnPoints();
+        // Connect dice events immediately so they work even without a network game start.
+        // SetupDiceEvents uses RemoveListener+AddListener so calling it again in
+        // ServerInitGame (for late-found dice) never duplicates the subscriptions.
+        SetupDiceEvents();
     }
 
     // ── NGO entry point ───────────────────────────────────────────────────────
@@ -248,15 +254,29 @@ public class CompleteGameManager : NetworkBehaviour
 
     private void AutoFindDice()
     {
-        if (dice != null && dice.Length >= 2 && dice[0] != null && dice[1] != null) return;
+        bool haveSimple = (dice != null && dice.Length >= 2 && dice[0] != null && dice[1] != null);
+        bool haveV2 = (diceV2 != null && diceV2.Length >= 2 && diceV2[0] != null && diceV2[1] != null);
+        if (haveSimple || haveV2) return;
+
         SimpleDiceController[] found = FindObjectsOfType<SimpleDiceController>();
         if (found.Length >= 2)
         {
             System.Array.Sort(found, (a, b) => a.diceNumber.CompareTo(b.diceNumber));
             dice = new SimpleDiceController[2] { found[0], found[1] };
-            Debug.Log($"Auto-found {found.Length} dice");
+            Debug.Log($"Auto-found {found.Length} SimpleDiceController dice");
+            return;
         }
-        else Debug.LogWarning($"Only found {found.Length} dice, need 2");
+
+        DiceControllerV2[] foundV2 = FindObjectsOfType<DiceControllerV2>();
+        if (foundV2.Length >= 2)
+        {
+            System.Array.Sort(foundV2, (a, b) => a.DiceNumber.CompareTo(b.DiceNumber));
+            diceV2 = new DiceControllerV2[2] { foundV2[0], foundV2[1] };
+            Debug.Log($"Auto-found {foundV2.Length} DiceControllerV2 dice");
+            return;
+        }
+
+        Debug.LogWarning($"Only found {found.Length} SimpleDice and {foundV2.Length} V2 dice, need 2");
     }
 
     private void AutoFindSpawnPoints()
@@ -282,8 +302,38 @@ public class CompleteGameManager : NetworkBehaviour
 
     private void SetupDiceEvents()
     {
-        if (dice[0] != null) { dice[0].OnDiceRolled.AddListener(OnDice1Rolled); Debug.Log("Dice 1 connected"); }
-        if (dice[1] != null) { dice[1].OnDiceRolled.AddListener(OnDice2Rolled); Debug.Log("Dice 2 connected"); }
+        // Always remove before adding so calling this multiple times never duplicates listeners.
+        if (dice != null)
+        {
+            if (dice.Length > 0 && dice[0] != null)
+            {
+                dice[0].OnDiceRolled.RemoveListener(OnDice1Rolled);
+                dice[0].OnDiceRolled.AddListener(OnDice1Rolled);
+                Debug.Log("SimpleDice 1 connected");
+            }
+            if (dice.Length > 1 && dice[1] != null)
+            {
+                dice[1].OnDiceRolled.RemoveListener(OnDice2Rolled);
+                dice[1].OnDiceRolled.AddListener(OnDice2Rolled);
+                Debug.Log("SimpleDice 2 connected");
+            }
+        }
+
+        if (diceV2 != null)
+        {
+            if (diceV2.Length > 0 && diceV2[0] != null)
+            {
+                diceV2[0].OnDiceRolled.RemoveListener(OnDice1Rolled);
+                diceV2[0].OnDiceRolled.AddListener(OnDice1Rolled);
+                Debug.Log("V2 Dice 1 connected");
+            }
+            if (diceV2.Length > 1 && diceV2[1] != null)
+            {
+                diceV2[1].OnDiceRolled.RemoveListener(OnDice2Rolled);
+                diceV2[1].OnDiceRolled.AddListener(OnDice2Rolled);
+                Debug.Log("V2 Dice 2 connected");
+            }
+        }
     }
 
     // ── Game flow ─────────────────────────────────────────────────────────────
@@ -311,7 +361,7 @@ public class CompleteGameManager : NetworkBehaviour
         Debug.Log($"\n── {p.playerName}'s TURN  {p.money} DT  {boardManager.GetTile(p.currentTileIndex)?.tileName ?? "?"} ──");
 
         OnTurnChanged?.Invoke(currentPlayerIndex);
-        NotifyTurnClientRpc(currentPlayerIndex);
+        if (IsSpawned) NotifyTurnClientRpc(currentPlayerIndex);
 
         if (p.isInJail) { HandleJailTurn(p); return; }
         EnableDiceForPlayer();
@@ -343,8 +393,16 @@ public class CompleteGameManager : NetworkBehaviour
         waitingForDiceRoll = true;
         dice1HasResult = false; dice1Result = 0;
         dice2HasResult = false; dice2Result = 0;
-        if (dice[0] != null) dice[0].ResetDice();
-        if (dice[1] != null) dice[1].ResetDice();
+        if (dice != null)
+        {
+            if (dice.Length > 0 && dice[0] != null) dice[0].ResetDice();
+            if (dice.Length > 1 && dice[1] != null) dice[1].ResetDice();
+        }
+        if (diceV2 != null)
+        {
+            if (diceV2.Length > 0 && diceV2[0] != null) diceV2[0].ResetDice();
+            if (diceV2.Length > 1 && diceV2[1] != null) diceV2[1].ResetDice();
+        }
         Debug.Log($"[Server] Dice ready for Player {currentPlayerIndex} ({players[currentPlayerIndex]?.playerName})");
     }
 
@@ -361,8 +419,16 @@ public class CompleteGameManager : NetworkBehaviour
     {
         if (!waitingForDiceRoll) { Debug.LogWarning("[Server] Roll requested but not waiting — ignored."); return; }
         Debug.Log("[Server] Rolling dice...");
-        if (dice[0] != null) dice[0].RollDice();
-        if (dice[1] != null) dice[1].RollDice();
+        if (dice != null)
+        {
+            if (dice.Length > 0 && dice[0] != null) dice[0].RollDice();
+            if (dice.Length > 1 && dice[1] != null) dice[1].RollDice();
+        }
+        if (diceV2 != null)
+        {
+            if (diceV2.Length > 0 && diceV2[0] != null) diceV2[0].SimulateThrow();
+            if (diceV2.Length > 1 && diceV2[1] != null) diceV2[1].SimulateThrow();
+        }
     }
 
     private void OnDice1Rolled(int value)
@@ -799,18 +865,80 @@ public class CompleteGameManager : NetworkBehaviour
 
     private void Update()
     {
-        if (!enableDebugCheats || !IsServer) return;
+        if (!enableDebugCheats) return;
+
+        // Allow cheats on the server, OR when no network session is active (editor / solo test).
+        bool networkActive = NetworkManager.Singleton != null && NetworkManager.Singleton.IsListening;
+        if (networkActive && !IsServer) return;
+
+        // Space: roll dice. Works even before a network game is formally started so
+        // you can test dice physics and result flow in isolation in the editor.
+        if (IsKeyDown(Key.Space))
+        {
+            Cheat_ForceRollDice();
+            return;
+        }
+
+        // All other cheat keys require an active game with valid player state.
         if (players == null || currentGameState != GameState.Playing) return;
         if (currentPlayerIndex < 0 || currentPlayerIndex >= players.Length) return;
 
-        if (Input.GetKeyDown(cheatKey_GiveMonopoly)) Cheat_GiveMonopoly();
-        if (Input.GetKeyDown(cheatKey_OpenBuildMenu)) Cheat_OpenBuildingMenu();
-        if (Input.GetKeyDown(cheatKey_GiveMoney)) Cheat_GiveMoney();
-        if (Input.GetKeyDown(cheatKey_TestRent)) Cheat_TestRent();
-        if (Input.GetKeyDown(cheatKey_BuyAll)) Cheat_BuyAllProperties();
-        if (Input.GetKeyDown(cheatKey_TestTrain)) Cheat_TestTrain_Station();
-        if (Input.GetKeyDown(cheatKey_TestMinigame)) Cheat_TestMinigame();
-        if (Input.GetKeyDown(cheatKey_TestMinigameRent)) Cheat_TestMinigameRent();
+        if (IsKeyDown(cheatKey_GiveMonopoly)) Cheat_GiveMonopoly();
+        if (IsKeyDown(cheatKey_OpenBuildMenu)) Cheat_OpenBuildingMenu();
+        if (IsKeyDown(cheatKey_GiveMoney)) Cheat_GiveMoney();
+        if (IsKeyDown(cheatKey_TestRent)) Cheat_TestRent();
+        if (IsKeyDown(cheatKey_BuyAll)) Cheat_BuyAllProperties();
+        if (IsKeyDown(cheatKey_TestTrain)) Cheat_TestTrain_Station();
+        if (IsKeyDown(cheatKey_TestMinigame)) Cheat_TestMinigame();
+        if (IsKeyDown(cheatKey_TestMinigameRent)) Cheat_TestMinigameRent();
+    }
+
+    private static bool IsKeyDown(Key key)
+    {
+        return Keyboard.current != null && Keyboard.current[key].wasPressedThisFrame;
+    }
+
+    /// <summary>
+    /// Space bar cheat: resets and rolls both dice. Sets up the minimum game state needed
+    /// for the result to be processed, so this works correctly both mid-game and in a
+    /// fresh editor session without a network connection.
+    /// </summary>
+    private void Cheat_ForceRollDice()
+    {
+        // Bootstrap minimal player state when rolling before a game has been started,
+        // so HandlePlayerMove doesn't crash on null players / null movementController.
+        if (players == null || players.Length == 0)
+        {
+            players = new PlayerData[1]
+            {
+                new(0, "TestPlayer", playerColors[0]) { money = startingMoney }
+            };
+            currentPlayerIndex = 0;
+            currentGameState = GameState.Playing;
+            Debug.Log("[CHEAT Space] Bootstrapped test player for dice roll.");
+        }
+
+        // Make sure events are wired (dice might have been found after Awake).
+        SetupDiceEvents();
+
+        waitingForDiceRoll = true;
+        dice1HasResult = false; dice1Result = 0;
+        dice2HasResult = false; dice2Result = 0;
+
+        // Reset both dice (clears isRolling and hasResult so result detection works again)
+        // then throw them.
+        if (dice != null)
+        {
+            if (dice.Length > 0 && dice[0] != null) { dice[0].ResetDice(); dice[0].RollDice(); }
+            if (dice.Length > 1 && dice[1] != null) { dice[1].ResetDice(); dice[1].RollDice(); }
+        }
+        if (diceV2 != null)
+        {
+            if (diceV2.Length > 0 && diceV2[0] != null) { diceV2[0].ResetDice(); diceV2[0].SimulateThrow(); }
+            if (diceV2.Length > 1 && diceV2[1] != null) { diceV2[1].ResetDice(); diceV2[1].SimulateThrow(); }
+        }
+
+        Debug.Log("[CHEAT Space] Dice force-rolled.");
     }
 
     private void Cheat_GiveMonopoly()

@@ -13,6 +13,8 @@ public class DiceControllerV2 : MonoBehaviour
 {
     [Header("Dice Settings")]
     [SerializeField] private int diceNumber = 1;
+    // Public accessor for other systems to read the dice number without exposing the field
+    public int DiceNumber => diceNumber;
     [SerializeField] private float throwForceMultiplier = 300f;
     [SerializeField] private float torqueMultiplier = 100f;
     [SerializeField] private float settleTime = 1f;

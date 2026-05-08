@@ -34,8 +34,15 @@ public class AuthUIController : MonoBehaviour
 
     private void Start()
     {
-        loginButton.onClick.AddListener(() => _ = OnLoginClicked());
-        registerButton.onClick.AddListener(() => _ = OnRegisterClicked());
+        if (loginButton != null)
+            loginButton.onClick.AddListener(() => _ = OnLoginClicked());
+        else
+            Debug.LogError("[AuthUI] loginButton is not assigned in the Inspector!", this);
+
+        if (registerButton != null)
+            registerButton.onClick.AddListener(() => _ = OnRegisterClicked());
+        else
+            Debug.LogError("[AuthUI] registerButton is not assigned in the Inspector!", this);
 
         if (resumePanel != null) resumePanel.SetActive(false);
         if (resumeButton != null) resumeButton.onClick.AddListener(OnResumeClicked);
@@ -145,7 +152,16 @@ public class AuthUIController : MonoBehaviour
 
     // ── Helpers ───────────────────────────────────────────────────────────────
 
-    private void LoadNextScene() => SceneManager.LoadScene(nextScene);
+    private void LoadNextScene()
+    {
+        if (string.IsNullOrEmpty(nextScene))
+        {
+            Debug.LogError("[AuthUI] nextScene is empty — set it in the Inspector.");
+            return;
+        }
+        Debug.Log($"[AuthUI] Loading scene: {nextScene}");
+        SceneManager.LoadScene(nextScene);
+    }
 
     private bool ValidateInputs()
     {
@@ -161,10 +177,10 @@ public class AuthUIController : MonoBehaviour
 
     private void SetLoading(bool state)
     {
-        loginButton.interactable = !state;
-        registerButton.interactable = !state;
+        if (loginButton != null) loginButton.interactable = !state;
+        if (registerButton != null) registerButton.interactable = !state;
         if (loadingSpinner) loadingSpinner.SetActive(state);
         if (!state) return;
-        feedbackText.text = "";
+        if (feedbackText != null) feedbackText.text = "";
     }
 }

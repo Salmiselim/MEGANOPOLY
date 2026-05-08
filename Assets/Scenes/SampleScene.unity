@@ -5417,7 +5417,7 @@ PrefabInstance:
     - target: {fileID: 6598815579406187037, guid: 18ddb545287c546e19cc77dc9fbb2189,
         type: 3}
       propertyPath: m_IsActive
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -29263,6 +29263,7 @@ GameObject:
   - component: {fileID: 667934877}
   - component: {fileID: 667934879}
   - component: {fileID: 667934878}
+  - component: {fileID: 667934880}
   m_Layer: 0
   m_Name: NetworkManager
   m_TagString: Untagged
@@ -29293,7 +29294,7 @@ MonoBehaviour:
   m_DisconnectTimeoutMS: 30000
   ConnectionData:
     Address: 127.0.0.1
-    Port: 7777
+    Port: 7789
     ServerListenAddress: 127.0.0.1
     ClientBindPort: 0
   DebugSimulator:
@@ -29382,6 +29383,23 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a6fd89dc549847f4096c58273ff2e979, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Unity.Netcode.Runtime::Unity.Netcode.Transports.SinglePlayer.SinglePlayerTransport
+--- !u!114 &667934880
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 667934873}
+  m_Enabled: 0
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7bf2a28ac6b5487c9ab2ea2e615c7b4f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::RockPaperScissors.RPSRelayNetworkStarter
+  maxConnections: 1
+  region: 
+  joinCodeInput: {fileID: 0}
+  statusText: {fileID: 0}
+  joinCodeText: {fileID: 0}
 --- !u!1 &669753052
 GameObject:
   m_ObjectHideFlags: 0
@@ -85487,6 +85505,9 @@ MonoBehaviour:
   playerPrefab: {fileID: 6776968426489970193, guid: 307cdc933f723644899eeae70ac95303,
     type: 3}
   dice:
+  - {fileID: 0}
+  - {fileID: 0}
+  diceV2:
   - {fileID: 0}
   - {fileID: 0}
   useManualSpawnPoints: 1
