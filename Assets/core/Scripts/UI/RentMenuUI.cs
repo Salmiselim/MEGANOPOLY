@@ -175,7 +175,7 @@ public class RentMenuUI : NetworkBehaviour
             Debug.LogWarning($"[Server] {payer.playerName} can't afford {amount} DT — minigame fallback");
             TileData tile = Object.FindFirstObjectByType<BoardManager>()?.GetTile(_tileIndex);
             if (tile != null)
-                CompleteGameManager.Instance?.TriggerMinigameChallenge(payer, tile, 0, amount);
+                CompleteGameManager.Instance?.TriggerMinigameChallenge(payer, tile, 0, amount, isRentContext: true);
             return; // minigame ends the turn via OnMinigameEnded
         }
 
@@ -195,7 +195,7 @@ public class RentMenuUI : NetworkBehaviour
         }
 
         Debug.Log($"[Server] {payer.playerName} chose minigame instead of rent on {tile.tileName}");
-        CompleteGameManager.Instance?.TriggerMinigameChallenge(payer, tile, 0, prizeAmount);
+        CompleteGameManager.Instance?.TriggerMinigameChallenge(payer, tile, 0, prizeAmount, isRentContext: true);
         // Turn continues via CompleteGameManager.OnMinigameEnded
     }
 
