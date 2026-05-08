@@ -1,13 +1,18 @@
-﻿using System.Collections;
+using System.Collections;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
 using UnityEngine.XR.Interaction.Toolkit.UI;
+using TMPro;
 
 /// <summary>
 /// Drop on any persistent scene object (e.g. your GameManager GameObject).
-/// Waits until Camera.main is available (after XROwnershipGuard enables Camera Offset),
-/// then auto-fixes all World Space canvases and logs a full diagnostic.
+///
+/// On Start: immediately fixes the EventSystem (removes StandaloneInputModule,
+/// ensures XRUIInputModule) and enforces shouldHideMobileInput / keyboardType on
+/// every TMP_InputField so the native Quest keyboard never opens.
+///
+/// Then waits for Camera.main and fixes World Space canvases.
 /// </summary>
 public class VRCanvasDiagnostic : MonoBehaviour
 {
@@ -27,10 +32,16 @@ public class VRCanvasDiagnostic : MonoBehaviour
 
     private int runCount = 0;
 
-    // ── Start: poll until Camera.main is live ─────────────────────────────────
+    // ── Start: fix EventSystem and input fields immediately, then wait for camera ─
 
     private void Start()
     {
+        // These fixes are camera-independent — run them right away so there is
+        // no window where StandaloneInputModule processes XR pointer events or
+        // TMP fields open the native Quest keyboard.
+        if (autoRemoveStandaloneInput) FixEventSystem();
+        FixInputFields();
+
         StartCoroutine(WaitForCameraAndFix());
     }
 
@@ -52,12 +63,12 @@ public class VRCanvasDiagnostic : MonoBehaviour
         Debug.Log($"[VRDiag] Camera.main found: '{Camera.main.name}' after {waited:F0}s. Running fixes.");
 
         if (autoFixCanvases) FixWorldSpaceCanvases();
-        if (autoRemoveStandaloneInput) FixEventSystem();
         if (runDiagnosticAfterFix) RunDiagnostic();
 
-        // Run again at 10s in case late-spawned canvases appeared
+        // Run again at 10s in case late-spawned canvases or input fields appeared
         yield return new WaitForSeconds(10f);
         if (autoFixCanvases) FixWorldSpaceCanvases();
+        FixInputFields();
         if (runDiagnosticAfterFix) RunDiagnostic();
     }
 
@@ -98,17 +109,38 @@ public class VRCanvasDiagnostic : MonoBehaviour
         EventSystem es = FindObjectOfType<EventSystem>();
         if (es == null) return;
 
+        // Destroy (not just disable) StandaloneInputModule — a disabled module can
+        // still intercept events in some Unity versions.
         StandaloneInputModule sim = es.GetComponent<StandaloneInputModule>();
-        if (sim != null && sim.enabled)
+        if (sim != null)
         {
-            sim.enabled = false;
-            Debug.Log("[VRDiag] Disabled StandaloneInputModule (blocks XR input).");
+            Destroy(sim);
+            Debug.Log("[VRDiag] Destroyed StandaloneInputModule (blocks XR input).");
         }
 
         if (es.GetComponent<XRUIInputModule>() == null)
         {
             es.gameObject.AddComponent<XRUIInputModule>();
             Debug.Log("[VRDiag] Added XRUIInputModule to EventSystem.");
+        }
+    }
+
+    /// <summary>
+    /// Enforces on every TMP_InputField in the scene that the native Quest/Android
+    /// on-screen keyboard never opens. XRKeyboardBridge already does this per-field
+    /// at Start, but this catches fields that don't have the bridge component and any
+    /// that appear after a late scene load.
+    /// </summary>
+    private void FixInputFields()
+    {
+        foreach (TMP_InputField field in FindObjectsOfType<TMP_InputField>(includeInactive: true))
+        {
+            if (field.shouldHideSoftKeyboard && !field.resetOnDeActivation)
+                continue;
+
+            field.shouldHideSoftKeyboard = true;
+            field.resetOnDeActivation = false;
+            Debug.Log($"[VRDiag] Patched TMP_InputField '{field.name}': shouldHideSoftKeyboard=true, resetOnDeActivation=false.");
         }
     }
 
@@ -164,6 +196,14 @@ public class VRCanvasDiagnostic : MonoBehaviour
                 else
                     Debug.Log($"[DIAG]   Button '{btn.name}': OK interactable={btn.interactable}");
             }
+        }
+
+        // TMP_InputField audit
+        foreach (TMP_InputField field in FindObjectsOfType<TMP_InputField>(includeInactive: true))
+        {
+            if (!field.shouldHideSoftKeyboard)
+                Debug.LogWarning($"[DIAG] TMP_InputField '{field.name}' may open native keyboard: " +
+                                 $"shouldHideSoftKeyboard={field.shouldHideSoftKeyboard}");
         }
 
         // XR Interactors

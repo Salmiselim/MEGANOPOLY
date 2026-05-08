@@ -118,6 +118,19 @@ namespace UnityEngine.XR.Interaction.Toolkit.Samples.SpatialKeyboard
                     Debug.LogWarning("Could not find main camera to assign the missing Camera Transform property.", this);
             }
 
+            // Fallback: if no player root was assigned in the Inspector, derive one from
+            // the camera hierarchy (XR Origin → Camera Offset → Main Camera).
+            // This keeps the keyboard parented inside the XR rig so it moves with the player.
+            if (m_PlayerRoot == null && m_CameraTransform != null)
+            {
+                // Camera Offset is the typical parent of the XR camera; XR Origin is its parent.
+                // Either makes a good anchor — prefer Camera Offset (one level up from camera).
+                m_PlayerRoot = m_CameraTransform.parent != null
+                    ? m_CameraTransform.parent   // Camera Offset
+                    : m_CameraTransform;          // camera itself as last resort
+                Debug.Log($"[GlobalNonNativeKeyboard] m_PlayerRoot not assigned — using '{m_PlayerRoot.name}' derived from camera hierarchy.", this);
+            }
+
             if (m_KeyboardPrefab != null)
             {
                 var keyboardObj = Instantiate(m_KeyboardPrefab, m_PlayerRoot);

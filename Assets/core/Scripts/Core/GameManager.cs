@@ -40,6 +40,7 @@ public class CompleteGameManager : NetworkBehaviour
     [SerializeField] private KeyCode cheatKey_BuyAll = KeyCode.F5;
     [SerializeField] private KeyCode cheatKey_TestTrain = KeyCode.F6;
     [SerializeField] private KeyCode cheatKey_TestMinigame = KeyCode.F7;
+    [SerializeField] private KeyCode cheatKey_TestMinigameRent = KeyCode.F8;
 
     // ── Auth maps ─────────────────────────────────────────────────────────────
     private Dictionary<ulong, string> clientAuthNames = new Dictionary<ulong, string>();
@@ -59,6 +60,15 @@ public class CompleteGameManager : NetworkBehaviour
     public UnityEvent<int> OnTurnChanged = new UnityEvent<int>();
 
     private MinigameOrchestrator minigameOrchestrator;
+
+    // ── Minigame session context ──────────────────────────────────────────────
+    private int minigameChallengerIndex = -1;
+    private int minigameTileIndex = -1;
+    private bool minigameIsRentContext = false;
+
+    [Header("Minigame Rewards")]
+    [Tooltip("Money awarded to the winner when they are NOT the player who triggered the mini-game.")]
+    [SerializeField] private int nonChallengerReward = 150;
 
     // ── Awake ─────────────────────────────────────────────────────────────────
 
@@ -720,8 +730,12 @@ public class CompleteGameManager : NetworkBehaviour
 
     // ── Minigame ──────────────────────────────────────────────────────────────
 
+    /// <param name="isRentContext">
+    /// True when triggered from a rent payment situation (challenger winning = free rent).
+    /// False when triggered from a property buy situation (challenger winning = free property).
+    /// </param>
     public void TriggerMinigameChallenge(PlayerData player, TileData property,
-        int minigameType = 0, int prizeAmount = 200)
+        int minigameType = 0, int prizeAmount = 200, bool isRentContext = false)
     {
         if (minigameOrchestrator == null)
         {
@@ -729,17 +743,55 @@ public class CompleteGameManager : NetworkBehaviour
             EndTurn();
             return;
         }
-        minigameOrchestrator.StartMinigame(minigameType, property.tileName, player, prizeAmount);
+
+        minigameChallengerIndex = player.playerId;
+        minigameTileIndex = property.tileIndex;
+        minigameIsRentContext = isRentContext;
+
+        minigameOrchestrator.StartMinigame(minigameType, property.tileName, player, prizeAmount, player.playerId);
     }
 
     private void OnMinigameEnded(int winnerId, int prizeAmount)
     {
-        if (winnerId >= 0 && winnerId < players.Length && prizeAmount > 0)
+        bool challengerWon = winnerId >= 0 && winnerId == minigameChallengerIndex;
+
+        if (winnerId >= 0 && winnerId < players.Length)
         {
-            players[winnerId].AddMoney(prizeAmount);
-            Debug.Log($"[GameManager] Minigame winner: {players[winnerId].playerName} won {prizeAmount} DT");
-            _ = CloudSaveManager.Instance?.SaveProfileOnlyAsync(players[winnerId]);
+            if (challengerWon)
+            {
+                if (!minigameIsRentContext)
+                {
+                    // Buy context: challenger wins the property for free
+                    TileData tile = boardManager?.GetTile(minigameTileIndex);
+                    if (tile != null && !tile.IsOwned())
+                    {
+                        players[winnerId].AddProperty(tile);
+                        Debug.Log($"[GameManager] {players[winnerId].playerName} won the minigame — {tile.tileName} granted for free!");
+                        _ = CloudSaveManager.Instance?.SaveProfileOnlyAsync(players[winnerId]);
+                    }
+                }
+                else
+                {
+                    // Rent context: challenger wins → rent is waived, no payment needed
+                    Debug.Log($"[GameManager] {players[winnerId].playerName} won the minigame — rent is waived!");
+                }
+            }
+            else
+            {
+                // A non-challenger won → small reward
+                players[winnerId].AddMoney(nonChallengerReward);
+                Debug.Log($"[GameManager] {players[winnerId].playerName} won the minigame and earns {nonChallengerReward} DT reward!");
+                _ = CloudSaveManager.Instance?.SaveProfileOnlyAsync(players[winnerId]);
+            }
         }
+        else
+        {
+            Debug.Log("[GameManager] Minigame ended with no winner — no reward distributed.");
+        }
+
+        minigameChallengerIndex = -1;
+        minigameTileIndex = -1;
+        minigameIsRentContext = false;
         EndTurn();
     }
 
@@ -758,6 +810,7 @@ public class CompleteGameManager : NetworkBehaviour
         if (Input.GetKeyDown(cheatKey_BuyAll)) Cheat_BuyAllProperties();
         if (Input.GetKeyDown(cheatKey_TestTrain)) Cheat_TestTrain_Station();
         if (Input.GetKeyDown(cheatKey_TestMinigame)) Cheat_TestMinigame();
+        if (Input.GetKeyDown(cheatKey_TestMinigameRent)) Cheat_TestMinigameRent();
     }
 
     private void Cheat_GiveMonopoly()
@@ -863,6 +916,19 @@ public class CompleteGameManager : NetworkBehaviour
         TileData dummy = new TileData(99, "Orange Test Tile", TileType.Property, Vector3.zero);
         dummy.propertyColor = PropertyColor.Orange;
         dummy.purchasePrice = 200;
-        TriggerMinigameChallenge(player, dummy, 3, 100);
+        // Buy context: challenger wins → property for free
+        TriggerMinigameChallenge(player, dummy, 3, 100, isRentContext: false);
+    }
+
+    private void Cheat_TestMinigameRent()
+    {
+        PlayerData player = players[currentPlayerIndex];
+        waitingForDiceRoll = false;
+        StopAllCoroutines();
+        TileData dummy = new TileData(99, "Rent Test Tile", TileType.Property, Vector3.zero);
+        dummy.propertyColor = PropertyColor.Orange;
+        dummy.purchasePrice = 200;
+        // Rent context: challenger wins → rent waived; another player wins → nonChallengerReward DT
+        TriggerMinigameChallenge(player, dummy, 3, 150, isRentContext: true);
     }
 }
