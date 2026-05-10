@@ -597,21 +597,15 @@ public class CompleteGameManager : NetworkBehaviour
 
     private void HandleProperty(PlayerData player, TileData property)
     {
-        // ── Unowned: always show the buy card UI first.
-        // The "Play Minigame" button inside PropertyCardUI calls
-        // RequestMinigameServerRpc when the player clicks it.
+        // ── Unowned: launch minigame immediately.
+        // All players are sent to the minigame scene; the winner claims the property.
         if (!property.IsOwned())
         {
-            TileMarker marker = boardManager.GetTileMarker(property.tileIndex);
-            if (PropertyCardUI.Instance != null && marker?.propertyCard != null)
-            {
-                PropertyCardUI.Instance.ShowPropertyCard(player, property, marker);
-                return;
-            }
+            int minigameType = GetMinigameTypeForProperty(property);
+            int prize        = Mathf.Max(100, property.purchasePrice / 2);
 
-            // PropertyCardUI not available — just end turn
-            Debug.LogWarning("[GameManager] PropertyCardUI not set up — auto-passing");
-            EndTurn();
+            Debug.Log($"[GameManager] '{property.tileName}' is unowned → launching minigame type={minigameType} prize={prize}");
+            TriggerMinigameChallenge(player, property, minigameType, prize);
             return;
         }
 
@@ -648,6 +642,21 @@ public class CompleteGameManager : NetworkBehaviour
 
     // ── Minigame: triggered ONLY by button click from PropertyCardUI ──────────
 
+    /// <summary>Maps a property's color to a minigame type index.</summary>
+    private static int GetMinigameTypeForProperty(TileData property) =>
+        property.propertyColor switch
+        {
+            PropertyColor.Brown     => 0,
+            PropertyColor.LightBlue => 1,
+            PropertyColor.Pink      => 2,
+            PropertyColor.Orange    => 3,
+            PropertyColor.Red       => 4,
+            PropertyColor.Yellow    => 5,
+            PropertyColor.Green     => 6,
+            PropertyColor.DarkBlue  => 7,
+            _                       => 0
+        };
+
     /// <summary>
     /// Called by PropertyCardUI's "Play Minigame" button via ServerRpc.
     /// Only the server executes the actual minigame launch.
@@ -666,18 +675,7 @@ public class CompleteGameManager : NetworkBehaviour
             return;
         }
 
-        int minigameType = property.propertyColor switch
-        {
-            PropertyColor.Brown => 0,
-            PropertyColor.LightBlue => 1,
-            PropertyColor.Pink => 2,
-            PropertyColor.Orange => 3,
-            PropertyColor.Red => 4,
-            PropertyColor.Yellow => 5,
-            PropertyColor.Green => 6,
-            PropertyColor.DarkBlue => 7,
-            _ => 0
-        };
+        int minigameType = GetMinigameTypeForProperty(property);
 
         int prize = Mathf.Max(100, property.purchasePrice / 2);
 
@@ -813,6 +811,17 @@ public class CompleteGameManager : NetworkBehaviour
         minigameChallengerIndex = player.playerId;
         minigameTileIndex = property.tileIndex;
         minigameIsRentContext = isRentContext;
+
+        // Build clientId → player index map so the minigame scene can resolve the winner.
+        // ConnectedClientsIds order matches the order players[] was created in ServerInitGame.
+        if (NetworkManager.Singleton != null)
+        {
+            var clientIds = new List<ulong>(NetworkManager.Singleton.ConnectedClientsIds);
+            var map = new Dictionary<ulong, int>();
+            for (int i = 0; i < Mathf.Min(clientIds.Count, players.Length); i++)
+                map[clientIds[i]] = i;
+            minigameOrchestrator.RegisterClientPlayerMap(map);
+        }
 
         minigameOrchestrator.StartMinigame(minigameType, property.tileName, player, prizeAmount, player.playerId);
     }
@@ -1038,14 +1047,35 @@ public class CompleteGameManager : NetworkBehaviour
 
     private void Cheat_TestMinigame()
     {
+        if (!IsServer) return;
+
         PlayerData player = players[currentPlayerIndex];
+
+        // Find the first unowned property tile on the board
+        TileData target = null;
+        foreach (var tile in boardManager.allTiles)
+        {
+            if (tile.tileType == TileType.Property && !tile.IsOwned())
+            {
+                target = tile;
+                break;
+            }
+        }
+
+        if (target == null)
+        {
+            Debug.LogWarning("[CHEAT F7] No unowned property tiles left.");
+            return;
+        }
+
         waitingForDiceRoll = false;
         StopAllCoroutines();
-        TileData dummy = new TileData(99, "Orange Test Tile", TileType.Property, Vector3.zero);
-        dummy.propertyColor = PropertyColor.Orange;
-        dummy.purchasePrice = 200;
-        // Buy context: challenger wins → property for free
-        TriggerMinigameChallenge(player, dummy, 3, 100, isRentContext: false);
+
+        player.currentTileIndex = target.tileIndex;
+        player.movementController?.TeleportToTile(target.tileIndex, boardManager.allTiles);
+
+        Debug.Log($"[CHEAT F7] Teleporting {player.playerName} to '{target.tileName}' → triggering minigame.");
+        HandleProperty(player, target);
     }
 
     private void Cheat_TestMinigameRent()
