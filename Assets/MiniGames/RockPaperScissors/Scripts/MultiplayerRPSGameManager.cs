@@ -319,8 +319,7 @@ namespace RockPaperScissors
             if (resultText != null)
             {
                 int shownTotal = Math.Max(1, totalRounds);
-                resultText.text = $"Round 0/{shownTotal}  |  Score 0-0\nChoose your move!";
-                resultText.color = Color.white;
+                resultText.text = $"Choose your move!";
             }
             if (localPlayerChoiceText != null) localPlayerChoiceText.text = "Your choice: ?";
             if (opponentChoiceText != null) opponentChoiceText.text = "Opponent choice: ?";
@@ -340,7 +339,7 @@ namespace RockPaperScissors
                 bool isPlayer1 = myId == p1Id;
                 int myWins = isPlayer1 ? p1Wins : p2Wins;
                 int oppWins = isPlayer1 ? p2Wins : p1Wins;
-                scoreText.text = $"Score: You {myWins} - {oppWins} Opp";
+                scoreText.text = $"Score: {myWins} - {oppWins}";
             }
 
             bool isP1 = myId == p1Id;
