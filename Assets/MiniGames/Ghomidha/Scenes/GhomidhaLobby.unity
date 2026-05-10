@@ -6893,79 +6893,6 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1025853660}
   m_CullTransparentMesh: 1
---- !u!1001 &1049534963
-PrefabInstance:
-  m_ObjectHideFlags: 0
-  serializedVersion: 2
-  m_Modification:
-    serializedVersion: 3
-    m_TransformParent: {fileID: 0}
-    m_Modifications:
-    - target: {fileID: -8679921383154817045, guid: ba16f422ff299b246acc3e2406f90a31,
-        type: 3}
-      propertyPath: m_LocalPosition.x
-      value: -2.7
-      objectReference: {fileID: 0}
-    - target: {fileID: -8679921383154817045, guid: ba16f422ff299b246acc3e2406f90a31,
-        type: 3}
-      propertyPath: m_LocalPosition.y
-      value: 4.03
-      objectReference: {fileID: 0}
-    - target: {fileID: -8679921383154817045, guid: ba16f422ff299b246acc3e2406f90a31,
-        type: 3}
-      propertyPath: m_LocalPosition.z
-      value: -9.93572
-      objectReference: {fileID: 0}
-    - target: {fileID: -8679921383154817045, guid: ba16f422ff299b246acc3e2406f90a31,
-        type: 3}
-      propertyPath: m_LocalRotation.w
-      value: 0.7071067
-      objectReference: {fileID: 0}
-    - target: {fileID: -8679921383154817045, guid: ba16f422ff299b246acc3e2406f90a31,
-        type: 3}
-      propertyPath: m_LocalRotation.x
-      value: -0.7071068
-      objectReference: {fileID: 0}
-    - target: {fileID: -8679921383154817045, guid: ba16f422ff299b246acc3e2406f90a31,
-        type: 3}
-      propertyPath: m_LocalRotation.y
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: -8679921383154817045, guid: ba16f422ff299b246acc3e2406f90a31,
-        type: 3}
-      propertyPath: m_LocalRotation.z
-      value: -0
-      objectReference: {fileID: 0}
-    - target: {fileID: -8679921383154817045, guid: ba16f422ff299b246acc3e2406f90a31,
-        type: 3}
-      propertyPath: m_LocalEulerAnglesHint.x
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: -8679921383154817045, guid: ba16f422ff299b246acc3e2406f90a31,
-        type: 3}
-      propertyPath: m_LocalEulerAnglesHint.y
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: -8679921383154817045, guid: ba16f422ff299b246acc3e2406f90a31,
-        type: 3}
-      propertyPath: m_LocalEulerAnglesHint.z
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: -7511558181221131132, guid: ba16f422ff299b246acc3e2406f90a31,
-        type: 3}
-      propertyPath: 'm_Materials.Array.data[0]'
-      value: 
-      objectReference: {fileID: 2100000, guid: 0b86238d6e189284ea42dbfc19295413, type: 2}
-    - target: {fileID: 919132149155446097, guid: ba16f422ff299b246acc3e2406f90a31,
-        type: 3}
-      propertyPath: m_Name
-      value: City Rooftop Night Sphere
-      objectReference: {fileID: 0}
-    m_RemovedComponents: []
-    m_RemovedGameObjects: []
-    m_AddedGameObjects: []
-    m_AddedComponents: []
-  m_SourcePrefab: {fileID: 100100000, guid: ba16f422ff299b246acc3e2406f90a31, type: 3}
 --- !u!1 &1054421285
 GameObject:
   m_ObjectHideFlags: 0
@@ -20071,6 +19998,74 @@ Transform:
   m_Children: []
   m_Father: {fileID: 5816535059826538082}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1001 &544898608627409754
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 0}
+    m_Modifications:
+    - target: {fileID: 5909819142946403455, guid: 81c66c8cff1d3f14a9e80e535cd22aac,
+        type: 3}
+      propertyPath: m_LocalPosition.x
+      value: -2.7
+      objectReference: {fileID: 0}
+    - target: {fileID: 5909819142946403455, guid: 81c66c8cff1d3f14a9e80e535cd22aac,
+        type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 4.03
+      objectReference: {fileID: 0}
+    - target: {fileID: 5909819142946403455, guid: 81c66c8cff1d3f14a9e80e535cd22aac,
+        type: 3}
+      propertyPath: m_LocalPosition.z
+      value: -9.93572
+      objectReference: {fileID: 0}
+    - target: {fileID: 5909819142946403455, guid: 81c66c8cff1d3f14a9e80e535cd22aac,
+        type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 0.7071067
+      objectReference: {fileID: 0}
+    - target: {fileID: 5909819142946403455, guid: 81c66c8cff1d3f14a9e80e535cd22aac,
+        type: 3}
+      propertyPath: m_LocalRotation.x
+      value: -0.7071068
+      objectReference: {fileID: 0}
+    - target: {fileID: 5909819142946403455, guid: 81c66c8cff1d3f14a9e80e535cd22aac,
+        type: 3}
+      propertyPath: m_LocalRotation.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5909819142946403455, guid: 81c66c8cff1d3f14a9e80e535cd22aac,
+        type: 3}
+      propertyPath: m_LocalRotation.z
+      value: -0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5909819142946403455, guid: 81c66c8cff1d3f14a9e80e535cd22aac,
+        type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5909819142946403455, guid: 81c66c8cff1d3f14a9e80e535cd22aac,
+        type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5909819142946403455, guid: 81c66c8cff1d3f14a9e80e535cd22aac,
+        type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6433451022377545413, guid: 81c66c8cff1d3f14a9e80e535cd22aac,
+        type: 3}
+      propertyPath: m_Name
+      value: City Rooftop Night Sphere
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: 81c66c8cff1d3f14a9e80e535cd22aac, type: 3}
 --- !u!1 &547931468919056761
 GameObject:
   m_ObjectHideFlags: 0
@@ -142120,7 +142115,7 @@ SceneRoots:
   - {fileID: 2068625117}
   - {fileID: 1750492023}
   - {fileID: 350989884}
-  - {fileID: 1049534963}
+  - {fileID: 544898608627409754}
   - {fileID: 1992566715}
   - {fileID: 1193951020}
   - {fileID: 15756999}
