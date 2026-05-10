@@ -22,6 +22,10 @@ public class AuthUIController : MonoBehaviour
     public TMP_Text feedbackText;
     public GameObject loadingSpinner;
 
+    [Header("Panels")]
+    [Tooltip("Parent panel for username/password and login/register buttons")]
+    public GameObject credentialsPanel;
+
     [Header("Resume Panel (optional)")]
     [Tooltip("Panel shown when a cloud save is detected after login")]
     public GameObject resumePanel;
@@ -45,6 +49,7 @@ public class AuthUIController : MonoBehaviour
             Debug.LogError("[AuthUI] registerButton is not assigned in the Inspector!", this);
 
         if (resumePanel != null) resumePanel.SetActive(false);
+        SetCredentialsVisible(true);
         if (resumeButton != null) resumeButton.onClick.AddListener(OnResumeClicked);
         if (newGameButton != null) newGameButton.onClick.AddListener(OnNewGameClicked);
 
@@ -128,13 +133,14 @@ public class AuthUIController : MonoBehaviour
         {
             resumeSummaryText.text =
                 $"Welcome back!\n\n" +
-                $"💰 Money: {profile.money} DT\n" +
-                $"📍 Tile: {profile.currentTile}\n" +
-                $"🏠 Wealth: {profile.totalWealth} DT\n" +
-                $"{(profile.isInJail ? "🔒 In Jail" : "")}";
+                $"Money: {profile.money} DT\n" +
+                $"Tile: {profile.currentTile}\n" +
+                $"Wealth: {profile.totalWealth} DT\n" +
+                $"{(profile.isInJail ? "In Jail" : "")}";
         }
 
         resumePanel.SetActive(true);
+        SetCredentialsVisible(false);
     }
 
     private void OnResumeClicked()
@@ -182,5 +188,21 @@ public class AuthUIController : MonoBehaviour
         if (loadingSpinner) loadingSpinner.SetActive(state);
         if (!state) return;
         if (feedbackText != null) feedbackText.text = "";
+    }
+
+    private void SetCredentialsVisible(bool visible)
+    {
+        if (credentialsPanel != null)
+        {
+            credentialsPanel.SetActive(visible);
+            return;
+        }
+
+        if (usernameInput != null) usernameInput.gameObject.SetActive(visible);
+        if (passwordInput != null) passwordInput.gameObject.SetActive(visible);
+        if (loginButton != null) loginButton.gameObject.SetActive(visible);
+        if (registerButton != null) registerButton.gameObject.SetActive(visible);
+        if (feedbackText != null) feedbackText.gameObject.SetActive(visible);
+        if (loadingSpinner != null) loadingSpinner.SetActive(visible);
     }
 }

@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.InputSystem;
 
 [System.Serializable]
 public class AchievementData
@@ -126,7 +127,7 @@ public class AchievementManager : MonoBehaviour
     private void Update()
     {
         // Debug cheat to reset achievements quickly
-        if (Input.GetKeyDown(KeyCode.F10))
+        if (Keyboard.current != null && Keyboard.current[Key.F10].wasPressedThisFrame)
         {
             ResetAllAchievements();
         }

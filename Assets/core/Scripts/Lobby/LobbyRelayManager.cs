@@ -99,10 +99,13 @@ public class LobbyRelayManager : MonoBehaviour
 
     private void Update()
     {
-        RefreshPlayerList();
+        // Gather live players once per frame and pass to helpers — avoids
+        // multiple FindObjectsByType calls per frame on Quest hardware.
+        var live = FindObjectsByType<XRINetworkPlayer>(FindObjectsSortMode.None);
+        SyncPlayerList(live);
         RefreshReadyButtonVisual();
-        RefreshStartButton();
-        RefreshUI();
+        RefreshStartButton(live);
+        RefreshUI(live);
     }
 
     // ── Button handlers ───────────────────────────────────────────────────────
@@ -175,11 +178,8 @@ public class LobbyRelayManager : MonoBehaviour
     private int ConnectedCount()
         => NetworkManager.Singleton?.ConnectedClientsList.Count ?? 0;
 
-    private bool AllPlayersReady()
+    private bool AllPlayersReady(XRINetworkPlayer[] live)
     {
-        // Use live FindObjectsByType as a fallback for players that joined before
-        // this component subscribed.
-        var live = FindObjectsByType<XRINetworkPlayer>(FindObjectsSortMode.None);
         if (live.Length < minPlayers) return false;
         foreach (var p in live)
             if (!p.isReady.Value) return false;
@@ -188,10 +188,8 @@ public class LobbyRelayManager : MonoBehaviour
 
     // ── Visual refresh (called every frame from Update) ───────────────────────
 
-    private void RefreshPlayerList()
+    private void SyncPlayerList(XRINetworkPlayer[] live)
     {
-        // Sync internal list with live objects in case late-spawned players were missed.
-        var live = FindObjectsByType<XRINetworkPlayer>(FindObjectsSortMode.None);
         foreach (var p in live)
             if (!_players.Contains(p)) TrackPlayer(p);
     }
@@ -204,19 +202,18 @@ public class LobbyRelayManager : MonoBehaviour
         SetRendererColor(readyButtonRenderer, localReady ? readyColor : notReadyColor);
     }
 
-    private void RefreshStartButton()
+    private void RefreshStartButton(XRINetworkPlayer[] live)
     {
-        bool canStart = IsHost() && AllPlayersReady() && ConnectedCount() >= minPlayers;
+        bool canStart = IsHost() && AllPlayersReady(live) && ConnectedCount() >= minPlayers;
         if (canStart != _startEnabled)
             SetStartButtonEnabled(canStart);
     }
 
-    private void RefreshUI()
+    private void RefreshUI(XRINetworkPlayer[] live)
     {
         // Player list
         if (playerListText != null)
         {
-            var live = FindObjectsByType<XRINetworkPlayer>(FindObjectsSortMode.None);
             var sb = new System.Text.StringBuilder();
             foreach (var p in live)
             {
@@ -238,7 +235,7 @@ public class LobbyRelayManager : MonoBehaviour
                 startHintText.text = "Waiting for the host to start…";
             else if (ConnectedCount() < minPlayers)
                 startHintText.text = $"Need at least {minPlayers} players to start.";
-            else if (!AllPlayersReady())
+            else if (!AllPlayersReady(live))
                 startHintText.text = "Waiting for all players to be ready…";
             else
                 startHintText.text = "All ready! Press Start.";
