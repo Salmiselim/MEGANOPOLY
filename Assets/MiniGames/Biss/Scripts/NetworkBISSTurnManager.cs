@@ -270,7 +270,8 @@ namespace BISS
             for (int r = 0; r < count; r++)
                 sortedDists[r] = _bestDistances[ranking[r]];
 
-            ShowLeaderboardClientRpc(ranking, sortedDists);
+            ulong winnerClientId = _playerOrder[ranking[0]];
+            ShowLeaderboardClientRpc(ranking, sortedDists, winnerClientId);
             Debug.Log($"[BISS] Game over. Winner: Player {ranking[0] + 1}");
         }
 
@@ -299,14 +300,14 @@ namespace BISS
         private void MarbleResultClientRpc(int playerIdx, int attemptIdx, float dist)
         {
             ui?.ShowAttemptResult(playerIdx, attemptIdx, dist);
-            if (dist >= 0f) // dist == -1 means timed out, no sparkle
-                sparkle?.PlayScore();
         }
 
         [ClientRpc]
-        private void ShowLeaderboardClientRpc(int[] rankedPlayerIndices, float[] sortedBestDistances)
+        private void ShowLeaderboardClientRpc(int[] rankedPlayerIndices, float[] sortedBestDistances, ulong winnerClientId)
         {
             ui?.ShowLeaderboard(rankedPlayerIndices, sortedBestDistances);
+            if (NetworkManager.Singleton.LocalClientId == winnerClientId)
+                sparkle?.PlayScore();
         }
     }
 }

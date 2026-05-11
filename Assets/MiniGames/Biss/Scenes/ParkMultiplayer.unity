@@ -438,7 +438,7 @@ ParticleSystem:
     startLifetime:
       serializedVersion: 2
       minMaxState: 0
-      scalar: 1
+      scalar: 1.2
       minScalar: 5
       maxCurve:
         serializedVersion: 2
@@ -491,7 +491,7 @@ ParticleSystem:
     startSpeed:
       serializedVersion: 2
       minMaxState: 0
-      scalar: 0.17
+      scalar: 0.46
       minScalar: 5
       maxCurve:
         serializedVersion: 2
@@ -5146,7 +5146,7 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: -0.7071068, y: 0, z: 0, w: 0.7071068}
   m_LocalPosition: {x: 5.82121, y: 0.733, z: 0.644}
-  m_LocalScale: {x: 11.970001, y: 11.970001, z: 11.970001}
+  m_LocalScale: {x: 9.29, y: 9.29, z: 9.29}
   m_ConstrainProportionsScale: 1
   m_Children: []
   m_Father: {fileID: 0}
@@ -6836,6 +6836,7 @@ MonoBehaviour:
   marblePrefab: {fileID: 5821868888177175720, guid: ea470f69cf6e47f469599ab37ade9bfb,
     type: 3}
   ui: {fileID: 533837853}
+  sparkle: {fileID: 7528563416847046546}
 --- !u!4 &1081216483
 Transform:
   m_ObjectHideFlags: 0
