@@ -453,7 +453,46 @@ public class CompleteGameManager : NetworkBehaviour
         waitingForDiceRoll = false;
         int total = dice1Result + dice2Result;
         Debug.Log($"\n{dice1Result} + {dice2Result} = {total}\n");
+
+        if (IsServer)
+        {
+            int biased = BiasTotalToPropertyOrTrain(total);
+            if (biased != total)
+            {
+                Debug.Log($"[DiceBias] Overriding total {total} -> {biased} to land on property/train.");
+                total = biased;
+            }
+        }
+
         StartCoroutine(HandlePlayerMove(total));
+    }
+
+    private int BiasTotalToPropertyOrTrain(int rolledTotal)
+    {
+        if (boardManager == null || currentPlayerIndex < 0 || currentPlayerIndex >= players.Length)
+            return rolledTotal;
+
+        int from = players[currentPlayerIndex].currentTileIndex;
+
+        if (IsValidLanding(from, rolledTotal))
+            return rolledTotal;
+
+        List<int> valid = new List<int>();
+        for (int t = 2; t <= 12; t++)
+        {
+            if (IsValidLanding(from, t)) valid.Add(t);
+        }
+
+        if (valid.Count == 0) return rolledTotal;
+        return valid[Random.Range(0, valid.Count)];
+    }
+
+    private bool IsValidLanding(int fromTile, int total)
+    {
+        int target = (fromTile + total) % 40;
+        TileData tile = boardManager.GetTile(target);
+        if (tile == null) return false;
+        return tile.tileType == TileType.Property || tile.tileType == TileType.Railroad;
     }
 
     private IEnumerator HandlePlayerMove(int spaces)
