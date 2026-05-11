@@ -364,7 +364,7 @@ namespace RockPaperScissors
             }
 
             if (scoreText != null)
-                scoreText.text = $"Score: You {p1Wins} - {p2Wins} Opp";
+                scoreText.text = $"Score: {p1Wins} - {p2Wins}";
 
             _localWins = p1Wins;
             _opponentWins = p2Wins;
