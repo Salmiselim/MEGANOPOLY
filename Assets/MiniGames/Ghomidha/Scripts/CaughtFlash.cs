@@ -24,6 +24,9 @@ namespace Ghomidha
         [SerializeField] private float holdTime     = 0.3f;
         [SerializeField] private float fadeOutTime  = 0.6f;
 
+        [Header("Sound")]
+        [SerializeField] private AudioSource caughtAudioSource;
+
         private void Awake()
         {
             Instance = this;
@@ -40,6 +43,7 @@ namespace Ghomidha
 
         private IEnumerator DoFlash()
         {
+            if (caughtAudioSource != null) caughtAudioSource.Play();
             // Fade in
             yield return Fade(0f, peakAlpha, fadeInTime);
             // Hold
