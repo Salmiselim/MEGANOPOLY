@@ -21,6 +21,10 @@ namespace Ghomidha
         [Header("Button")]
         [SerializeField] private float fadeDuration = 0.2f;
 
+        [Header("Sound")]
+        [SerializeField] private AudioSource foundSFX;
+        [SerializeField] private AudioSource emptySFX;
+
         // ── Runtime ────────────────────────────────────────────────────────
         private List<MultiplayerHidingSpot> allSpots = new List<MultiplayerHidingSpot>();
         private MultiplayerHidingSpot       targetSpot;
@@ -145,7 +149,7 @@ namespace Ghomidha
                 // FOUND!
                 btnText.text = "FOUND!";
                 btnImage.color = new Color(0.1f, 0.8f, 0.1f, 0.9f); // Green
-                
+                foundSFX?.Play();
                 targetSpot.RevealHiderBySeeker();
                 FoundCount++;
                 Debug.Log($"[Seeker] Found {FoundCount} player(s)! Tagged '{targetSpot.gameObject.name}'");
@@ -155,6 +159,7 @@ namespace Ghomidha
                 // EMPTY!
                 btnText.text = "EMPTY";
                 btnImage.color = new Color(0.4f, 0.4f, 0.4f, 0.9f); // Gray
+                emptySFX?.Play();
                 Debug.Log($"[Seeker] Inspected '{targetSpot.gameObject.name}'... nobody is there.");
             }
 
