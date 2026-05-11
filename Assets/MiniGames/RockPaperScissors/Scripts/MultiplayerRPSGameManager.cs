@@ -33,6 +33,9 @@ namespace RockPaperScissors
         [Header("Sound")]
         [SerializeField] private RPSSoundManager soundManager;
 
+        [Header("VFX")]
+        [SerializeField] private RPSConfettiEffect confettiEffect;
+
         public enum Choice
         {
             None = -1,
@@ -304,6 +307,7 @@ namespace RockPaperScissors
                     resultText.text = $"FINAL: {myWins} - {oppWins}\nYOU WIN THE MATCH!";
                     resultText.color = Color.green;
                     soundManager?.PlayMatchResult(true, false);
+                    confettiEffect?.PlayWin();
                 }
                 else
                 {

@@ -42,6 +42,9 @@ namespace BISS
         [Header("UI")]
         [SerializeField] private BISSMultiplayerUI ui;
 
+        [Header("VFX")]
+        [SerializeField] private BISSSparkle sparkle;
+
         // ── Network state ──────────────────────────────────────────────────
         // Read by all clients so UI can react to turn/attempt changes
         private NetworkVariable<int>  _currentPlayerIdx = new(0);
@@ -296,6 +299,8 @@ namespace BISS
         private void MarbleResultClientRpc(int playerIdx, int attemptIdx, float dist)
         {
             ui?.ShowAttemptResult(playerIdx, attemptIdx, dist);
+            if (dist >= 0f) // dist == -1 means timed out, no sparkle
+                sparkle?.PlayScore();
         }
 
         [ClientRpc]

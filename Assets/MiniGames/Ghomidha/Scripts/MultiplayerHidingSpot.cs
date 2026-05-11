@@ -272,6 +272,8 @@ namespace Ghomidha
             if (NetworkManager.Singleton.LocalClientId == hiderId)
             {
                 Debug.Log($"[MultiplayerHidingSpot] Spot '{gameObject.name}' revealed by seeker!");
+                CaughtFlash.TriggerFlash();
+                GhomidhaVignette.TriggerCaughtPulse();
                 OnExitClicked();
             }
         }
