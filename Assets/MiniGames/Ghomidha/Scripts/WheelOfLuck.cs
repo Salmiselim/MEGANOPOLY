@@ -28,6 +28,11 @@ namespace Ghomidha
         [Tooltip("Ending interval between flips (seconds) — slow at end.")]
         [SerializeField] private float endInterval = 0.55f;
 
+        [Header("Sound")]
+        [SerializeField] private AudioSource audioSource;
+        [SerializeField] private AudioClip   tickClip;    // plays on every flip
+        [SerializeField] private AudioClip   revealClip;  // plays when result lands
+
         // ── Runtime refs (built procedurally) ───────────────────────────────
         private TextMeshProUGUI _roleLabel;   // big centre text: SEEKER / HIDER
         private Image           _background;  // coloured backing panel
@@ -145,6 +150,8 @@ namespace Ghomidha
                 showSeeker = !showSeeker;
                 SetSlot(showSeeker ? "SEEKER" : "HIDER",
                         showSeeker ? SeekerColor : HiderColor);
+                if (audioSource != null && tickClip != null)
+                    audioSource.PlayOneShot(tickClip);
 
                 yield return new WaitForSeconds(interval);
                 elapsed += interval;
@@ -154,6 +161,8 @@ namespace Ghomidha
             string finalLabel = localPlayerIsSeeker ? "SEEKER" : "HIDER";
             Color  finalColor = localPlayerIsSeeker ? SeekerColor : HiderColor;
             SetSlot(finalLabel, finalColor);
+            if (audioSource != null && revealClip != null)
+                audioSource.PlayOneShot(revealClip);
 
             _isSpinning = false;
             onComplete?.Invoke();
