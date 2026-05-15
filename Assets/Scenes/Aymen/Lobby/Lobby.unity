@@ -2287,7 +2287,7 @@ GameObject:
   - component: {fileID: 930485408}
   - component: {fileID: 930485407}
   m_Layer: 0
-  m_Name: khobz button
+  m_Name: start button
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -2350,7 +2350,7 @@ MonoBehaviour:
           m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
           m_IntArgument: 0
           m_FloatArgument: 0
-          m_StringArgument: Khobz
+          m_StringArgument: SampleScene
           m_BoolArgument: 0
         m_CallState: 2
   m_SelectExited:
@@ -2391,6 +2391,15 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6517e563b312087429d482e6a7295272, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::ReadyButtonUI
+  buttonJuice: {fileID: 0}
+  readyText: READY!
+  notReadyText: READY?
+  readyColor: {r: 0, g: 1, b: 0, a: 1}
+  notReadyColor: {r: 1, g: 0, b: 0, a: 1}
+  readyMaterial: {fileID: 0}
+  notReadyMaterial: {fileID: 0}
+  targetGraphic: {fileID: 0}
+  targetRenderer: {fileID: 0}
 --- !u!65 &930485409
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -3202,6 +3211,15 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6517e563b312087429d482e6a7295272, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::ReadyButtonUI
+  buttonJuice: {fileID: 0}
+  readyText: READY!
+  notReadyText: READY?
+  readyColor: {r: 0, g: 1, b: 0, a: 1}
+  notReadyColor: {r: 1, g: 0, b: 0, a: 1}
+  readyMaterial: {fileID: 0}
+  notReadyMaterial: {fileID: 0}
+  targetGraphic: {fileID: 0}
+  targetRenderer: {fileID: 0}
 --- !u!65 &1443149504
 BoxCollider:
   m_ObjectHideFlags: 0

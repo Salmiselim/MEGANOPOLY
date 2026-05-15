@@ -19,6 +19,8 @@ using XRMultiplayer;
 /// </summary>
 public class LobbyRelayManager : MonoBehaviour
 {
+    public static LobbyRelayManager Instance { get; private set; }
+
     [Header("3D Buttons — drag XRSimpleInteractable objects")]
     [Tooltip("Any player presses this to toggle their ready state.")]
     [SerializeField] private XRSimpleInteractable readyButton;
@@ -64,13 +66,19 @@ public class LobbyRelayManager : MonoBehaviour
 
     // ── Unity lifecycle ───────────────────────────────────────────────────────
 
+    private void Awake()
+    {
+        if (Instance == null) Instance = this;
+        else Destroy(gameObject);
+    }
+
     private void OnEnable()
     {
         if (readyButton != null)
             readyButton.selectEntered.AddListener(_ => OnReadyPressed());
 
         if (startButton != null)
-            startButton.selectEntered.AddListener(_ => OnStartPressed());
+            startButton.selectEntered.AddListener(_ => TryStartGame());
 
         // Listen for players joining/leaving via XRINetworkGameManager.
         if (XRINetworkGameManager.Instance != null)
@@ -120,9 +128,13 @@ public class LobbyRelayManager : MonoBehaviour
         XRINetworkPlayer.LocalPlayer.ToggleReady();
     }
 
-    private void OnStartPressed()
+    public void TryStartGame()
     {
-        if (!_startEnabled) return;
+        if (!_startEnabled) 
+        {
+            Debug.Log("[LobbyReady] Cannot start game yet. Missing players or not everyone is ready.");
+            return;
+        }
 
         if (NetworkManager.Singleton == null || !NetworkManager.Singleton.IsServer)
         {
@@ -247,7 +259,7 @@ public class LobbyRelayManager : MonoBehaviour
     private void SetStartButtonEnabled(bool active)
     {
         _startEnabled = active;
-        if (startButton != null) startButton.enabled = active;
+        if (startButton != null) startButton.enabled = true; // Keep enabled so players can click and get feedback
         if (startButtonRenderer != null)
             SetRendererColor(startButtonRenderer, active ? startActiveColor : startInactiveColor);
     }

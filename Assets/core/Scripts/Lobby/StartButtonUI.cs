@@ -12,6 +12,37 @@ public class StartButtonUI : MonoBehaviour
     {
         if (buttonJuice == null) buttonJuice = GetComponent<VRButtonJuice>();
         UpdateStatus();
+
+        // Automatically hook up the click event for XR interactables
+        var interactable = GetComponent<UnityEngine.XR.Interaction.Toolkit.Interactables.XRBaseInteractable>();
+        if (interactable != null)
+        {
+            interactable.selectEntered.AddListener((args) => OnStartClicked());
+        }
+
+        // Also hook up standard UI Buttons
+        var uiButton = GetComponent<UnityEngine.UI.Button>();
+        if (uiButton != null)
+        {
+            uiButton.onClick.AddListener(OnStartClicked);
+        }
+    }
+
+    public void OnStartClicked()
+    {
+        Debug.Log("[StartButtonUI] Start game clicked.");
+        if (LobbyRelayManager.Instance != null)
+        {
+            LobbyRelayManager.Instance.TryStartGame();
+        }
+        else
+        {
+            // Fallback if LobbyRelayManager is not in the scene
+            if (NetworkManager.Singleton != null && NetworkManager.Singleton.IsServer)
+            {
+                NetworkManager.Singleton.SceneManager.LoadScene("SampleScene", UnityEngine.SceneManagement.LoadSceneMode.Single);
+            }
+        }
     }
 
     private void OnEnable()
