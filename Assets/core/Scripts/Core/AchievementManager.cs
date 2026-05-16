@@ -87,6 +87,12 @@ public class AchievementManager : MonoBehaviour
                         XRMultiplayer.PlayerHudNotification.Instance.ShowText($"🏆 Achievement Unlocked: {data.title} 🏆\n<color=yellow>{data.description}</color>", 5f);
                     }
                 }
+
+                // Trigger VFX
+                if (AchievementVFXManager.Instance != null)
+                {
+                    AchievementVFXManager.Instance.TriggerVFXAtPlayer();
+                }
             }
         }
         else
