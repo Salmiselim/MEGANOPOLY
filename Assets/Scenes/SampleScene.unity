@@ -5417,7 +5417,7 @@ PrefabInstance:
     - target: {fileID: 6598815579406187037, guid: 18ddb545287c546e19cc77dc9fbb2189,
         type: 3}
       propertyPath: m_IsActive
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -24655,12 +24655,12 @@ PrefabInstance:
     - target: {fileID: -8679921383154817045, guid: 359ea79210494664c96a677c58e72fee,
         type: 3}
       propertyPath: m_LocalPosition.x
-      value: 1.2162247
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: 359ea79210494664c96a677c58e72fee,
         type: 3}
       propertyPath: m_LocalPosition.y
-      value: 1.164473
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: 359ea79210494664c96a677c58e72fee,
         type: 3}
@@ -24670,22 +24670,22 @@ PrefabInstance:
     - target: {fileID: -8679921383154817045, guid: 359ea79210494664c96a677c58e72fee,
         type: 3}
       propertyPath: m_LocalRotation.w
-      value: 0.9999601
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: 359ea79210494664c96a677c58e72fee,
         type: 3}
       propertyPath: m_LocalRotation.x
-      value: -0
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: 359ea79210494664c96a677c58e72fee,
         type: 3}
       propertyPath: m_LocalRotation.y
-      value: -0
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: 359ea79210494664c96a677c58e72fee,
         type: 3}
       propertyPath: m_LocalRotation.z
-      value: 0.0089328075
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: 359ea79210494664c96a677c58e72fee,
         type: 3}
@@ -24700,7 +24700,7 @@ PrefabInstance:
     - target: {fileID: -8679921383154817045, guid: 359ea79210494664c96a677c58e72fee,
         type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
-      value: 1.024
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: -7831507586446391541, guid: 359ea79210494664c96a677c58e72fee,
         type: 3}
@@ -29342,7 +29342,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!114 &667934874
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -69453,7 +69453,7 @@ Transform:
   m_GameObject: {fileID: 1516899770}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -48.91, y: 1.65735, z: 58.43}
+  m_LocalPosition: {x: -50.66, y: 1.65735, z: 58.43}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -70186,6 +70186,81 @@ MeshFilter:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1528743897}
   m_Mesh: {fileID: -3278256112222460582, guid: bc75f21887109f943af81051bb5ccc31, type: 3}
+--- !u!1 &1529479647
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1529479649}
+  - component: {fileID: 1529479648}
+  - component: {fileID: 1529479650}
+  m_Layer: 0
+  m_Name: Board Session Starte
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &1529479648
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1529479647}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1a4470fad2777f54aacf270a31b5d3dc, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::BoardSessionStarter
+  lobbySceneOnFailure: Lobby
+  clientConnectionTimeout: 15
+  relayConnectionType: dtls
+  boardNetworkPrefabs:
+  - {fileID: 6776968426489970193, guid: 307cdc933f723644899eeae70ac95303, type: 3}
+--- !u!4 &1529479649
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1529479647}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: -25.78378, y: 0.65735, z: 27.82}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1529479650
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1529479647}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d5a57f767e5e46a458fc5d3c628d0cbb, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Unity.Netcode.Runtime::Unity.Netcode.NetworkObject
+  GlobalObjectIdHash: 442086649
+  InScenePlacedSourceGlobalObjectIdHash: 0
+  DeferredDespawnTick: 0
+  Ownership: 1
+  AlwaysReplicateAsRoot: 0
+  SynchronizeTransform: 1
+  ActiveSceneSynchronization: 0
+  SceneMigrationSynchronization: 0
+  SpawnWithObservers: 1
+  DontDestroyWithOwner: 0
+  AutoObjectParentSync: 1
+  SyncOwnerTransformWhenParented: 1
+  AllowOwnerToParent: 0
 --- !u!1 &1529674967
 GameObject:
   m_ObjectHideFlags: 0
@@ -85578,17 +85653,16 @@ MonoBehaviour:
   playerPrefab: {fileID: 6776968426489970193, guid: 307cdc933f723644899eeae70ac95303,
     type: 3}
   dice:
-  - {fileID: 0}
-  - {fileID: 0}
+  - {fileID: 111085005}
+  - {fileID: 7266616075930270876}
   diceV2:
-  - {fileID: 0}
   - {fileID: 0}
   useManualSpawnPoints: 1
   manualSpawnPoints:
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
+  - {fileID: 1475952}
+  - {fileID: 1487799903}
+  - {fileID: 1516899771}
+  - {fileID: 121124400}
   playerSpacing: 10
   manualSpawnOffset: {x: 0, y: 0, z: 0}
   playerColors:
@@ -85597,13 +85671,13 @@ MonoBehaviour:
   - {r: 0, g: 1, b: 0, a: 1}
   - {r: 1, g: 0.92156863, b: 0.015686275, a: 1}
   playerNames:
-  - Player 1
-  - Player 2
-  - Player 3
-  - Player 4
+  - selim
+  - 'aymen '
+  - oumayma
+  - mohamed
   enableDebugCheats: 1
-  cheatKey_GiveMonopoly: 282
-  cheatKey_OpenBuildMenu: 283
+  cheatKey_GiveMonopoly: 94
+  cheatKey_OpenBuildMenu: 95
   cheatKey_GiveMoney: 284
   cheatKey_TestRent: 285
   cheatKey_BuyAll: 286
@@ -85713,6 +85787,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::NetworkBootstrapper
   minPlayersToStart: 2
   autoStartAt: 4
+  _showLegacyOverlay: 0
 --- !u!114 &1853007519
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -98219,6 +98294,7 @@ SceneRoots:
   - {fileID: 1300675838}
   - {fileID: 1853007513}
   - {fileID: 2081029474}
+  - {fileID: 1529479649}
   - {fileID: 390211868}
   - {fileID: 394215719}
   - {fileID: 8577103386519858908}

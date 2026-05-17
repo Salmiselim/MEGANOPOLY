@@ -82,6 +82,9 @@ Assets/core/Scripts/Dice/
  DiceEventTester.cs
  SimpleDiceController.cs
 Assets/core/Scripts/Lobby/
+ BoardSessionBroadcaster.cs
+ BoardSessionStarter.cs
+ GameContext.cs
  LobbyAudioManager.cs
  LobbyRelayManager.cs
  LobbySceneLoader.cs

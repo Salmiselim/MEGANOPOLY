@@ -55,14 +55,13 @@ public class LobbySceneLoader : NetworkBehaviour
 
         if (isHost)
         {
-            LoadSceneRpc(sceneName);
+            // Use NGO's scene manager so the load syncs across host+clients
+            // and NetworkObjects (player avatars, dice, etc.) spawn correctly
+            // on every peer. Plain SceneManager.LoadScene bypasses NGO and
+            // leaves clients without server-spawned objects.
+            var status = NetworkManager.Singleton.SceneManager.LoadScene(
+                sceneName, LoadSceneMode.Single);
+            Debug.Log($"[LobbySceneLoader] NGO LoadScene({sceneName}) → {status}");
         }
-    }
-
-    [Rpc(SendTo.Everyone)]
-    private void LoadSceneRpc(string sceneName)
-    {
-        Debug.Log($"[LobbySceneLoader] LoadSceneRpc triggered for {sceneName}. Loading locally.");
-        SceneManager.LoadScene(sceneName, LoadSceneMode.Single);
     }
 }

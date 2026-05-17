@@ -54,8 +54,19 @@ namespace XRMultiplayer
             m_Camera = Camera.main;
         }
 
+        // Re-acquire the camera if our cached reference died (typically when
+        // crossing a scene boundary in Single mode, since this component lives
+        // on a DDOL NetworkObject but Camera.main was scene-bound).
+        bool TryEnsureCamera()
+        {
+            if (m_Camera != null) return true;
+            m_Camera = Camera.main;
+            return m_Camera != null;
+        }
+
         void LateUpdate()
         {
+            if (!TryEnsureCamera()) return;
             UpdateRotation();
             UpdateMinimizedState();
         }

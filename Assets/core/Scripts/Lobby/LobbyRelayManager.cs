@@ -1,7 +1,11 @@
+using System.Collections;
 using System.Collections.Generic;
 using TMPro;
 using Unity.Netcode;
+using Unity.Services.Relay;
+using Unity.Services.Relay.Models;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 using UnityEngine.XR.Interaction.Toolkit.Interactables;
 using XRMultiplayer;
 
@@ -91,6 +95,7 @@ public class LobbyRelayManager : MonoBehaviour
         SetStartButtonEnabled(false);
     }
 
+
     private void OnDisable()
     {
         if (readyButton != null)
@@ -128,23 +133,105 @@ public class LobbyRelayManager : MonoBehaviour
         XRINetworkPlayer.LocalPlayer.ToggleReady();
     }
 
-    public void TryStartGame()
+    public async void TryStartGame()
     {
-        if (!_startEnabled) 
+        if (!_startEnabled)
         {
-            Debug.Log("[LobbyReady] Cannot start game yet. Missing players or not everyone is ready.");
+            Debug.Log("[LobbyReady] Cannot start yet — missing players or not everyone ready.");
             return;
         }
 
-        if (NetworkManager.Singleton == null || !NetworkManager.Singleton.IsServer)
+        var nm = NetworkManager.Singleton;
+        if (nm == null)
         {
-            Debug.LogWarning("[LobbyReady] OnStartPressed called on a non-host client — ignoring.");
+            Debug.LogWarning("[LobbyReady] NetworkManager missing.");
             return;
         }
 
-        Debug.Log("[LobbyReady] Host starting game.");
-        NetworkManager.Singleton.SceneManager.LoadScene(
-            gameSceneName, UnityEngine.SceneManagement.LoadSceneMode.Single);
+        if (!IsSessionOwner())
+        {
+            Debug.LogWarning("[LobbyReady] Only the session owner can start the game.");
+            return;
+        }
+
+        // 1. Allocate a fresh Relay session for the BOARD (separate from VRMP's lobby relay).
+        int maxPlayers = Mathf.Max(2, nm.ConnectedClientsList?.Count ?? 2);
+        Allocation allocation;
+        string joinCode;
+        try
+        {
+            allocation = await RelayService.Instance.CreateAllocationAsync(maxPlayers);
+            joinCode = await RelayService.Instance.GetJoinCodeAsync(allocation.AllocationId);
+            Debug.Log($"[LobbyReady] Board relay allocated. JoinCode={joinCode}");
+        }
+        catch (System.Exception e)
+        {
+            Debug.LogError($"[LobbyReady] Relay allocation failed: {e.Message}");
+            return;
+        }
+
+        // 2. Stash for BoardSessionStarter to pick up after scene load.
+        GameContext.IsHost              = true;
+        GameContext.JoinCode            = joinCode;
+        GameContext.HostAllocation      = allocation;
+        GameContext.ExpectedPlayerCount = nm.ConnectedClientsList?.Count ?? 1;
+
+        // Disable NGO scene-sync BEFORE we broadcast so the host's upcoming
+        // plain SceneManager.LoadScene doesn't trigger NGO to shove a scene
+        // event at the still-connected clients.
+        if (nm.NetworkConfig != null && nm.NetworkConfig.EnableSceneManagement)
+        {
+            Debug.Log("[LobbyReady] Disabling NGO scene management for clean transition.");
+            nm.NetworkConfig.EnableSceneManagement = false;
+        }
+
+        // 3. Tell every other peer the join code via the DA-compatible
+        //    NetworkVariable broadcaster.
+        if (BoardSessionBroadcaster.Instance == null)
+        {
+            Debug.LogError("[LobbyReady] BoardSessionBroadcaster not found in the lobby scene. " +
+                           "Add the BoardSessionBroadcaster component + NetworkObject to the same " +
+                           "GameObject as LobbyRelayManager so the join code can reach clients.");
+            return;
+        }
+        if (!BoardSessionBroadcaster.Instance.PublishJoinCode(joinCode))
+        {
+            Debug.LogError("[LobbyReady] Broadcaster refused to publish the join code.");
+            return;
+        }
+
+        // 4. Delay so the NetworkVariable change actually replicates, then
+        //    shutdown VRMP and load the board scene locally.
+        StartCoroutine(TransitionToBoard(isHost: true));
+    }
+
+    /// <summary>
+    /// Tears down VRMP and loads the board scene locally on the host.
+    /// Clients use BoardSessionBroadcaster's own transition coroutine
+    /// after their NetworkVariable change handler fires.
+    /// </summary>
+    private IEnumerator TransitionToBoard(bool isHost)
+    {
+        // Hosts wait LONGER so the broadcast has time to reach all clients
+        // before the NGO session goes down. Clients only need a short delay
+        // because they're reacting to a message that already arrived.
+        float wait = isHost ? 1.5f : 0.2f;
+        Debug.Log($"[LobbyReady] TransitionToBoard isHost={isHost} GameContext.IsHost={GameContext.IsHost} " +
+                  $"JoinCode='{GameContext.JoinCode}' — waiting {wait}s before shutdown.");
+        yield return new WaitForSeconds(wait);
+
+        var nm = NetworkManager.Singleton;
+        if (nm != null && nm.IsListening)
+        {
+            Debug.Log("[LobbyReady] Shutting down VRMP session.");
+            nm.Shutdown();
+        }
+
+        // Give NGO a frame to finish its shutdown teardown.
+        yield return null;
+
+        Debug.Log($"[LobbyReady] Loading board scene '{gameSceneName}' locally.");
+        SceneManager.LoadScene(gameSceneName, LoadSceneMode.Single);
     }
 
     // ── Player tracking ───────────────────────────────────────────────────────
@@ -184,8 +271,16 @@ public class LobbyRelayManager : MonoBehaviour
 
     // ── Logic helpers ─────────────────────────────────────────────────────────
 
-    private bool IsHost()
-        => NetworkManager.Singleton != null && NetworkManager.Singleton.IsServer;
+    // Distributed Authority: every client has IsServer = true, so the real
+    // "host" is whoever NGO marks as CurrentSessionOwner.
+    private bool IsSessionOwner()
+    {
+        var nm = NetworkManager.Singleton;
+        if (nm == null) return false;
+        return nm.LocalClientId == nm.CurrentSessionOwner;
+    }
+
+    private bool IsHost() => IsSessionOwner();
 
     private int ConnectedCount()
         => NetworkManager.Singleton?.ConnectedClientsList.Count ?? 0;

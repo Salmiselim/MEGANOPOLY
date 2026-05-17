@@ -70,12 +70,44 @@ public class XROwnershipGuard : NetworkBehaviour
         }
         else
         {
-            // 3. We DO NOT own this player. Destroy their camera rig physically 
-            // so it cannot act like a camera on our screen.
+            // 3. We DO NOT own this player. Strip every XR/input component on
+            // the rig — keep only the network-synced visuals. Without this,
+            // the remote avatar's GravityProvider, LocomotionProviders, XR
+            // controllers, etc. keep Updating against a Camera we just
+            // destroyed, spamming MissingReferenceException.
+            DisableXrSystemsOnRemoteAvatar();
             Destroy(cameraOffsetRoot);
 
-            Debug.Log($"[XROwnershipGuard] Remote Player spawned. Destroyed their Camera Rig.");
+            Debug.Log($"[XROwnershipGuard] Remote Player spawned. Destroyed their Camera Rig + XR systems.");
         }
+    }
+
+    /// <summary>
+    /// Disables every MonoBehaviour on the rig whose namespace begins with
+    /// "UnityEngine.XR" or "Unity.XR" — locomotion providers, controllers,
+    /// gravity, hand subsystems, etc. We do this on remote avatars so they
+    /// stop reading the destroyed Camera every frame. Renderers / animators
+    /// are left alone, so the avatar still shows up.
+    /// </summary>
+    private void DisableXrSystemsOnRemoteAvatar()
+    {
+        var behaviours = GetComponentsInChildren<MonoBehaviour>(true);
+        int disabled = 0;
+        foreach (var b in behaviours)
+        {
+            if (b == null || b == this) continue;
+            // Keep NGO scripts so movement / ownership replication still works.
+            if (b is NetworkBehaviour) continue;
+            string ns = b.GetType().Namespace;
+            if (string.IsNullOrEmpty(ns)) continue;
+            if (ns.StartsWith("UnityEngine.XR") || ns.StartsWith("Unity.XR"))
+            {
+                b.enabled = false;
+                disabled++;
+            }
+        }
+        if (disabled > 0)
+            Debug.Log($"[XROwnershipGuard] Disabled {disabled} XR component(s) on remote avatar.");
     }
 
     // ── Helpers ───────────────────────────────────────────────────────────────

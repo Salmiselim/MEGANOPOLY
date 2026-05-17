@@ -5,6 +5,7 @@ using UnityEngine.Events;
 using Unity.Netcode;
 using Unity.Services.Authentication;
 using UnityEngine.InputSystem;
+using XRMultiplayer;
 
 public class CompleteGameManager : NetworkBehaviour
 {
@@ -17,6 +18,10 @@ public class CompleteGameManager : NetworkBehaviour
 
     [Header("References")]
     [SerializeField] private BoardManager boardManager;
+    [Tooltip("Full VR player prefab spawned per connected client when the board " +
+             "scene loads. Must contain XR Origin (Camera + hands), NetworkObject, " +
+             "and PlayerMovement. SampleScene has no scene-side XR Origin — this " +
+             "prefab provides it.")]
     [SerializeField] private GameObject playerPrefab;
     [SerializeField] private SimpleDiceController[] dice = new SimpleDiceController[2];
     [SerializeField] private DiceControllerV2[] diceV2 = new DiceControllerV2[2];
@@ -76,6 +81,8 @@ public class CompleteGameManager : NetworkBehaviour
 
     private void Awake()
     {
+        ResetCheatKeysIfInvalid();
+
         if (Instance == null) Instance = this;
         else { Destroy(gameObject); return; }
 
@@ -95,12 +102,37 @@ public class CompleteGameManager : NetworkBehaviour
 
     // ── NGO entry point ───────────────────────────────────────────────────────
 
+    /// <summary>
+    /// True only on the machine running the host of the current NGO session.
+    /// With the new (post-lobby) server-authoritative session, that's the
+    /// machine that called StartHost in BoardSessionStarter.
+    /// </summary>
+    private bool IsAuthority()
+    {
+        var nm = NetworkManager.Singleton;
+        return nm != null && nm.IsHost;
+    }
+
     public override void OnNetworkSpawn()
     {
-        if (IsServer)
+        var nm = NetworkManager.Singleton;
+        Debug.Log($"[GameManager] OnNetworkSpawn ★ " +
+                  $"LocalClient={nm?.LocalClientId} " +
+                  $"SessionOwner={nm?.CurrentSessionOwner} " +
+                  $"IsAuthority={IsAuthority()} " +
+                  $"ConnectedCount={nm?.ConnectedClientsList?.Count ?? 0} " +
+                  $"playerPrefabAssigned={(playerPrefab != null)}");
+
+        if (IsAuthority())
         {
-            NetworkManager.Singleton.OnClientConnectedCallback += OnClientConnected;
-            NetworkManager.Singleton.OnClientDisconnectCallback += OnClientDisconnected;
+            nm.OnClientConnectedCallback += OnClientConnected;
+            nm.OnClientDisconnectCallback += OnClientDisconnected;
+
+            // Auto-start the game as soon as the board scene has finished
+            // loading on every connected client. This replaces the manual
+            // "Force Start" button — game begins immediately on entering
+            // the board with whoever is connected.
+            StartCoroutine(AutoStartWhenSceneReady());
             return;
         }
 
@@ -117,6 +149,63 @@ public class CompleteGameManager : NetworkBehaviour
 
         RegisterAuthNameServerRpc(username, playerId, NetworkManager.Singleton.LocalClientId);
         Debug.Log($"[Client] Auth guard passed. Registered as '{username}' (PlayerId: {playerId})");
+    }
+
+    // ── Auto-start (server-side) ──────────────────────────────────────────────
+
+    /// <summary>
+    /// Server-side: waits until every player from the lobby is actually
+    /// connected to the fresh board NGO session, then force-starts. The
+    /// previous fixed-1.5s delay force-started before the relay join
+    /// completed on the clients, so they ended up with no avatar.
+    ///
+    /// We use GameContext.ExpectedPlayerCount (set by the lobby host on
+    /// Start) as the target. If we still haven't reached it after
+    /// MaxWaitForClientsSeconds, start anyway with whoever made it — better
+    /// to play a game with a missing player than to hang forever.
+    /// </summary>
+    private const float MaxWaitForClientsSeconds = 20f;
+    private const float ClientGracePeriodSeconds = 0.75f;
+
+    private IEnumerator AutoStartWhenSceneReady()
+    {
+        int expected = Mathf.Max(1, GameContext.ExpectedPlayerCount);
+        var nm = NetworkManager.Singleton;
+
+        float elapsed = 0f;
+        while (elapsed < MaxWaitForClientsSeconds)
+        {
+            if (nm == null) yield break;
+            int connected = nm.ConnectedClientsList?.Count ?? 0;
+            if (connected >= expected)
+            {
+                Debug.Log($"[GameManager] All expected players connected " +
+                          $"({connected}/{expected}). Waiting {ClientGracePeriodSeconds:0.0}s grace " +
+                          "before spawning so RegisterAuthNameServerRpc settles.");
+                break;
+            }
+            if (Mathf.FloorToInt(elapsed * 2f) != Mathf.FloorToInt((elapsed - Time.deltaTime) * 2f))
+            {
+                Debug.Log($"[GameManager] Waiting for clients ({connected}/{expected})…");
+            }
+            elapsed += Time.deltaTime;
+            yield return null;
+        }
+
+        if ((nm.ConnectedClientsList?.Count ?? 0) < expected)
+        {
+            Debug.LogWarning($"[GameManager] Timed out waiting for clients " +
+                             $"({nm.ConnectedClientsList?.Count}/{expected}). Starting with current peers.");
+        }
+
+        // Brief grace so the just-connected clients finish their
+        // RegisterAuthNameServerRpc round-trip before we read their names.
+        yield return new WaitForSeconds(ClientGracePeriodSeconds);
+
+        if (currentGameState != GameState.Setup) yield break;
+
+        Debug.Log("[GameManager] Auto-start: board scene ready, force-starting.");
+        ForceStartWithCurrentPlayers();
     }
 
     // ── Auth registration ─────────────────────────────────────────────────────
@@ -146,14 +235,13 @@ public class CompleteGameManager : NetworkBehaviour
 
     public void ForceStartWithCurrentPlayers()
     {
-        if (!IsServer) return;
+        if (!IsAuthority()) return; // DA: only the session owner spawns players
         if (currentGameState != GameState.Setup) return;
 
         int connected = NetworkManager.Singleton.ConnectedClientsList.Count;
         if (connected == 0) { Debug.LogError("[GameManager] ForceStart: 0 players connected!"); return; }
 
-        numberOfPlayers = connected;
-        Debug.Log($"[GameManager] Force-starting with {numberOfPlayers} player(s).");
+        Debug.Log($"[GameManager] Force-starting (connected clients = {connected}).");
         StartCoroutine(ServerInitGame());
     }
 
@@ -162,32 +250,65 @@ public class CompleteGameManager : NetworkBehaviour
     private IEnumerator ServerInitGame()
     {
         currentGameState = GameState.Setup;
-        players = new PlayerData[numberOfPlayers];
+
+        // Re-find spawn points now that the board scene is fully loaded.
+        // (Awake() may have run before scene objects were ready.)
+        AutoFindSpawnPoints();
+
+        // 1. Despawn any orphaned XRINetworkPlayer objects that came from the
+        //    lobby scene. They survive the scene load as NetworkObjects (DDOL)
+        //    but their references to the lobby's now-destroyed XR Origin /
+        //    Camera are broken — that's the source of the PlayerNameTag
+        //    MissingReferenceException spam. The board scene provides a fresh
+        //    VR rig per player via playerPrefab below.
+        DespawnLobbyAvatars();
+
+        // 2. Spawn one playerPrefab (full VR rig) per connected client, owned
+        //    by that client. This is the same flow that worked pre-merge —
+        //    SampleScene has no scene-side XR Origin, so the prefab IS the
+        //    rig the player sees through.
+        if (playerPrefab == null)
+        {
+            Debug.LogError("[GameManager] playerPrefab is not assigned — cannot spawn players.");
+            yield break;
+        }
 
         var clients = new List<ulong>(NetworkManager.Singleton.ConnectedClientsIds);
+        numberOfPlayers = clients.Count;
+        if (numberOfPlayers == 0)
+        {
+            Debug.LogError("[GameManager] No connected clients — cannot start game.");
+            yield break;
+        }
+
+        players = new PlayerData[numberOfPlayers];
 
         for (int i = 0; i < numberOfPlayers; i++)
         {
-            ulong ownerClientId = (i < clients.Count) ? clients[i] : NetworkManager.ServerClientId;
+            ulong ownerClientId = clients[i];
+
             string authName = clientAuthNames.TryGetValue(ownerClientId, out string n)
-                                        ? n : (i < playerNames.Length ? playerNames[i] : $"Player {i + 1}");
+                ? n : (i < playerNames.Length ? playerNames[i] : $"Player {i + 1}");
             string unityPlayerId = clientUnityPlayerIds.TryGetValue(ownerClientId, out string pid)
-                                        ? pid : ownerClientId.ToString();
+                ? pid : ownerClientId.ToString();
 
             players[i] = new PlayerData(i, authName, playerColors[i]);
             players[i].money = startingMoney;
             players[i].unityPlayerId = unityPlayerId;
 
-            Debug.Log($"[Server] Spawning Player {i} → '{authName}' | id='{unityPlayerId}' | client={ownerClientId}");
-
             Vector3 spawnPos = GetSpawnPosition(i);
-            GameObject avatarObj = Instantiate(playerPrefab, spawnPos, Quaternion.identity);
+            Quaternion spawnRot = GetSpawnRotation(i);
+
+            Debug.Log($"[GameManager] Spawning Player {i} '{authName}' " +
+                      $"(client={ownerClientId}) at {spawnPos}");
+
+            GameObject avatarObj = Instantiate(playerPrefab, spawnPos, spawnRot);
             avatarObj.name = $"Player_{i}_{authName}";
 
             NetworkObject netObj = avatarObj.GetComponent<NetworkObject>();
             if (netObj == null)
             {
-                Debug.LogError("[Server] Player prefab missing NetworkObject!");
+                Debug.LogError("[GameManager] playerPrefab is missing NetworkObject!");
                 Destroy(avatarObj);
                 continue;
             }
@@ -200,6 +321,32 @@ public class CompleteGameManager : NetworkBehaviour
         yield return new WaitForSeconds(0.5f);
         SetupDiceEvents();
         StartGame();
+    }
+
+    /// <summary>
+    /// Despawns every XRINetworkPlayer that survived the lobby→board scene
+    /// transition. Called on the authority — NGO replicates the despawn to
+    /// every client, killing the orphans and stopping the PlayerNameTag
+    /// MissingReferenceException spam they cause.
+    /// </summary>
+    private void DespawnLobbyAvatars()
+    {
+        var orphans = FindObjectsByType<XRINetworkPlayer>(FindObjectsSortMode.None);
+        foreach (var p in orphans)
+        {
+            if (p == null) continue;
+            var no = p.NetworkObject;
+            if (no != null && no.IsSpawned)
+            {
+                Debug.Log($"[GameManager] Despawning lobby avatar '{p.name}' (client={no.OwnerClientId})");
+                try { no.Despawn(true); }
+                catch (System.Exception e) { Debug.LogWarning($"[GameManager] Despawn failed: {e.Message}"); }
+            }
+            else if (p.gameObject != null)
+            {
+                Destroy(p.gameObject);
+            }
+        }
     }
 
     // ── Avatar helpers ────────────────────────────────────────────────────────
@@ -220,8 +367,19 @@ public class CompleteGameManager : NetworkBehaviour
         players[index].playerAvatar = avatarObj;
         players[index].avatarTransform = avatarObj.transform;
 
+        // PlayerMovement is a NetworkBehaviour — it must be on the prefab.
+        // If the XRINetworkPlayer prefab doesn't have it, log a clear warning
+        // and skip wiring. The game can still start; players just won't have
+        // tile-to-tile token movement until the component is added.
         PlayerMovement movement = avatarObj.GetComponent<PlayerMovement>();
-        if (movement == null) movement = avatarObj.AddComponent<PlayerMovement>();
+        if (movement == null)
+        {
+            Debug.LogWarning(
+                $"[GameManager] '{avatarObj.name}' has no PlayerMovement component. " +
+                "Add PlayerMovement to the XRINetworkPlayer prefab if you want " +
+                "the player token to walk between tiles on dice roll.");
+            return;
+        }
 
         movement.Initialize(players[index]);
         players[index].movementController = movement;
@@ -241,13 +399,56 @@ public class CompleteGameManager : NetworkBehaviour
 
     private Vector3 GetSpawnPosition(int playerIndex)
     {
-        if (useManualSpawnPoints && manualSpawnPoints != null &&
-            playerIndex < manualSpawnPoints.Length && manualSpawnPoints[playerIndex] != null)
-            return manualSpawnPoints[playerIndex].transform.position;
+        Transform t = GetSpawnTransform(playerIndex);
+        if (t != null) return t.position;
 
         TileData goTile = boardManager.GetTile(0);
         if (goTile == null) { Debug.LogError("GO tile not found!"); return Vector3.zero; }
         return goTile.worldPosition + manualSpawnOffset + Vector3.right * (playerIndex * playerSpacing);
+    }
+
+    private Quaternion GetSpawnRotation(int playerIndex)
+    {
+        Transform t = GetSpawnTransform(playerIndex);
+        return t != null ? t.rotation : Quaternion.identity;
+    }
+
+    private Transform GetSpawnTransform(int playerIndex)
+    {
+        if (!useManualSpawnPoints || manualSpawnPoints == null || manualSpawnPoints.Length == 0)
+            return null;
+
+        // Prefer the spawn point whose playerIndex field matches.
+        foreach (var sp in manualSpawnPoints)
+        {
+            if (sp != null && sp.playerIndex == playerIndex)
+                return sp.transform;
+        }
+        // Otherwise fall back to the i-th entry if present.
+        if (playerIndex < manualSpawnPoints.Length && manualSpawnPoints[playerIndex] != null)
+            return manualSpawnPoints[playerIndex].transform;
+
+        return null;
+    }
+
+    // ── VR rig teleport (targeted to one client) ──────────────────────────────
+
+    /// <summary>
+    /// Server-authority Rpc: tells one specific client to move its local
+    /// XR Origin (the VR rig containing camera + hands) to the given pose,
+    /// so each player ends up at their assigned seat around the board.
+    /// </summary>
+    [Rpc(SendTo.SpecifiedInParams)]
+    private void TeleportRigRpc(Vector3 pos, Quaternion rot, RpcParams rpcParams = default)
+    {
+        var origin = FindFirstObjectByType<Unity.XR.CoreUtils.XROrigin>();
+        if (origin == null)
+        {
+            Debug.LogWarning("[Client] XR Origin not found — cannot position VR rig.");
+            return;
+        }
+        origin.transform.SetPositionAndRotation(pos, rot);
+        Debug.Log($"[Client] Teleported VR rig to {pos}.");
     }
 
     // ── Dice ──────────────────────────────────────────────────────────────────
@@ -282,22 +483,28 @@ public class CompleteGameManager : NetworkBehaviour
     private void AutoFindSpawnPoints()
     {
         if (!useManualSpawnPoints) return;
-        if (manualSpawnPoints != null && manualSpawnPoints.Length >= numberOfPlayers &&
-            manualSpawnPoints[0] != null) return;
 
+        // Inspector-assigned spawn points win.
+        bool inspectorAssigned =
+            manualSpawnPoints != null &&
+            manualSpawnPoints.Length > 0 &&
+            manualSpawnPoints[0] != null;
+        if (inspectorAssigned) return;
+
+        // Find every PlayerSpawnPoint in the scene. Supports any count 1..N —
+        // games can be 2, 3, or 4 players. GetSpawnPosition falls back to
+        // procedural placement for any player index without a matching point.
         PlayerSpawnPoint[] found = FindObjectsOfType<PlayerSpawnPoint>();
-        if (found.Length >= numberOfPlayers)
+        if (found.Length == 0)
         {
-            System.Array.Sort(found, (a, b) => a.playerIndex.CompareTo(b.playerIndex));
-            manualSpawnPoints = new PlayerSpawnPoint[numberOfPlayers];
-            for (int i = 0; i < numberOfPlayers; i++) manualSpawnPoints[i] = found[i];
-            Debug.Log($"Auto-found {found.Length} spawn points");
-        }
-        else
-        {
-            Debug.LogWarning($"Only {found.Length} spawn points, using procedural");
+            Debug.LogWarning("[GameManager] No PlayerSpawnPoint in scene — using procedural spawn.");
             useManualSpawnPoints = false;
+            return;
         }
+
+        System.Array.Sort(found, (a, b) => a.playerIndex.CompareTo(b.playerIndex));
+        manualSpawnPoints = found;
+        Debug.Log($"[GameManager] Auto-found {found.Length} spawn point(s).");
     }
 
     private void SetupDiceEvents()
@@ -943,8 +1150,45 @@ public class CompleteGameManager : NetworkBehaviour
 
     private static bool IsKeyDown(Key key)
     {
-        return Keyboard.current != null && Keyboard.current[key].wasPressedThisFrame;
+        // Guard against stale inspector values from the legacy KeyCode enum
+        // (e.g. F1=282) being assigned to an Input System Key field — the
+        // indexer throws ArgumentOutOfRangeException for any value outside
+        // the Key enum range.
+        if (Keyboard.current == null) return false;
+        if ((int)key <= 0 || (int)key > (int)Key.OEM5) return false;
+        return Keyboard.current[key].wasPressedThisFrame;
     }
+
+    // Inspector-set Key fields can hold stale legacy KeyCode integers (e.g.
+    // 282 for F1). Those values are far outside the Input System Key enum
+    // range and would throw at runtime. If any cheat key is invalid, reset
+    // the WHOLE block to the F1..F8 defaults so the inspector still wins
+    // for any value the user has explicitly chosen (a valid F-key, J, etc.)
+    // but bad migrations get cleaned up automatically.
+    private void ResetCheatKeysIfInvalid()
+    {
+        if (IsValidKey(cheatKey_GiveMonopoly) &&
+            IsValidKey(cheatKey_OpenBuildMenu) &&
+            IsValidKey(cheatKey_GiveMoney) &&
+            IsValidKey(cheatKey_TestRent) &&
+            IsValidKey(cheatKey_BuyAll) &&
+            IsValidKey(cheatKey_TestTrain) &&
+            IsValidKey(cheatKey_TestMinigame) &&
+            IsValidKey(cheatKey_TestMinigameRent)) return;
+
+        cheatKey_GiveMonopoly     = Key.F1;
+        cheatKey_OpenBuildMenu    = Key.F2;
+        cheatKey_GiveMoney        = Key.F3;
+        cheatKey_TestRent         = Key.F4;
+        cheatKey_BuyAll           = Key.F5;
+        cheatKey_TestTrain        = Key.F6;
+        cheatKey_TestMinigame     = Key.F7;
+        cheatKey_TestMinigameRent = Key.F8;
+        Debug.Log("[GameManager] Cheat key bindings were out of range — reset to F1..F8.");
+    }
+
+    private static bool IsValidKey(Key key) =>
+        (int)key > 0 && (int)key <= (int)Key.OEM5;
 
     /// <summary>
     /// Space bar cheat: resets and rolls both dice. Sets up the minimum game state needed

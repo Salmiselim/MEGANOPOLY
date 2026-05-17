@@ -29655,6 +29655,8 @@ GameObject:
   - component: {fileID: 6278597892695212931}
   - component: {fileID: 4174558661730727925}
   - component: {fileID: 7594198793404732517}
+  - component: {fileID: 9074329849498600403}
+  - component: {fileID: 7142308907795387358}
   m_Layer: 2
   m_Name: XR Origin Hands (XR Rig) MP Template Variant
   m_TagString: Untagged
@@ -29825,6 +29827,58 @@ MonoBehaviour:
   m_ResetDistance: 75
   offlinePosition: {x: 0, y: 0, z: -1.465}
   onlinePosition: {x: 0, y: 0, z: -1.465}
+--- !u!114 &9074329849498600403
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3193392166441394268}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d5a57f767e5e46a458fc5d3c628d0cbb, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Unity.Netcode.Runtime::Unity.Netcode.NetworkObject
+  GlobalObjectIdHash: 3636423003
+  InScenePlacedSourceGlobalObjectIdHash: 0
+  DeferredDespawnTick: 0
+  Ownership: 1
+  AlwaysReplicateAsRoot: 0
+  SynchronizeTransform: 1
+  ActiveSceneSynchronization: 0
+  SceneMigrationSynchronization: 1
+  SpawnWithObservers: 1
+  DontDestroyWithOwner: 0
+  AutoObjectParentSync: 1
+  SyncOwnerTransformWhenParented: 1
+  AllowOwnerToParent: 0
+--- !u!114 &7142308907795387358
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3193392166441394268}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 45f2e41803d6cc949b0ff05ea82f3b76, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::PlayerMovement
+  ShowTopMostFoldoutHeaderGroup: 1
+  moveSpeed: 5
+  hopHeight: 0.3
+  heightOffset: 0.1
+  occupancyCheckRadius: 2
+  playerOffset: 8
+  OnTilePassed:
+    m_PersistentCalls:
+      m_Calls: []
+  OnTileLanded:
+    m_PersistentCalls:
+      m_Calls: []
+  OnPassedGO:
+    m_PersistentCalls:
+      m_Calls: []
 --- !u!1 &3195239035530469840
 GameObject:
   m_ObjectHideFlags: 0

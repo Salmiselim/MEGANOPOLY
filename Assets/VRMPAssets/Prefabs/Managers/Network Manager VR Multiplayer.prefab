@@ -84,10 +84,10 @@ MonoBehaviour:
       type: 3}
     Prefabs:
       NetworkPrefabsLists:
-      - {fileID: 11400000, guid: 2995457f2d3cc4242a2895501478048c, type: 2}
       - {fileID: 11400000, guid: 602d40a0e3e4bd540a7a1070430d0368, type: 2}
       - {fileID: 11400000, guid: 7c6e842cd7704084fa88682fe4e71ae6, type: 2}
       - {fileID: 11400000, guid: a4390c5271cb1294ba726e4409e1ec04, type: 2}
+      - {fileID: 11400000, guid: 937b698cbed73874ba63eb3ff0714965, type: 2}
     TickRate: 30
     ClientConnectionBufferTimeout: 10
     ConnectionApproval: 0
@@ -134,6 +134,7 @@ MonoBehaviour:
     Address: 127.0.0.1
     Port: 7777
     ServerListenAddress: 127.0.0.1
+    ClientBindPort: 0
   DebugSimulator:
     PacketDelayMS: 0
     PacketJitterMS: 0

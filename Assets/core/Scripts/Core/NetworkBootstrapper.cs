@@ -33,14 +33,23 @@ public class NetworkBootstrapper : MonoBehaviour
 
     // ── Lifecycle ─────────────────────────────────────────────────────────────
 
+    // Set to true to bring back the legacy screen-space lobby overlay
+    // (Start Host / Start Client / Force Start). The real lobby flow
+    // is handled by LobbyRelayManager + LobbySceneLoader, and the game
+    // auto-starts via CompleteGameManager.AutoStartWhenSceneReady, so
+    // this UI is no longer needed.
+    [SerializeField] private bool _showLegacyOverlay = false;
+
     private void Start()
     {
+        if (!_showLegacyOverlay) return;
         BuildUI();
         ShowLobby(true);
     }
 
     private void Update()
     {
+        if (!_showLegacyOverlay) return;
         if (_gameStarted) return;
         if (NetworkManager.Singleton == null || !NetworkManager.Singleton.IsServer) return;
 

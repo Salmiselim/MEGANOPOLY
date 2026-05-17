@@ -38,11 +38,26 @@ namespace Unity.VRTemplate
         private Vector3 velocity = Vector3.zero;
         bool m_InFOV = false;
 
-        Vector3 targetPosition => m_Target.position + m_Target.TransformVector(m_TargetOffset);
+        // Re-acquire target/camera if our cached refs died across a scene load.
+        // Without this guard, LazyFollow on a DDOL'd NetworkObject spams
+        // MissingReferenceException every frame after the lobby unloads.
+        bool TryEnsureTarget()
+        {
+            if (m_Target != null) return true;
+            if (m_Camera == null) m_Camera = Camera.main;
+            if (m_Camera != null) m_Target = m_Camera.transform;
+            return m_Target != null;
+        }
+
+        Vector3 targetPosition => m_Target != null
+            ? m_Target.position + m_Target.TransformVector(m_TargetOffset)
+            : transform.position;
         Quaternion targetRotation
         {
             get
             {
+                if (m_Target == null) return transform.rotation;
+
                 if (!m_ZRot)
                 {
                     var eulerAngles = m_Target.eulerAngles;
@@ -82,8 +97,11 @@ namespace Unity.VRTemplate
 
         void Update()
         {
+            if (!TryEnsureTarget()) return;
+
             if (m_FOV)
             {
+                if (m_Camera == null) return;
                 Vector3 screenPoint = m_Camera.WorldToViewportPoint(this.gameObject.transform.position);
                 var inFov = screenPoint.z > 0f && screenPoint.x > 0f && screenPoint.x < 1f && screenPoint.y > 0f && screenPoint.y < 1f;
                 if (inFov)

@@ -28,7 +28,7 @@ public class VRCameraProvider : MonoBehaviour
     private void Awake()
     {
         if (Instance == null) { Instance = this; DontDestroyOnLoad(gameObject); }
-        else { Destroy(gameObject); return; }
+        else { Destroy(this); return; } // destroy duplicate component only — other components on this GO (e.g. CompleteGameManager) must keep living
 
         EnsureFallbackCamera();
     }

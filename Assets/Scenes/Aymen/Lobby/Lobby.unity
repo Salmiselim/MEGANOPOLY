@@ -4173,10 +4173,10 @@ MonoBehaviour:
   m_SelectEntered:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 1992484353}
-        m_TargetAssemblyTypeName: LobbySceneLoader, Assembly-CSharp
-        m_MethodName: RequestLoadScene
-        m_Mode: 5
+      - m_Target: {fileID: 1992484355}
+        m_TargetAssemblyTypeName: LobbyRelayManager, Assembly-CSharp
+        m_MethodName: TryStartGame
+        m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
           m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
@@ -4223,6 +4223,15 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6517e563b312087429d482e6a7295272, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::ReadyButtonUI
+  buttonJuice: {fileID: 0}
+  readyText: READY!
+  notReadyText: READY?
+  readyColor: {r: 0, g: 1, b: 0, a: 1}
+  notReadyColor: {r: 1, g: 0, b: 0, a: 1}
+  readyMaterial: {fileID: 0}
+  notReadyMaterial: {fileID: 0}
+  targetGraphic: {fileID: 0}
+  targetRenderer: {fileID: 0}
 --- !u!65 &1950030424
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -4335,6 +4344,7 @@ GameObject:
   - component: {fileID: 1992484353}
   - component: {fileID: 1992484355}
   - component: {fileID: 1992484356}
+  - component: {fileID: 1992484357}
   m_Layer: 0
   m_Name: LobbyManager
   m_TagString: Untagged
@@ -4435,6 +4445,21 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::PlayerCardSpawner
   cardPrefab: {fileID: 2815233347505733160, guid: b629e99b983fdee45948c192a1396169,
     type: 3}
+--- !u!114 &1992484357
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1992484351}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5383d216980c602479e3737f2eb37315, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::BoardSessionBroadcaster
+  ShowTopMostFoldoutHeaderGroup: 1
+  boardSceneName: SampleScene
+  clientTransitionDelay: 0.2
 --- !u!1 &2008523592 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 5087823492143518475, guid: 3967f87296c892e40b57e37bc8601550,
