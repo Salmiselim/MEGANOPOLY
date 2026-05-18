@@ -13,22 +13,11 @@ public class AuthWorldSpaceUI : MonoBehaviour
     [Tooltip("The World Space Canvas containing your Auth UI")]
     public Canvas authCanvas;
 
-    [Header("Positioning")]
-    [Tooltip("Distance in front of the camera")]
-    public float distanceFromCamera = 1.5f;
-
-    [Tooltip("Height offset relative to camera (negative = slightly below eye level)")]
-    public float heightOffset = -0.1f;
-
-    [Tooltip("How fast the panel smoothly follows if camera moves before settled")]
-    public float settleSpeed = 5f;
-
     [Header("Scale")]
     [Tooltip("World space size of the canvas — 0.001 converts Unity units to metres")]
     public float canvasScale = 0.002f;
 
     private Camera _vrCamera;
-    private bool _settled = false;
 
     private void Start()
     {
@@ -105,70 +94,18 @@ public class AuthWorldSpaceUI : MonoBehaviour
             rect.sizeDelta = new Vector2(1200f, 900f);
         }
 
-        // Position it
-        PlacePanelInFrontOfCamera();
-
-        _settled = true;
         Debug.Log("[AuthWorldSpaceUI] Auth panel placed successfully.");
     }
 
-    // ── Placement ─────────────────────────────────────────────────────────────
-
-    private void PlacePanelInFrontOfCamera()
-    {
-        Vector3 forward = _vrCamera.transform.forward;
-        forward.y = 0f;          // keep panel vertical
-        forward.Normalize();
-
-        Vector3 targetPos = _vrCamera.transform.position
-                             + forward * distanceFromCamera
-                             + Vector3.up * heightOffset;
-
-        authCanvas.transform.position = targetPos;
-
-        // Face the player
-        authCanvas.transform.rotation = Quaternion.LookRotation(
-            authCanvas.transform.position - _vrCamera.transform.position
-        );
-    }
-
-    // ── Optional: re-settle if camera moves a lot before player touches UI ───
+    // ── Camera swap detection ─────────────────────────────────────────────────
 
     private void Update()
     {
-        if (!_settled) return;
-
-        // Automatically update if the camera changes (e.g. from offline Rig over to Networked Rig)
+        // Keep worldCamera up to date if the active camera changes
         if (Camera.main != null && _vrCamera != Camera.main)
         {
             _vrCamera = Camera.main;
             if (authCanvas != null) authCanvas.worldCamera = _vrCamera;
-        }
-
-        if (_vrCamera == null) return;
-
-        // Smoothly keep the panel in front until the player interacts
-        // (stops updating once they look away — feel free to remove if unwanted)
-        Vector3 forward = _vrCamera.transform.forward;
-        forward.y = 0f;
-        forward.Normalize();
-
-        Vector3 targetPos = _vrCamera.transform.position
-                          + forward * distanceFromCamera
-                          + Vector3.up * heightOffset;
-
-        // Only reposition if very far off (> 0.5 m) — avoids jitter
-        if (Vector3.Distance(authCanvas.transform.position, targetPos) > 0.5f)
-        {
-            authCanvas.transform.position = Vector3.Lerp(
-                authCanvas.transform.position,
-                targetPos,
-                Time.deltaTime * settleSpeed
-            );
-
-            authCanvas.transform.rotation = Quaternion.LookRotation(
-                authCanvas.transform.position - _vrCamera.transform.position
-            );
         }
     }
 }
