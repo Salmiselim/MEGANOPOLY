@@ -1906,6 +1906,16 @@ PrefabInstance:
       propertyPath: GlobalObjectIdHash
       value: 891525871
       objectReference: {fileID: 0}
+    - target: {fileID: 9074329849498600403, guid: ddd644a735f58354588b40bfac379245,
+        type: 3}
+      propertyPath: SceneMigrationSynchronization
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 9074329849498600403, guid: ddd644a735f58354588b40bfac379245,
+        type: 3}
+      propertyPath: InScenePlacedSourceGlobalObjectIdHash
+      value: 3636423003
+      objectReference: {fileID: 0}
     - target: {fileID: 9093563060623342089, guid: ddd644a735f58354588b40bfac379245,
         type: 3}
       propertyPath: m_AnchorMax.y
