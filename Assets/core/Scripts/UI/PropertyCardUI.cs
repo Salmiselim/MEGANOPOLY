@@ -195,14 +195,27 @@ public class PropertyCardUI : NetworkBehaviour
         Quaternion targetRot = tilt * upright;
         Vector3 targetScale = _cardOriginalScale * cardDisplayScale;
 
+        // Show the button panel from the start of the animation and keep it
+        // glued under the card every frame, so the UI flies in WITH the card
+        // instead of snapping in at the end.
+        if (buttonPanel != null) buttonPanel.SetActive(true);
+
         float elapsed = 0f;
         while (elapsed < flyDuration)
         {
             elapsed += Time.deltaTime;
             float t = flyCurve.Evaluate(elapsed / flyDuration);
-            _currentCard.transform.position = Vector3.Lerp(_cardOriginalPosition, targetPos, t);
+            Vector3 cardPos = Vector3.Lerp(_cardOriginalPosition, targetPos, t);
+            _currentCard.transform.position = cardPos;
             _currentCard.transform.rotation = Quaternion.Slerp(_cardOriginalRotation, targetRot, t);
             _currentCard.transform.localScale = Vector3.Lerp(_cardOriginalScale, targetScale, t);
+
+            if (buttonPanel != null)
+            {
+                buttonPanel.transform.position = cardPos - Vector3.up * buttonPanelGap;
+                buttonPanel.transform.LookAt(cam.transform);
+                buttonPanel.transform.Rotate(0, 180, 0);
+            }
             yield return null;
         }
 
@@ -215,7 +228,6 @@ public class PropertyCardUI : NetworkBehaviour
             buttonPanel.transform.position = targetPos - Vector3.up * buttonPanelGap;
             buttonPanel.transform.LookAt(cam.transform);
             buttonPanel.transform.Rotate(0, 180, 0);
-            buttonPanel.SetActive(true);
         }
 
         _isWaiting = true;
@@ -224,20 +236,28 @@ public class PropertyCardUI : NetworkBehaviour
     private IEnumerator AnimateCardBack(bool didBuy)
     {
         _isWaiting = false;
-        if (buttonPanel != null) buttonPanel.SetActive(false);
 
         Vector3 startPos = _currentCard.transform.position;
         Quaternion startRot = _currentCard.transform.rotation;
         Vector3 startScale = _currentCard.transform.localScale;
         float elapsed = 0f;
 
+        Camera cam = VRCameraProvider.Camera;
         while (elapsed < flyDuration)
         {
             elapsed += Time.deltaTime;
             float t = flyCurve.Evaluate(elapsed / flyDuration);
-            _currentCard.transform.position = Vector3.Lerp(startPos, _cardOriginalPosition, t);
+            Vector3 cardPos = Vector3.Lerp(startPos, _cardOriginalPosition, t);
+            _currentCard.transform.position = cardPos;
             _currentCard.transform.rotation = Quaternion.Slerp(startRot, _cardOriginalRotation, t);
             _currentCard.transform.localScale = Vector3.Lerp(startScale, _cardOriginalScale, t);
+
+            if (buttonPanel != null && cam != null)
+            {
+                buttonPanel.transform.position = cardPos - Vector3.up * buttonPanelGap;
+                buttonPanel.transform.LookAt(cam.transform);
+                buttonPanel.transform.Rotate(0, 180, 0);
+            }
             yield return null;
         }
 
@@ -245,6 +265,8 @@ public class PropertyCardUI : NetworkBehaviour
         _currentCard.transform.rotation = _cardOriginalRotation;
         _currentCard.transform.localScale = _cardOriginalScale;
         _currentCard = null;
+
+        if (buttonPanel != null) buttonPanel.SetActive(false);
 
         if (didBuy)
             BuyPropertyServerRpc(_playerIndex, _tileIndex);

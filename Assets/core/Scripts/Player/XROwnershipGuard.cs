@@ -38,48 +38,59 @@ public class XROwnershipGuard : NetworkBehaviour
 
         if (IsOwner)
         {
-            // 1. Cleanly disable the old offline XROrigin / Camera instead of destroying it
-            Camera[] allCams = FindObjectsOfType<Camera>();
-            foreach (Camera c in allCams)
-            {
-                if (c.transform.root != this.transform.root && c.gameObject.scene.name != "DontDestroyOnLoad")
-                {
-                    // Disable the old camera and its root object cleanly
-                    c.enabled = false;
-                    
-                    var oldOrigin = c.transform.root.GetComponentInChildren<XROrigin>(true);
-                    if (oldOrigin != null)
-                    {
-                        oldOrigin.gameObject.SetActive(false);
-                    }
-                    else
-                    {
-                        c.gameObject.SetActive(false);
-                    }
-                }
-            }
-
-            // 2. Ensure our camera is tagged correctly
+            // Local player. Make our camera the rendering main camera AND
+            // silence every other Camera/AudioListener in active scenes so
+            // they don't outrank ours. We deliberately ONLY disable the
+            // Camera/AudioListener components — not the GameObjects — so the
+            // XR Device Simulator (in editor) keeps producing head/hand
+            // input via its TrackedPoseDriver/InputActions; only its visual
+            // camera goes silent. Cameras in DontDestroyOnLoad (e.g. the
+            // VRCameraProvider fallback) are left alone — that script
+            // already steps aside when a real XR camera shows up.
             Camera myCam = cameraOffsetRoot.GetComponentInChildren<Camera>(true);
-            if (myCam != null)
+            if (myCam != null) myCam.tag = "MainCamera";
+
+            int silenced = 0;
+            foreach (var cam in FindObjectsByType<Camera>(FindObjectsInactive.Exclude, FindObjectsSortMode.None))
             {
-                myCam.tag = "MainCamera";
+                if (cam == null || cam == myCam) continue;
+                if (cam.transform.root == this.transform.root) continue; // skip our own rig
+                if (cam.gameObject.scene.name == "DontDestroyOnLoad") continue; // skip fallback / DDOL cams
+                cam.enabled = false;
+                var listener = cam.GetComponent<AudioListener>();
+                if (listener != null) listener.enabled = false;
+                silenced++;
             }
 
-            Debug.Log($"[XROwnershipGuard] Local Player spawned. Keeping Camera Rig.");
+            Debug.Log($"[XROwnershipGuard] Local Player spawned. Kept rig, silenced {silenced} other camera(s).");
         }
         else
         {
-            // 3. We DO NOT own this player. Strip every XR/input component on
-            // the rig — keep only the network-synced visuals. Without this,
-            // the remote avatar's GravityProvider, LocomotionProviders, XR
-            // controllers, etc. keep Updating against a Camera we just
-            // destroyed, spamming MissingReferenceException.
+            // Remote player. Their VISUAL mesh (hand models, body) must stay
+            // visible so other players actually see the avatar, but anything
+            // that would render to *our* screen or consume *our* XR input has
+            // to go. So: keep the cameraOffsetRoot GameObject (which holds
+            // the hand meshes), but disable just the Camera + AudioListener
+            // and strip XR input/locomotion components.
+            StripRemoteAvatarCamera();
             DisableXrSystemsOnRemoteAvatar();
-            Destroy(cameraOffsetRoot);
 
-            Debug.Log($"[XROwnershipGuard] Remote Player spawned. Destroyed their Camera Rig + XR systems.");
+            Debug.Log($"[XROwnershipGuard] Remote Player spawned. Disabled their Camera + XR systems; visuals kept.");
         }
+    }
+
+    /// <summary>
+    /// On a remote avatar, disable just the Camera + AudioListener under the
+    /// rig so the remote rig stops trying to render to or pull audio through
+    /// the local screen — but leave the GameObject tree intact so the
+    /// network-synced hand/body meshes still render for us.
+    /// </summary>
+    private void StripRemoteAvatarCamera()
+    {
+        foreach (var cam in cameraOffsetRoot.GetComponentsInChildren<Camera>(true))
+            cam.enabled = false;
+        foreach (var listener in cameraOffsetRoot.GetComponentsInChildren<AudioListener>(true))
+            listener.enabled = false;
     }
 
     /// <summary>
@@ -100,7 +111,15 @@ public class XROwnershipGuard : NetworkBehaviour
             if (b is NetworkBehaviour) continue;
             string ns = b.GetType().Namespace;
             if (string.IsNullOrEmpty(ns)) continue;
-            if (ns.StartsWith("UnityEngine.XR") || ns.StartsWith("Unity.XR"))
+            // All XR/input-driven namespaces we want silenced on a remote
+            // avatar. Critically this includes UnityEngine.InputSystem.XR —
+            // that's where TrackedPoseDriver lives, and if it stays enabled
+            // the remote avatar reads YOUR local controller poses and
+            // duplicates your hand movement on the other player's body.
+            if (ns.StartsWith("UnityEngine.XR")
+             || ns.StartsWith("Unity.XR")
+             || ns.StartsWith("UnityEngine.InputSystem.XR")
+             || ns.StartsWith("UnityEngine.SpatialTracking"))
             {
                 b.enabled = false;
                 disabled++;

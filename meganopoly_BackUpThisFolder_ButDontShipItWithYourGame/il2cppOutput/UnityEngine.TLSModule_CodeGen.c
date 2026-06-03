@@ -1,0 +1,88 @@
+﻿#include "pch-c.h"
+
+
+#include "codegen/il2cpp-codegen-metadata.h"
+
+
+
+
+
+extern void Binding_unitytls_client_send_data_m5086C52FA8F5F51D6A764CDF277FFFBCBA6D1928 (void);
+extern void Binding_unitytls_client_read_data_mF232A9B9C2DB17E25ACB540144CB2C4CD3D67C2F (void);
+extern void Binding_unitytls_client_init_config_m82074495EA2A17758484F4A7FF1C6BB2EFE198B5 (void);
+extern void Binding_unitytls_client_create_mA830787311EBD55A7ACAA925541EE3A28F398026 (void);
+extern void Binding_unitytls_client_destroy_m3454EE8424B3F530183F2FB04DE935EFA0D4CE0B (void);
+extern void Binding_unitytls_client_init_m4A2D0AEC37B2EEAFFF7793ECE1C27B52E718C9AA (void);
+extern void Binding_unitytls_client_handshake_mD90B620858219D8DF2E01747ED7DEFE6CF944F46 (void);
+extern void Binding_unitytls_client_get_handshake_state_m5DCB8B5E8841F1BCF2CC2E52310B30CCE0EB2199 (void);
+extern void Binding_unitytls_client_get_errorsState_m7452878361ADEBEC32111BC8087D2C61F370505F (void);
+extern void Binding_unitytls_client_get_state_mFA36FD1C48800D3B88D142ED9E1FFFC65F196B0F (void);
+extern void Binding_unitytls_client_get_role_m1F838334033B29D9251DDD0153303DEE21B6C8EB (void);
+extern void unitytls_client_data_send_callback__ctor_mA3190917673633997FB351384D19AC2DCB09F3D4 (void);
+extern void unitytls_client_data_send_callback_Invoke_m9BAC5496CD637DEBFA55F4D2BA1960C45B8AF277 (void);
+extern void unitytls_client_data_receive_callback__ctor_m856BA3CAF960B07B7C62FF0A91FA3108F55FF56E (void);
+extern void unitytls_client_data_receive_callback_Invoke_m569CE992486A426475D923974F91171087AAE6B8 (void);
+extern void unitytls_client_log_callback__ctor_mF4D1B69EBBC1450CE50921B0C4E648F333BA9396 (void);
+extern void unitytls_client_log_callback_Invoke_m92876965C2CF1E3FEB2495C6E7FADC56AC5DBE3A (void);
+static Il2CppMethodPointer s_methodPointers[17] = 
+{
+	Binding_unitytls_client_send_data_m5086C52FA8F5F51D6A764CDF277FFFBCBA6D1928,
+	Binding_unitytls_client_read_data_mF232A9B9C2DB17E25ACB540144CB2C4CD3D67C2F,
+	Binding_unitytls_client_init_config_m82074495EA2A17758484F4A7FF1C6BB2EFE198B5,
+	Binding_unitytls_client_create_mA830787311EBD55A7ACAA925541EE3A28F398026,
+	Binding_unitytls_client_destroy_m3454EE8424B3F530183F2FB04DE935EFA0D4CE0B,
+	Binding_unitytls_client_init_m4A2D0AEC37B2EEAFFF7793ECE1C27B52E718C9AA,
+	Binding_unitytls_client_handshake_mD90B620858219D8DF2E01747ED7DEFE6CF944F46,
+	Binding_unitytls_client_get_handshake_state_m5DCB8B5E8841F1BCF2CC2E52310B30CCE0EB2199,
+	Binding_unitytls_client_get_errorsState_m7452878361ADEBEC32111BC8087D2C61F370505F,
+	Binding_unitytls_client_get_state_mFA36FD1C48800D3B88D142ED9E1FFFC65F196B0F,
+	Binding_unitytls_client_get_role_m1F838334033B29D9251DDD0153303DEE21B6C8EB,
+	unitytls_client_data_send_callback__ctor_mA3190917673633997FB351384D19AC2DCB09F3D4,
+	unitytls_client_data_send_callback_Invoke_m9BAC5496CD637DEBFA55F4D2BA1960C45B8AF277,
+	unitytls_client_data_receive_callback__ctor_m856BA3CAF960B07B7C62FF0A91FA3108F55FF56E,
+	unitytls_client_data_receive_callback_Invoke_m569CE992486A426475D923974F91171087AAE6B8,
+	unitytls_client_log_callback__ctor_mF4D1B69EBBC1450CE50921B0C4E648F333BA9396,
+	unitytls_client_log_callback_Invoke_m92876965C2CF1E3FEB2495C6E7FADC56AC5DBE3A,
+};
+static const int32_t s_InvokerIndices[17] = 
+{
+	29558,
+	28015,
+	38735,
+	31234,
+	38735,
+	37955,
+	38576,
+	38576,
+	33465,
+	38576,
+	38576,
+	8989,
+	1795,
+	8989,
+	1795,
+	8989,
+	638,
+};
+extern const Il2CppDebuggerMetadataRegistration g_DebuggerMetadataRegistrationUnityEngine_TLSModule;
+IL2CPP_EXTERN_C const Il2CppCodeGenModule g_UnityEngine_TLSModule_CodeGenModule;
+const Il2CppCodeGenModule g_UnityEngine_TLSModule_CodeGenModule = 
+{
+	"UnityEngine.TLSModule.dll",
+	17,
+	s_methodPointers,
+	0,
+	NULL,
+	s_InvokerIndices,
+	0,
+	NULL,
+	0,
+	NULL,
+	0,
+	NULL,
+	&g_DebuggerMetadataRegistrationUnityEngine_TLSModule,
+	NULL,
+	NULL,
+	NULL,
+	NULL,
+};

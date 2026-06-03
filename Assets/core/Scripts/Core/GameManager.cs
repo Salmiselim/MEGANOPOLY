@@ -40,6 +40,22 @@ public class CompleteGameManager : NetworkBehaviour
 
     [Header("DEBUG")]
     [SerializeField] private bool enableDebugCheats = true;
+    [Tooltip("Player index that takes the first turn. Index 0 = whoever pressed Start in the lobby " +
+             "(the host). Index 1 = the player that joined the lobby. For our solo dev loop, the " +
+             "editor is the host (player 0) and the Quest joins (player 1) — so set this to 1 to " +
+             "make the Quest take the first turn.")]
+    [SerializeField] private int startingPlayerIndex = 1;
+    [Tooltip("If >= 0, that player's turns are automatically skipped (after the very first turn). " +
+             "Solo dev loop: startingPlayerIndex=1 + autoSkipPlayerIndex=0 makes the Quest play " +
+             "every turn while the editor host just sits there receiving cheat keys. -1 disables.")]
+    [SerializeField] private int autoSkipPlayerIndex = 0;
+    public enum DiceLandingForce { Off, UnownedProperty, UnownedRailroad, AnyBuyable }
+    [Tooltip("Forces the dice roll to land on a specific tile type so you can repeatedly test a flow:\n" +
+             "  Off             — normal dice behaviour.\n" +
+             "  UnownedProperty — lands on an unowned property (triggers the minigame).\n" +
+             "  UnownedRailroad — lands on an unowned train station (triggers the PropertyCardUI fly-in).\n" +
+             "  AnyBuyable      — any unowned property/railroad, whichever the roll can reach.")]
+    [SerializeField] private DiceLandingForce forceDiceLanding = DiceLandingForce.UnownedRailroad;
     [SerializeField] private Key cheatKey_GiveMonopoly = Key.F1;
     [SerializeField] private Key cheatKey_OpenBuildMenu = Key.F2;
     [SerializeField] private Key cheatKey_GiveMoney = Key.F3;
@@ -550,7 +566,10 @@ public class CompleteGameManager : NetworkBehaviour
         currentGameState = GameState.Playing;
         Debug.Log("\n═══════════════════════════════════\n       GAME STARTED!\n═══════════════════════════════════\n");
         OnGameStarted?.Invoke();
-        StartTurn(0);
+        int firstPlayer = (players != null && players.Length > 0)
+            ? Mathf.Clamp(startingPlayerIndex, 0, players.Length - 1)
+            : 0;
+        StartTurn(firstPlayer);
     }
 
     private void StartTurn(int playerIndex)
@@ -572,6 +591,10 @@ public class CompleteGameManager : NetworkBehaviour
 
         if (p.isInJail) { HandleJailTurn(p); return; }
         EnableDiceForPlayer();
+
+        // Mark that the first turn has begun so auto-skip can kick in on
+        // subsequent rotations (it deliberately leaves the FIRST turn alone).
+        _firstTurnHasRun = true;
     }
 
     [ClientRpc]
@@ -681,25 +704,76 @@ public class CompleteGameManager : NetworkBehaviour
 
         int from = players[currentPlayerIndex].currentTileIndex;
 
-        if (IsValidLanding(from, rolledTotal))
-            return rolledTotal;
-
-        List<int> valid = new List<int>();
-        for (int t = 2; t <= 12; t++)
+        // Testing mode: bias to a specific tile type so the corresponding
+        // flow (minigame, property card, etc.) can be exercised every turn.
+        // Falls back through progressively looser preferences before giving
+        // up and returning the original roll.
+        switch (forceDiceLanding)
         {
-            if (IsValidLanding(from, t)) valid.Add(t);
+            case DiceLandingForce.UnownedProperty:
+            {
+                int t1 = PickValidTotal(from, LandingPref.UnownedProperty);
+                if (t1 > 0) return t1;
+                int t2 = PickValidTotal(from, LandingPref.AnyProperty);
+                if (t2 > 0) return t2;
+                int t3 = PickValidTotal(from, LandingPref.PropertyOrRail);
+                if (t3 > 0) return t3;
+                return rolledTotal;
+            }
+            case DiceLandingForce.UnownedRailroad:
+            {
+                int t1 = PickValidTotal(from, LandingPref.UnownedRailroad);
+                if (t1 > 0) return t1;
+                int t2 = PickValidTotal(from, LandingPref.AnyRailroad);
+                if (t2 > 0) return t2;
+                int t3 = PickValidTotal(from, LandingPref.PropertyOrRail);
+                if (t3 > 0) return t3;
+                return rolledTotal;
+            }
+            case DiceLandingForce.AnyBuyable:
+            {
+                int t = PickValidTotal(from, LandingPref.PropertyOrRail);
+                return t > 0 ? t : rolledTotal;
+            }
         }
 
-        if (valid.Count == 0) return rolledTotal;
-        return valid[Random.Range(0, valid.Count)];
+        // Default (Off): keep the rolled total if it lands on Property or
+        // Railroad, otherwise nudge to a random Property/Railroad landing.
+        if (IsValidLanding(from, rolledTotal, LandingPref.PropertyOrRail))
+            return rolledTotal;
+        int picked = PickValidTotal(from, LandingPref.PropertyOrRail);
+        return picked > 0 ? picked : rolledTotal;
     }
 
-    private bool IsValidLanding(int fromTile, int total)
+    private enum LandingPref { UnownedProperty, AnyProperty, UnownedRailroad, AnyRailroad, PropertyOrRail }
+
+    private int PickValidTotal(int fromTile, LandingPref pref)
+    {
+        List<int> valid = new List<int>();
+        for (int t = 2; t <= 12; t++)
+            if (IsValidLanding(fromTile, t, pref)) valid.Add(t);
+        return valid.Count == 0 ? 0 : valid[Random.Range(0, valid.Count)];
+    }
+
+    private bool IsValidLanding(int fromTile, int total, LandingPref pref)
     {
         int target = (fromTile + total) % 40;
         TileData tile = boardManager.GetTile(target);
         if (tile == null) return false;
-        return tile.tileType == TileType.Property || tile.tileType == TileType.Railroad;
+        switch (pref)
+        {
+            case LandingPref.UnownedProperty:
+                return tile.tileType == TileType.Property && !tile.IsOwned();
+            case LandingPref.AnyProperty:
+                return tile.tileType == TileType.Property;
+            case LandingPref.UnownedRailroad:
+                return tile.tileType == TileType.Railroad && !tile.IsOwned();
+            case LandingPref.AnyRailroad:
+                return tile.tileType == TileType.Railroad;
+            case LandingPref.PropertyOrRail:
+            default:
+                return tile.tileType == TileType.Property || tile.tileType == TileType.Railroad;
+        }
     }
 
     private IEnumerator HandlePlayerMove(int spaces)
@@ -843,15 +917,26 @@ public class CompleteGameManager : NetworkBehaviour
 
     private void HandleProperty(PlayerData player, TileData property)
     {
-        // ── Unowned: launch minigame immediately.
-        // All players are sent to the minigame scene; the winner claims the property.
+        // ── Unowned: show the property card with Buy / Pass buttons.
+        // PropertyCardUI.OnPropertyCardClosed → CompleteGameManager.OnPropertyCardClosed
+        // already ends the turn whether the player bought or passed.
         if (!property.IsOwned())
         {
-            int minigameType = GetMinigameTypeForProperty(property);
-            int prize        = Mathf.Max(100, property.purchasePrice / 2);
+            TileMarker marker = boardManager.GetTileMarker(property.tileIndex);
+            if (PropertyCardUI.Instance != null && marker?.propertyCard != null)
+            {
+                Debug.Log($"[GameManager] '{property.tileName}' is unowned → showing PropertyCardUI.");
+                PropertyCardUI.Instance.ShowPropertyCard(player, property, marker);
+                return;
+            }
 
-            Debug.Log($"[GameManager] '{property.tileName}' is unowned → launching minigame type={minigameType} prize={prize}");
-            TriggerMinigameChallenge(player, property, minigameType, prize);
+            // Fallback: no PropertyCardUI / no marker — end the turn so the
+            // game doesn't hang. The minigame challenge path is no longer
+            // triggered automatically; if you want it back, call
+            // TriggerMinigameChallenge from a UI button instead.
+            Debug.LogWarning($"[GameManager] '{property.tileName}' is unowned but PropertyCardUI " +
+                             $"or its marker is missing — ending turn.");
+            EndTurn();
             return;
         }
 
@@ -1006,10 +1091,29 @@ public class CompleteGameManager : NetworkBehaviour
         StartCoroutine(NextPlayerTurn());
     }
 
+    // Set true once the very first StartTurn has run, so auto-skip leaves the
+    // initial turn alone and only kicks in for subsequent rotations.
+    private bool _firstTurnHasRun;
+
     private IEnumerator NextPlayerTurn()
     {
         yield return new WaitForSeconds(2f);
-        currentPlayerIndex = (currentPlayerIndex + 1) % numberOfPlayers;
+
+        // Advance, then keep advancing if the new current player is the one
+        // we're auto-skipping. The `safety` counter avoids any infinite loop
+        // if a user mis-configures autoSkipPlayerIndex to the only valid
+        // player.
+        int safety = 0;
+        do
+        {
+            currentPlayerIndex = (currentPlayerIndex + 1) % numberOfPlayers;
+            if (++safety > numberOfPlayers + 1) break;
+        }
+        while (_firstTurnHasRun
+               && autoSkipPlayerIndex >= 0
+               && autoSkipPlayerIndex < numberOfPlayers
+               && currentPlayerIndex == autoSkipPlayerIndex);
+
         StartTurn(currentPlayerIndex);
     }
 
@@ -1122,21 +1226,46 @@ public class CompleteGameManager : NetworkBehaviour
     {
         if (!enableDebugCheats) return;
 
-        // Allow cheats on the server, OR when no network session is active (editor / solo test).
+        // Cheat keypresses are read on every peer; the work itself runs only
+        // on the server (against `currentPlayerIndex`), so a key press on the
+        // editor client triggers the cheat for whoever currently owns the
+        // turn on the host. In a solo/offline editor session (no NGO active)
+        // we just run the cheat locally.
         bool networkActive = NetworkManager.Singleton != null && NetworkManager.Singleton.IsListening;
-        if (networkActive && !IsServer) return;
 
-        // Space: roll dice. Works even before a network game is formally started so
-        // you can test dice physics and result flow in isolation in the editor.
+        // Space: roll dice. Works even before a network game has formally
+        // started (so you can sanity-check dice physics in isolation too).
         if (IsKeyDown(Key.Space))
         {
-            Cheat_ForceRollDice();
+            if (!networkActive)            Cheat_ForceRollDice();
+            else if (IsServer)             Cheat_ForceRollDice();
+            else                           RequestCheatRollServerRpc();
             return;
         }
 
         // All other cheat keys require an active game with valid player state.
         if (players == null || currentGameState != GameState.Playing) return;
         if (currentPlayerIndex < 0 || currentPlayerIndex >= players.Length) return;
+
+        // B = build test (give monopoly + open build menu for current player).
+        if (IsKeyDown(Key.B))
+        {
+            if (!networkActive || IsServer)
+            {
+                Cheat_GiveMonopoly();
+                Cheat_OpenBuildingMenu();
+            }
+            else RequestCheatBuildServerRpc();
+            return;
+        }
+
+        // R = rent test (teleport to opponent's property, open rent menu).
+        if (IsKeyDown(Key.R))
+        {
+            if (!networkActive || IsServer) Cheat_TestRent();
+            else                            RequestCheatRentServerRpc();
+            return;
+        }
 
         if (IsKeyDown(cheatKey_GiveMonopoly)) Cheat_GiveMonopoly();
         if (IsKeyDown(cheatKey_OpenBuildMenu)) Cheat_OpenBuildingMenu();
@@ -1157,6 +1286,33 @@ public class CompleteGameManager : NetworkBehaviour
         if (Keyboard.current == null) return false;
         if ((int)key <= 0 || (int)key > (int)Key.OEM5) return false;
         return Keyboard.current[key].wasPressedThisFrame;
+    }
+
+    // ── Client → Server cheat RPCs ────────────────────────────────────────
+    // These let the editor (joined as a client) trigger debug cheats that
+    // execute on the host against whoever owns the current turn. That's the
+    // intended dev loop: editor has the keyboard, Quest is immersed and
+    // owning the turn; the editor's Space/B/R hit the host and the result
+    // appears for the Quest player.
+
+    [Rpc(SendTo.Server, InvokePermission = RpcInvokePermission.Everyone)]
+    private void RequestCheatRollServerRpc() => Cheat_ForceRollDice();
+
+    [Rpc(SendTo.Server, InvokePermission = RpcInvokePermission.Everyone)]
+    private void RequestCheatBuildServerRpc()
+    {
+        if (currentGameState != GameState.Playing) return;
+        if (players == null || currentPlayerIndex < 0 || currentPlayerIndex >= players.Length) return;
+        Cheat_GiveMonopoly();
+        Cheat_OpenBuildingMenu();
+    }
+
+    [Rpc(SendTo.Server, InvokePermission = RpcInvokePermission.Everyone)]
+    private void RequestCheatRentServerRpc()
+    {
+        if (currentGameState != GameState.Playing) return;
+        if (players == null || currentPlayerIndex < 0 || currentPlayerIndex >= players.Length) return;
+        Cheat_TestRent();
     }
 
     // Inspector-set Key fields can hold stale legacy KeyCode integers (e.g.

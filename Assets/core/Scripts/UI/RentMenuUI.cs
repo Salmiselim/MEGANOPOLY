@@ -126,8 +126,12 @@ public class RentMenuUI : NetworkBehaviour
             if (lbl != null) lbl.text = $"Pay {rentAmount} DT";
         }
 
+        // Always offer Play Minigame as an alternative to paying. Previously
+        // the button only appeared when the player couldn't afford the rent;
+        // now it's available regardless so the player can choose to play
+        // even when they have enough money.
         if (playMinigameButton != null)
-            playMinigameButton.gameObject.SetActive(payerMoney < rentAmount);
+            playMinigameButton.gameObject.SetActive(true);
 
         TryAssignCamera();
         PositionCanvas();

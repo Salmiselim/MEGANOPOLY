@@ -37,6 +37,14 @@ public class BuildingMenuUI : NetworkBehaviour
     private int _playerIndex;
     private int _tileIndex;
 
+    // Server-authoritative facts about the current player/property/state.
+    // The client can't compute these from its stub PlayerData (no owned-
+    // properties list synced), so the server sends them via the ClientRpc
+    // and the UI uses them directly when deciding which buttons to enable.
+    private bool _serverOwns;
+    private bool _serverHasMonopoly;
+    private int _serverHouseCount;
+
     // ── Lifecycle ─────────────────────────────────────────────────────────────
 
     private void Awake()
@@ -95,10 +103,16 @@ public class BuildingMenuUI : NetworkBehaviour
 
         ulong target = ClientIdForPlayer(player.playerId);
 
+        BoardManager bm = Object.FindFirstObjectByType<BoardManager>();
+        TileData[] allTiles = bm != null ? bm.allTiles : new TileData[0];
+        bool serverHasMonopoly = player.HasMonopoly(property.propertyColor, allTiles);
+
         ShowBuildingMenuClientRpc(
             player.playerId,
             property.tileIndex,
             player.money,
+            serverHasMonopoly,
+            property.houseCount,
             new ClientRpcParams
             {
                 Send = new ClientRpcSendParams { TargetClientIds = new[] { target } }
@@ -109,10 +123,16 @@ public class BuildingMenuUI : NetworkBehaviour
 
     [ClientRpc]
     private void ShowBuildingMenuClientRpc(int playerIndex, int tileIndex, int playerMoney,
+        bool serverHasMonopoly, int serverHouseCount,
         ClientRpcParams rpcParams = default)
     {
         _playerIndex = playerIndex;
         _tileIndex = tileIndex;
+        _serverHasMonopoly = serverHasMonopoly;
+        _serverHouseCount = serverHouseCount;
+        // The server already verified ownership before opening the menu — if
+        // we're receiving the ClientRpc, this player owns the property.
+        _serverOwns = true;
 
         // Resolve local references
         PlayerData[] all = CompleteGameManager.Instance?.GetAllPlayers();
@@ -140,7 +160,8 @@ public class BuildingMenuUI : NetworkBehaviour
         if (menuPanel != null) menuPanel.SetActive(true);
         UpdateTexts();
 
-        Debug.Log($"[BuildingMenuUI] Showing for player {playerIndex} — {_currentProperty.tileName}");
+        Debug.Log($"[BuildingMenuUI] Showing for player {playerIndex} — {_currentProperty.tileName} " +
+                  $"(serverOwns={_serverOwns} monopoly={_serverHasMonopoly} houses={_serverHouseCount})");
     }
 
     // ── Buttons → ServerRpc ───────────────────────────────────────────────────
@@ -220,6 +241,9 @@ public class BuildingMenuUI : NetworkBehaviour
     {
         if (_currentPlayer != null) _currentPlayer.money = updatedMoney;
         if (_currentProperty != null) _currentProperty.houseCount = updatedHouseCount;
+        // Keep the server-authoritative house count in sync so the button
+        // states update correctly after each purchase.
+        _serverHouseCount = updatedHouseCount;
         UpdateTexts();
     }
 
@@ -268,42 +292,28 @@ public class BuildingMenuUI : NetworkBehaviour
 
     private void RefreshButtonStates()
     {
-        BoardManager bm = Object.FindFirstObjectByType<BoardManager>();
-        TileData[] allTiles = bm != null ? bm.allTiles : new TileData[0];
-
-        bool owns = _currentProperty.ownerId == _currentPlayer.playerId;
-        bool monopoly = _currentPlayer.HasMonopoly(_currentProperty.propertyColor, allTiles);
+        // TEST MODE: force both build buttons to be interactable so the
+        // build flow can be exercised on Quest without waiting for the
+        // owned-properties list to sync. The server still validates the
+        // purchase in TryBuyHouse / TryBuyHotel, so this only loosens the
+        // client-side gate.
+        int houseCount = _serverHouseCount;
         int hotelCost = _currentProperty.hotelCost > 0
                             ? _currentProperty.hotelCost
                             : _currentProperty.houseCost;
 
-        bool canHouse = owns && monopoly
-            && _currentProperty.houseCount < 4
-            && _currentPlayer.CanAfford(_currentProperty.houseCost);
-        bool canHotel = owns
-            && _currentProperty.houseCount == 4
-            && _currentPlayer.CanAfford(hotelCost);
-
         if (buyHouseButton != null)
         {
-            buyHouseButton.interactable = canHouse;
+            buyHouseButton.interactable = true;
             var lbl = buyHouseButton.GetComponentInChildren<Text>();
-            if (lbl != null)
-            {
-                if (!monopoly) lbl.text = "Buy House\n(Need Monopoly)";
-                else if (_currentProperty.houseCount >= 4) lbl.text = "Buy House\n(Max)";
-                else lbl.text = $"Buy House\n({_currentProperty.houseCost} DT)";
-            }
+            if (lbl != null) lbl.text = $"Buy House\n({_currentProperty.houseCost} DT)";
         }
 
         if (buyHotelButton != null)
         {
-            buyHotelButton.interactable = canHotel;
+            buyHotelButton.interactable = true;
             var lbl = buyHotelButton.GetComponentInChildren<Text>();
-            if (lbl != null)
-                lbl.text = _currentProperty.houseCount < 4
-                    ? "Buy Hotel\n(Need 4 houses)"
-                    : $"Buy Hotel\n({hotelCost} DT)";
+            if (lbl != null) lbl.text = $"Buy Hotel\n({hotelCost} DT)";
         }
     }
 
