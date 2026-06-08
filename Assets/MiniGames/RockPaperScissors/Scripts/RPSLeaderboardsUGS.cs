@@ -137,7 +137,7 @@ namespace RockPaperScissors
         private void RenderLeaderboard(LeaderboardScoresPage page)
         {
             var sb = new StringBuilder();
-            sb.AppendLine("== LEADERBOARD ==");
+            sb.AppendLine("Leaderboard:");
             sb.AppendLine($"{leaderboardId} (Top {topLimit})");
 
             if (page == null || page.Results == null || page.Results.Count == 0)

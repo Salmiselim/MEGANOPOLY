@@ -33,6 +33,9 @@ namespace RockPaperScissors
         [Header("Sound")]
         [SerializeField] private RPSSoundManager soundManager;
 
+        [Header("VFX")]
+        [SerializeField] private RPSConfettiEffect confettiEffect;
+
         public enum Choice
         {
             None = -1,
@@ -202,14 +205,6 @@ namespace RockPaperScissors
             {
                 // Lock inputs and show final match result.
                 MatchOverClientRpc(player1, player2, p1Wins, p2Wins, totalRounds);
-
-                // Determine match winner clientId (ulong.MaxValue = tie)
-                ulong matchWinnerClientId = ulong.MaxValue;
-                if (p1Wins != p2Wins)
-                    matchWinnerClientId = (p1Wins > p2Wins) ? player1 : player2;
-
-                // Wait 5s so players read the result, then return to board
-                StartCoroutine(ReturnToBoardAfterDelay(matchWinnerClientId));
             }
             else
             {
@@ -278,17 +273,6 @@ namespace RockPaperScissors
             ResetRoundClientRpc();
         }
 
-        /// <summary>
-        /// Server-only. Waits 5s so players can read the final result,
-        /// then hands control back to MinigameOrchestrator to load the board scene.
-        /// </summary>
-        private IEnumerator ReturnToBoardAfterDelay(ulong winnerClientId)
-        {
-            yield return new WaitForSeconds(5f);
-            // winnerClientId == ulong.MaxValue means tie (no winner)
-            MinigameOrchestrator.FinishMinigame(winnerClientId, 0);
-        }
-
         [ClientRpc]
         private void ResetRoundClientRpc()
         {
@@ -323,6 +307,7 @@ namespace RockPaperScissors
                     resultText.text = $"FINAL: {myWins} - {oppWins}\nYOU WIN THE MATCH!";
                     resultText.color = Color.green;
                     soundManager?.PlayMatchResult(true, false);
+                    confettiEffect?.PlayWin();
                 }
                 else
                 {
@@ -338,8 +323,7 @@ namespace RockPaperScissors
             if (resultText != null)
             {
                 int shownTotal = Math.Max(1, totalRounds);
-                resultText.text = $"Round 0/{shownTotal}  |  Score 0-0\nChoose your move!";
-                resultText.color = Color.white;
+                resultText.text = $"Choose your move!";
             }
             if (localPlayerChoiceText != null) localPlayerChoiceText.text = "Your choice: ?";
             if (opponentChoiceText != null) opponentChoiceText.text = "Opponent choice: ?";
@@ -359,7 +343,7 @@ namespace RockPaperScissors
                 bool isPlayer1 = myId == p1Id;
                 int myWins = isPlayer1 ? p1Wins : p2Wins;
                 int oppWins = isPlayer1 ? p2Wins : p1Wins;
-                scoreText.text = $"Score: You {myWins} - {oppWins} Opp";
+                scoreText.text = $"Score: {myWins} - {oppWins}";
             }
 
             bool isP1 = myId == p1Id;
@@ -380,7 +364,7 @@ namespace RockPaperScissors
             }
 
             if (scoreText != null)
-                scoreText.text = $"Score: You {p1Wins} - {p2Wins} Opp";
+                scoreText.text = $"Score: {p1Wins} - {p2Wins}";
 
             _localWins = p1Wins;
             _opponentWins = p2Wins;
