@@ -484,6 +484,7 @@ MonoBehaviour:
   totalRounds: 3
   handGestureBridge: {fileID: 157180297}
   soundManager: {fileID: 157180300}
+  confettiEffect: {fileID: 0}
 --- !u!114 &157180296
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -10392,110 +10393,12 @@ Transform:
     type: 3}
   m_PrefabInstance: {fileID: 1215437803}
   m_PrefabAsset: {fileID: 0}
---- !u!1 &1222701791
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 1085826371251791982, guid: 75429845a2c50e449b757ddc979cb9c8,
-    type: 3}
-  m_PrefabInstance: {fileID: 227918477132379895}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 1232032541}
-  - component: {fileID: 1232032543}
-  - component: {fileID: 1232032542}
-  m_Layer: 5
-  m_Name: 'Soundboard '
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!224 &1232032541
+--- !u!224 &1232032541 stripped
 RectTransform:
-  m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 2595369844177674214, guid: 75429845a2c50e449b757ddc979cb9c8,
     type: 3}
   m_PrefabInstance: {fileID: 227918477132379895}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1222701791}
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 1300213525}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0.5, y: 0.5}
-  m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 100, y: 100}
-  m_Pivot: {x: 0.5, y: 0.5}
---- !u!114 &1232032542
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 690693701575405368, guid: 75429845a2c50e449b757ddc979cb9c8,
-    type: 3}
-  m_PrefabInstance: {fileID: 227918477132379895}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1222701791}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: d1e2cb3c079ce2f41a868aad1ec3ae7c, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::NetworkSoundboard
-  ShowTopMostFoldoutHeaderGroup: 1
-  m_NetworkManager: {fileID: 0}
-  <IsLocalPlayer>k__BackingField: 0
-  <IsOwner>k__BackingField: 0
-  <IsServer>k__BackingField: 0
-  <HasAuthority>k__BackingField: 0
-  <IsSessionOwner>k__BackingField: 0
-  <ServerIsHost>k__BackingField: 0
-  <IsClient>k__BackingField: 0
-  <IsHost>k__BackingField: 0
-  <IsOwnedByServer>k__BackingField: 0
-  <IsSpawned>k__BackingField: 0
-  m_NetworkObject: {fileID: 0}
-  <NetworkObjectId>k__BackingField: 0
-  <NetworkBehaviourId>k__BackingField: 0
-  NetworkBehaviourIdCache: 0
-  <OwnerClientId>k__BackingField: 0
-  m_VarInit: 0
-  <m_TargetIdBeingSynchronized>k__BackingField: 0
-  button1: {fileID: 363283711}
-  button2: {fileID: 1658502653}
-  button3: {fileID: 486176874}
-  clip1: {fileID: 8300000, guid: a450d558677e81b4fb80138f670a0fe2, type: 3}
-  clip2: {fileID: 8300000, guid: a1bce61d6ab3bab47bb88477a5409f30, type: 3}
-  clip3: {fileID: 8300000, guid: b471325b09ee61b479f06425d165914c, type: 3}
-  _audio: {fileID: 0}
---- !u!114 &1232032543
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 6080298668249413654, guid: 75429845a2c50e449b757ddc979cb9c8,
-    type: 3}
-  m_PrefabInstance: {fileID: 227918477132379895}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1222701791}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: d5a57f767e5e46a458fc5d3c628d0cbb, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Unity.Netcode.Runtime::Unity.Netcode.NetworkObject
-  GlobalObjectIdHash: 1075749554
-  InScenePlacedSourceGlobalObjectIdHash: 145665254
-  DeferredDespawnTick: 0
-  Ownership: 1
-  AlwaysReplicateAsRoot: 0
-  SynchronizeTransform: 1
-  ActiveSceneSynchronization: 0
-  SceneMigrationSynchronization: 0
-  SpawnWithObservers: 1
-  DontDestroyWithOwner: 0
-  AutoObjectParentSync: 1
-  SyncOwnerTransformWhenParented: 1
-  AllowOwnerToParent: 0
 --- !u!1 &1253666043
 GameObject:
   m_ObjectHideFlags: 0
