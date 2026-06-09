@@ -21,6 +21,12 @@ namespace RockPaperScissors
         [SerializeField] private TextMeshProUGUI roundText;
         [SerializeField] private TextMeshProUGUI scoreText;
 
+        [Header("Start Game (Host Only)")]
+        [Tooltip("Assign a Button in the scene. Only the host can see/press it. " +
+                 "It becomes interactable once both players are connected.")]
+        [SerializeField] private Button startGameButton;
+        [SerializeField] private TextMeshProUGUI startGameStatusText; // optional — shows "Waiting for player..." etc.
+
         [Header("Video Setup (Optional)")]
         [SerializeField] private VideoPlayer backgroundVideo;
 
@@ -62,11 +68,25 @@ namespace RockPaperScissors
             if (paperButton != null) paperButton.onClick.AddListener(() => OnChoiceSelected(Choice.Paper));
             if (scissorsButton != null) scissorsButton.onClick.AddListener(() => OnChoiceSelected(Choice.Scissors));
 
+            // Wire Start Game button — only the host will ever have it interactable,
+            // but we register the listener on everyone so no null-check is needed later.
+            if (startGameButton != null)
+            {
+                startGameButton.onClick.AddListener(BeginGame);
+                startGameButton.interactable = false; // greyed out until both players connected
+            }
+
+            // Video does NOT auto-play here — both clients start it together via
+            // BeginGameClientRpc so the playback is perfectly in sync from frame 0.
+            // We still call Prepare() so the decoder is warm and Play() is instant.
             if (backgroundVideo != null)
             {
                 backgroundVideo.isLooping = true;
-                backgroundVideo.Play();
+                backgroundVideo.Prepare(); // decodes first frame silently, no playback
             }
+
+            // RPS buttons are disabled until the game is officially started.
+            SetButtonsInteractable(false);
 
             ResetUI();
             UpdateRoundAndScoreUI(0, 0, 0, totalRounds);
@@ -76,40 +96,96 @@ namespace RockPaperScissors
         {
             if (IsServer)
             {
-                isRoundActive = true;
+                // isRoundActive intentionally NOT set here — the game only begins
+                // when the host presses Start Game (BeginGame), which fires
+                // BeginGameClientRpc on both clients simultaneously so the video
+                // starts in perfect sync.
                 _roundsPlayed = 0;
                 _winsByClientId.Clear();
-            }
-            
-            // Listen for players joining to log debug messages in console
-            if (IsServer && NetworkManager.Singleton != null)
-            {
                 NetworkManager.Singleton.OnClientConnectedCallback += OnClientConnected;
+                SetStartGameButtonState(false); // host sees button but it's greyed
+                SetStatusText("Waiting for the other player to join...");
+            }
+            else
+            {
+                // Clients never see or use the Start Game button
+                if (startGameButton != null) startGameButton.gameObject.SetActive(false);
+                SetStatusText("Connected! Waiting for host to start the game...");
             }
         }
 
         public override void OnNetworkDespawn()
         {
             if (IsServer && NetworkManager.Singleton != null)
-            {
                 NetworkManager.Singleton.OnClientConnectedCallback -= OnClientConnected;
-            }
         }
 
         private void OnClientConnected(ulong clientId)
         {
             Debug.Log($"<color=cyan>[RPS Multiplayer]</color> Player {clientId} has entered the game!");
-            if (clientId != NetworkManager.ServerClientId)
-            {
-                Debug.Log($"<color=green>[RPS Multiplayer]</color> PLAYER 2 (Client {clientId}) IS HERE! Game is ready.");
-            }
 
-            // Initialize win counters on the server for each connected player.
             if (IsServer)
             {
                 if (!_winsByClientId.ContainsKey(clientId))
                     _winsByClientId[clientId] = 0;
+
+                // Enable Start Game only once both players are present
+                int count = NetworkManager.Singleton.ConnectedClientsList.Count;
+                if (count >= 2)
+                {
+                    Debug.Log("<color=green>[RPS Multiplayer]</color> Both players connected — host can now start!");
+                    SetStartGameButtonState(true);
+                    SetStatusText("Both players ready!\nPress Start Game.");
+                }
             }
+        }
+
+        // ── Start Game (host presses button) ─────────────────────────────────
+
+        /// <summary>
+        /// Called when the host presses the Start Game button.
+        /// Fires a ClientRpc that simultaneously starts the video and enables
+        /// RPS buttons on BOTH machines — this is what keeps the video in sync.
+        /// </summary>
+        public void BeginGame()
+        {
+            if (!IsServer) return;
+
+            isRoundActive = true;
+            _roundsPlayed = 0;
+            _winsByClientId.Clear();
+
+            // Hide the start button so it can't be pressed again
+            if (startGameButton != null) startGameButton.gameObject.SetActive(false);
+
+            BeginGameClientRpc();
+        }
+
+        [ClientRpc]
+        private void BeginGameClientRpc()
+        {
+            // Both clients (including host-as-client) hit this at virtually the same frame.
+            // Starting the video here — not in Start() — is what makes it synchronized.
+            if (backgroundVideo != null)
+                backgroundVideo.Play();
+
+            SetButtonsInteractable(true);
+            SetStatusText(string.Empty);
+            ResetUI();
+        }
+
+        // ── Helpers ──────────────────────────────────────────────────────────
+
+        private void SetStartGameButtonState(bool interactable)
+        {
+            if (startGameButton == null) return;
+            startGameButton.interactable = interactable;
+        }
+
+        private void SetStatusText(string msg)
+        {
+            if (startGameStatusText != null)
+                startGameStatusText.text = msg;
         }
 
         /// <summary>Called by HandGestureInputBridge when player holds a hand gesture.</summary>
