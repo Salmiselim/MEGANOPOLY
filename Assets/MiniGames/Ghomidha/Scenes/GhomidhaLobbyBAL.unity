@@ -3821,7 +3821,7 @@ MonoBehaviour:
   yourRoleText: {fileID: 889433759}
   opponentRoleText: {fileID: 1794363260}
   startGameButton: {fileID: 924454912}
-  ghomidhaGameScene: PoliceStationMultiplayerBAL
+  ghomidhaGameScene: PoliceStationMultiplayer
 --- !u!4 &617205579
 Transform:
   m_ObjectHideFlags: 0
@@ -7691,10 +7691,11 @@ MonoBehaviour:
   NetworkConfig:
     ProtocolVersion: 0
     NetworkTransport: {fileID: 1193951018}
-    PlayerPrefab: {fileID: 1567073739824853431, guid: fe1e78b6c4d71274a8539508f9aa9576,
-      type: 3}
+    PlayerPrefab: {fileID: 0}
     Prefabs:
-      NetworkPrefabsLists: []
+      NetworkPrefabsLists:
+      - {fileID: 11400000, guid: abd709ec644fd3f41be29b055b8ef29c, type: 2}
+      - {fileID: 11400000, guid: 68bb4d54328f3ac4e90fa205408a0ebb, type: 2}
     TickRate: 30
     ClientConnectionBufferTimeout: 10
     ConnectionApproval: 0

@@ -46,7 +46,7 @@ EditorBuildSettings:
     path: Assets/MiniGames/RockPaperScissors/Scenes/HandTracking_PlayerVSComputer.unity
     guid: fc7641204423dfd4ab098b18d6face0f
   - enabled: 1
-    path: Assets/MiniGames/Ghomidha/Scenes/PoliceStationMultiplayer.unity
+    path: Assets/MiniGames/Ghomidha/Scenes/PoliceStationMultiplayerrrrrrr.unity
     guid: cc0d1b3dd3385fc40a38894d2922a9be
   - enabled: 1
     path: Assets/MiniGames/Ghomidha/Scenes/GhomidhaLobby.unity
@@ -70,7 +70,7 @@ EditorBuildSettings:
     path: Assets/MiniGames/Ghomidha/Scenes/GhomidhaLobbyBAL.unity
     guid: 48f54211a0c78df40a2f7bbb3f1247a8
   - enabled: 1
-    path: Assets/MiniGames/Ghomidha/Scenes/PoliceStationMultiplayerBAL.unity
+    path: Assets/MiniGames/Ghomidha/Scenes/PoliceStationMultiplayer.unity
     guid: 710ed6e4cf7edc141a6bf222334b7959
   m_configObjects:
     com.unity.input.settings: {fileID: 11400000, guid: dcd322a7b2e365140b98f70bf2c68411,
