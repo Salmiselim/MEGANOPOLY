@@ -119,28 +119,41 @@ public class BoardSessionStarter : MonoBehaviour
             System.Reflection.BindingFlags.Instance |
             System.Reflection.BindingFlags.NonPublic |
             System.Reflection.BindingFlags.Public);
-        int reboundActive = 0, reboundDDOL = 0;
+        int reboundActive = 0, destroyedDDOL = 0;
         var rebindNames = new System.Text.StringBuilder();
-        foreach (var no in sceneObjects)
+        // Snapshot to a list first: we destroy DDOL orphans inside the loop, and
+        // destroying GameObjects while iterating the live FindObjects array is unsafe.
+        foreach (var no in new System.Collections.Generic.List<NetworkObject>(sceneObjects))
         {
             if (no == null) continue;
-            if (ownerField != null) ownerField.SetValue(no, nm);
 
             bool inActiveScene = no.gameObject.scene == activeScene;
             if (inActiveScene)
             {
+                // Legit in-scene board objects (CompleteGameManager, dice, the
+                // TestScene spawner, …). Rebind them to the fresh NM and mark
+                // them as scene objects so the host's SpawnSweep claims them.
+                if (ownerField != null) ownerField.SetValue(no, nm);
                 no.SetSceneObjectStatus(true);
                 reboundActive++;
                 rebindNames.Append($"  ✓ {no.gameObject.name}\n");
             }
             else
             {
-                reboundDDOL++;
-                rebindNames.Append($"  · DDOL {no.gameObject.name} (skipped scene-flag)\n");
+                // DDOL orphans: VRMP runtime-spawned objects (sandbox toy balls,
+                // lobby avatars, …) that survived the lobby→board teardown. They
+                // are NOT registered in the board NetworkManager's prefab list,
+                // so if we let them live the host tries to replicate them during
+                // client scene-sync and the client throws
+                // "NetworkPrefab could not be found [globalObjectIdHash=…]".
+                // Destroy them here so the fresh board session starts clean.
+                destroyedDDOL++;
+                rebindNames.Append($"  ✗ DDOL {no.gameObject.name} (destroyed orphan)\n");
+                Destroy(no.gameObject);
             }
         }
-        Debug.Log($"[BoardSession] Rebound {reboundActive} active-scene + {reboundDDOL} DDOL " +
-                  $"NetworkObject(s) to fresh NM (reflection {(ownerField != null ? "OK" : "FAILED")}):\n{rebindNames}");
+        Debug.Log($"[BoardSession] Rebound {reboundActive} active-scene NetworkObject(s) and " +
+                  $"destroyed {destroyedDDOL} DDOL orphan(s) (reflection {(ownerField != null ? "OK" : "FAILED")}):\n{rebindNames}");
 
         // Give the engine one frame so the NM is fully initialised before we
         // hand it relay data and call StartHost/StartClient.

@@ -57,13 +57,18 @@ EditorBuildSettings:
   - enabled: 0
     path: Assets/MiniGames/RockPaperScissors/Scenes/RPS_leaderboard.unity
     guid: ca794a33304ee7849872cd6304d6fdd8
-  - enabled: 1
+  - enabled: 0
     path: Assets/MiniGames/RockPaperScissors/Scenes/RPS+SFX.unity
     guid: 0e98dcf6db680cf479608ef06a4cfb65
   - enabled: 1
     path: Assets/MiniGames/RockPaperScissors/Scenes/RPS_BAL.unity
     guid: 54d7e0d032cddb742891f126d5a6586a
+  - enabled: 1
+    path: Assets/core/Bal/MinigameShowcase.unity
+    guid: 205f4803cdc2a1249b2edfe122f93895
   m_configObjects:
+    com.unity.input.settings: {fileID: 11400000, guid: dcd322a7b2e365140b98f70bf2c68411,
+      type: 2}
     com.unity.xr.arfoundation.simulation_settings: {fileID: 11400000, guid: 33491290b38a6094fbf61d3c24a308a5,
       type: 2}
     com.unity.xr.management.loader_settings: {fileID: 11400000, guid: e3aee76b9372917449aef639e2f74814,

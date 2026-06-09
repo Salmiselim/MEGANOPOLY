@@ -190,41 +190,83 @@ public class BuildingMenuUI : NetworkBehaviour
     [Rpc(SendTo.Server, InvokePermission = RpcInvokePermission.Everyone)]
     private void BuyHouseServerRpc(int playerIndex, int tileIndex)
     {
-        PlayerData player = CompleteGameManager.Instance?.GetServerPlayer(playerIndex);
-        TileData property = Object.FindFirstObjectByType<BoardManager>()?.GetTile(tileIndex);
-        if (player == null || property == null) return;
+        Debug.Log($"[Server] BuyHouseServerRpc received: player={playerIndex} tile={tileIndex}");
 
-        if (PropertyManager.Instance != null &&
-            PropertyManager.Instance.TryBuyHouse(player, property))
+        PlayerData player = CompleteGameManager.Instance?.GetServerPlayer(playerIndex);
+        BoardManager bm = Object.FindFirstObjectByType<BoardManager>();
+        TileData property = bm?.GetTile(tileIndex);
+        if (player == null || property == null || bm == null)
         {
-            Debug.Log($"[Server] House built on {property.tileName}");
-            ulong target = ClientIdForPlayer(playerIndex);
-            RefreshUIClientRpc(player.money, property.houseCount,
-                new ClientRpcParams
-                {
-                    Send = new ClientRpcSendParams { TargetClientIds = new[] { target } }
-                });
+            Debug.LogWarning($"[Server] Buy house aborted: player={player}, property={property}, bm={bm}");
+            return;
         }
+
+        // TEST MODE: skip PropertyManager.TryBuyHouse so the monopoly /
+        // affordability gates never block testing. The server is still the
+        // only one mutating houseCount and spawning visuals.
+        if (property.houseCount >= 5)
+        {
+            Debug.LogWarning($"[Server] {property.tileName} already maxed out (count={property.houseCount}).");
+            return;
+        }
+
+        property.houseCount++;
+        bm.SpawnHouse(tileIndex, property.houseCount);
+
+        Debug.Log($"[Server] House #{property.houseCount} built on {property.tileName}");
+
+        // Replicate visual to all clients (prefab has no NetworkObject).
+        SpawnHouseOnAllClientsClientRpc(tileIndex, property.houseCount);
+
+        ulong target = ClientIdForPlayer(playerIndex);
+        RefreshUIClientRpc(player.money, property.houseCount,
+            new ClientRpcParams
+            {
+                Send = new ClientRpcSendParams { TargetClientIds = new[] { target } }
+            });
     }
 
     [Rpc(SendTo.Server, InvokePermission = RpcInvokePermission.Everyone)]
     private void BuyHotelServerRpc(int playerIndex, int tileIndex)
     {
-        PlayerData player = CompleteGameManager.Instance?.GetServerPlayer(playerIndex);
-        TileData property = Object.FindFirstObjectByType<BoardManager>()?.GetTile(tileIndex);
-        if (player == null || property == null) return;
+        Debug.Log($"[Server] BuyHotelServerRpc received: player={playerIndex} tile={tileIndex}");
 
-        if (PropertyManager.Instance != null &&
-            PropertyManager.Instance.TryBuyHotel(player, property))
-        {
-            Debug.Log($"[Server] Hotel built on {property.tileName}");
-            ulong target = ClientIdForPlayer(playerIndex);
-            RefreshUIClientRpc(player.money, property.houseCount,
-                new ClientRpcParams
-                {
-                    Send = new ClientRpcSendParams { TargetClientIds = new[] { target } }
-                });
-        }
+        PlayerData player = CompleteGameManager.Instance?.GetServerPlayer(playerIndex);
+        BoardManager bm = Object.FindFirstObjectByType<BoardManager>();
+        TileData property = bm?.GetTile(tileIndex);
+        if (player == null || property == null || bm == null) return;
+
+        property.houseCount = 5;
+        bm.SpawnHotel(tileIndex);
+
+        Debug.Log($"[Server] Hotel built on {property.tileName}");
+        SpawnHotelOnAllClientsClientRpc(tileIndex);
+
+        ulong target = ClientIdForPlayer(playerIndex);
+        RefreshUIClientRpc(player.money, property.houseCount,
+            new ClientRpcParams
+            {
+                Send = new ClientRpcSendParams { TargetClientIds = new[] { target } }
+            });
+    }
+
+    // Prefab has no NetworkObject, so SpawnHouse/SpawnHotel only runs where
+    // it's called. Tell every non-host client to instantiate the same visual
+    // locally (skipping IsServer so the host doesn't double-spawn).
+    [ClientRpc]
+    private void SpawnHouseOnAllClientsClientRpc(int tileIndex, int houseNumber)
+    {
+        if (IsServer) return;
+        BoardManager bm = Object.FindFirstObjectByType<BoardManager>();
+        if (bm != null) bm.SpawnHouse(tileIndex, houseNumber);
+    }
+
+    [ClientRpc]
+    private void SpawnHotelOnAllClientsClientRpc(int tileIndex)
+    {
+        if (IsServer) return;
+        BoardManager bm = Object.FindFirstObjectByType<BoardManager>();
+        if (bm != null) bm.SpawnHotel(tileIndex);
     }
 
     [Rpc(SendTo.Server, InvokePermission = RpcInvokePermission.Everyone)]

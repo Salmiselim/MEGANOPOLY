@@ -48,7 +48,7 @@ public class CompleteGameManager : NetworkBehaviour
     [Tooltip("If >= 0, that player's turns are automatically skipped (after the very first turn). " +
              "Solo dev loop: startingPlayerIndex=1 + autoSkipPlayerIndex=0 makes the Quest play " +
              "every turn while the editor host just sits there receiving cheat keys. -1 disables.")]
-    [SerializeField] private int autoSkipPlayerIndex = 0;
+    [SerializeField] private int autoSkipPlayerIndex = -1;
     public enum DiceLandingForce { Off, UnownedProperty, UnownedRailroad, AnyBuyable }
     [Tooltip("Forces the dice roll to land on a specific tile type so you can repeatedly test a flow:\n" +
              "  Off             — normal dice behaviour.\n" +

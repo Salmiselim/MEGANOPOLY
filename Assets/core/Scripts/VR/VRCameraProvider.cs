@@ -71,13 +71,19 @@ public class VRCameraProvider : MonoBehaviour
 
     private void UpdateFallbackState()
     {
-        // Keep the fallback camera always rendering at low depth — real cameras
-        // with higher depth automatically render over it when they produce frames.
-        // We only disable the AudioListener if the scene already has another one,
-        // because Unity warns about multiple active listeners.
-        if (_fallbackCamera != null) _fallbackCamera.enabled = true;
+        // Once a real camera (an owned XR rig camera) exists, fully DISABLE the
+        // fallback. Previously we left it enabled and relied on depth ordering
+        // (-100 vs 0) to be drawn over. That breaks when the machine has more
+        // than one XR Origin in the scene at once — e.g. the HOST holds both its
+        // own rig AND the remote player's (stripped) rig. LateUpdate then snaps
+        // the fallback to an arbitrary XROrigin (sometimes the dead remote one),
+        // leaving the host stuck staring at a frozen fallback view with the
+        // player-prefab placeholder Cube in frame. Disabling the fallback when a
+        // real camera is present removes that whole failure mode.
+        bool haveRealCamera = s_Camera != null && s_Camera.isActiveAndEnabled;
+        if (_fallbackCamera != null) _fallbackCamera.enabled = !haveRealCamera;
         if (_fallbackListener != null)
-            _fallbackListener.enabled = !SceneHasOtherAudioListener();
+            _fallbackListener.enabled = !haveRealCamera && !SceneHasOtherAudioListener();
     }
 
     private bool SceneHasOtherAudioListener()
@@ -89,12 +95,20 @@ public class VRCameraProvider : MonoBehaviour
 
     private IEnumerator PollUntilFound()
     {
-        while (s_Camera == null)
+        // Keep polling until we have a REAL, currently-enabled camera. We don't
+        // yield out the instant s_Camera is non-null, because on the host the
+        // first camera found can be the remote player's rig camera that the
+        // ownership guard disables a frame later. If that happens the cached
+        // camera goes inactive and we must look again — otherwise the host is
+        // left with a dead camera reference and a black/frozen view.
+        while (true)
         {
-            s_Camera = FindRealCamera(excluding: _fallbackCamera);
+            if (s_Camera == null || !s_Camera.isActiveAndEnabled)
+                s_Camera = FindRealCamera(excluding: _fallbackCamera);
+
             UpdateFallbackState();
 
-            if (s_Camera != null)
+            if (s_Camera != null && s_Camera.isActiveAndEnabled)
             {
                 Debug.Log($"[VRCameraProvider] Found: '{s_Camera.name}' tag='{s_Camera.tag}'");
                 AssignToAllWorldSpaceCanvases(s_Camera);
@@ -121,15 +135,20 @@ public class VRCameraProvider : MonoBehaviour
 
     private static Camera FindRealCamera(Camera excluding = null)
     {
-        Camera main = UnityEngine.Camera.main;
-        if (main != null && main != excluding) return main;
+        // Only ever return an ENABLED camera. On the host there can be a second,
+        // DISABLED rig camera (the remote player's, silenced by XROwnershipGuard).
+        // Returning that would leave us rendering nothing.
+        Camera main = UnityEngine.Camera.main; // Camera.main already ignores disabled cameras
+        if (main != null && main != excluding && main.isActiveAndEnabled) return main;
 
         XROrigin origin = FindObjectOfType<XROrigin>();
-        if (origin != null && origin.Camera != null && origin.Camera != excluding)
+        if (origin != null && origin.Camera != null && origin.Camera != excluding
+            && origin.Camera.isActiveAndEnabled)
             return origin.Camera;
 
         foreach (Camera c in FindObjectsOfType<Camera>())
-            if (c != excluding) return c;
+            if (c != excluding && c.isActiveAndEnabled)
+                return c;
 
         return null;
     }

@@ -30,6 +30,16 @@ public class BoardManager : MonoBehaviour
     [Header("Building Prefabs")]
     [SerializeField] private GameObject housePrefab;
     [SerializeField] private GameObject hotelPrefab;
+    [Tooltip("Uniform scale applied to spawned house prefabs (1 = original size).")]
+    [SerializeField] private float houseScale = 0.4f;
+    [Tooltip("Vertical offset (in world units) applied to spawned houses on top of the tile-marker / fallback position. Lower this to bring shrunken houses down to the board surface.")]
+    [SerializeField] private float houseHeightOffset = -0.4f;
+    [Tooltip("Vertical offset applied to spawned hotels, same idea as houseHeightOffset.")]
+    [SerializeField] private float hotelHeightOffset = 0f;
+
+    // Track spawned house GameObjects per tile so we can clear them when a
+    // hotel replaces them.
+    private Dictionary<int, List<GameObject>> spawnedHousesByTile = new Dictionary<int, List<GameObject>>();
     
     private void Awake()
     {
@@ -379,8 +389,19 @@ public class BoardManager : MonoBehaviour
         else
      spawnPos = tile.worldPosition + Vector3.right * ((houseNumber - 1) * 3f) + Vector3.up * 0.5f;
 
+        spawnPos += Vector3.up * houseHeightOffset;
+
         GameObject house = Instantiate(housePrefab, spawnPos, Quaternion.identity);
         house.name = $"House_{tile.tileName}_{houseNumber}";
+        house.transform.localScale *= houseScale;
+
+        if (!spawnedHousesByTile.TryGetValue(tileIndex, out var list))
+        {
+            list = new List<GameObject>();
+            spawnedHousesByTile[tileIndex] = list;
+        }
+        list.Add(house);
+
         Debug.Log($"[BoardManager] Spawned house #{houseNumber} on {tile.tileName} at {spawnPos}");
         return house;
     }
@@ -408,7 +429,18 @@ public class BoardManager : MonoBehaviour
         else
    spawnPos = tile.worldPosition + Vector3.up * 0.5f;
 
- GameObject hotel = Instantiate(hotelPrefab, spawnPos, Quaternion.identity);
+        spawnPos += Vector3.up * hotelHeightOffset;
+
+        // Remove any houses previously placed on this tile — a hotel
+        // replaces them.
+        if (spawnedHousesByTile.TryGetValue(tileIndex, out var existingHouses))
+        {
+            foreach (var h in existingHouses)
+                if (h != null) Destroy(h);
+            existingHouses.Clear();
+        }
+
+        GameObject hotel = Instantiate(hotelPrefab, spawnPos, Quaternion.identity);
         hotel.name = $"Hotel_{tile.tileName}";
         Debug.Log($"[BoardManager] Spawned hotel on {tile.tileName} at {spawnPos}");
         return hotel;

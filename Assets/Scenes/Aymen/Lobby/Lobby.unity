@@ -4430,7 +4430,7 @@ MonoBehaviour:
   playerCountText: {fileID: 0}
   startHintText: {fileID: 0}
   minPlayers: 2
-  gameSceneName: SampleScene
+  gameSceneName: MinigameShowcase
 --- !u!114 &1992484356
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -4458,7 +4458,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::BoardSessionBroadcaster
   ShowTopMostFoldoutHeaderGroup: 1
-  boardSceneName: SampleScene
+  boardSceneName: MinigameShowcase
   clientTransitionDelay: 0.2
 --- !u!1 &2008523592 stripped
 GameObject:
@@ -5215,6 +5215,21 @@ PrefabInstance:
         type: 3}
       propertyPath: m_SizeDelta.x
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 9074329849498600403, guid: ddd644a735f58354588b40bfac379245,
+        type: 3}
+      propertyPath: GlobalObjectIdHash
+      value: 1672262881
+      objectReference: {fileID: 0}
+    - target: {fileID: 9074329849498600403, guid: ddd644a735f58354588b40bfac379245,
+        type: 3}
+      propertyPath: SceneMigrationSynchronization
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 9074329849498600403, guid: ddd644a735f58354588b40bfac379245,
+        type: 3}
+      propertyPath: InScenePlacedSourceGlobalObjectIdHash
+      value: 3636423003
       objectReference: {fileID: 0}
     - target: {fileID: 9093563060623342089, guid: ddd644a735f58354588b40bfac379245,
         type: 3}
