@@ -116,14 +116,14 @@ namespace RockPaperScissors
                 _roundsPlayed = 0;
                 _winsByClientId.Clear();
                 NetworkManager.Singleton.OnClientConnectedCallback += OnClientConnected;
-                SetStartGameButtonState(false); // host sees button but it's greyed
-                SetStatusText("Waiting for the other player to join...");
+                SetStartGameButtonState(false);
+                SetStatusText("Waiting for your opponent to join...");
             }
             else
             {
-                // Clients never see or use the Start Game button
+                // Clients never see or use the Begin button
                 if (startGameButton != null) startGameButton.gameObject.SetActive(false);
-                SetStatusText("Connected! Waiting for host to start the game...");
+                SetStatusText("Connected!\nWaiting for the match to begin...");
             }
         }
 
@@ -148,7 +148,7 @@ namespace RockPaperScissors
                 {
                     Debug.Log("<color=green>[RPS Multiplayer]</color> Both players connected — host can now start!");
                     SetStartGameButtonState(true);
-                    SetStatusText("Both players ready!\nPress Start Game.");
+                    SetStatusText("Your opponent is here!\nPress Begin when ready.");
                 }
             }
         }
@@ -177,17 +177,45 @@ namespace RockPaperScissors
         [ClientRpc]
         private void BeginGameClientRpc()
         {
-            // Both clients (including host-as-client) hit this at virtually the same frame.
-            // Starting the video here — not in Start() — is what makes it synchronized.
-            if (backgroundVideo != null)
-                backgroundVideo.Play();
+            // Fires on both clients at the same instant — start the countdown coroutine
+            // which will call video.Play() on both machines simultaneously at "GO!".
+            StartCoroutine(CountdownThenStart());
+        }
 
-            // Spawn both UIs in front of this player's camera.
+        private IEnumerator CountdownThenStart()
+        {
+            // Show UIs first so the player can see the countdown.
             SpawnUIInFrontOfCamera(gameUIRoot);
             SpawnUIInFrontOfCamera(soundboardUIRoot);
 
-            SetButtonsInteractable(true);
+            // Hide connection status — the countdown takes over the result text.
             SetStatusText(string.Empty);
+
+            // 3 … 2 … 1 … GO!
+            if (resultText != null)
+            {
+                string[] steps  = { "3", "2", "1", "GO!" };
+                Color[]  colors = { Color.white, Color.white, Color.white, Color.green };
+
+                for (int i = 0; i < steps.Length; i++)
+                {
+                    resultText.text  = steps[i];
+                    resultText.color = colors[i];
+                    yield return new WaitForSeconds(1f);
+                }
+            }
+            else
+            {
+                // No result text? Just wait 1 second before starting.
+                yield return new WaitForSeconds(1f);
+            }
+
+            // Both clients hit this line at virtually the same moment —
+            // this is what keeps the video in sync.
+            if (backgroundVideo != null)
+                backgroundVideo.Play();
+
+            SetButtonsInteractable(true);
             ResetUI();
         }
 

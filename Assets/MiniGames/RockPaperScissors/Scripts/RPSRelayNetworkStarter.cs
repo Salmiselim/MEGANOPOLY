@@ -88,18 +88,18 @@ namespace RockPaperScissors
         {
             try
             {
-                SetStatus("Initialising services...");
+                SetStatus("Getting ready...");
                 await EnsureUGSAsync();
 
                 // ── Step 1: Relay allocation ──────────────────────────────────
-                SetStatus("Creating relay...");
+                SetStatus("Setting up your match...");
                 var allocation = await RelayService.Instance
                     .CreateAllocationAsync(maxConnections, region);
                 var joinCode   = await RelayService.Instance
                     .GetJoinCodeAsync(allocation.AllocationId);
 
                 // ── Step 2: Unity Lobby (join code hidden inside) ─────────────
-                SetStatus("Creating room...");
+                SetStatus("Creating match room...");
                 var options = new CreateLobbyOptions
                 {
                     IsPrivate = false,
@@ -129,7 +129,7 @@ namespace RockPaperScissors
                 transport.SetRelayServerData(BuildHostRelayData(allocation));
                 NetworkManager.Singleton.StartHost();
 
-                SetStatus("Host ready — waiting for opponent...");
+                SetStatus("Match room ready!\nWaiting for your opponent to join...");
                 Debug.Log($"[Relay] Host up. LobbyId={_currentLobby.Id}  Code={joinCode}");
             }
             catch (Exception e)
@@ -143,7 +143,7 @@ namespace RockPaperScissors
         {
             try
             {
-                SetStatus("Initialising services...");
+                SetStatus("Getting ready...");
                 await EnsureUGSAsync();
 
                 // ── Step 1: Find the lobby ────────────────────────────────────
@@ -167,8 +167,8 @@ namespace RockPaperScissors
                 while (attempts > 0)
                 {
                     SetStatus(attempts == clientRetries
-                        ? "Searching for game..."
-                        : $"No game found yet, retrying... ({attempts} left)");
+                        ? "Looking for a match..."
+                        : $"Still searching... ({attempts} attempts left)");
 
                     results = await LobbyService.Instance.QueryLobbiesAsync(queryOptions);
                     if (results.Results.Count > 0) break;
@@ -180,25 +180,25 @@ namespace RockPaperScissors
 
                 if (results == null || results.Results.Count == 0)
                 {
-                    SetStatus("No game found. Make sure the host pressed Start Host first.");
+                    SetStatus("No match found.\nAsk your opponent to create one first!");
                     return;
                 }
 
                 // ── Step 2: Join lobby and read the hidden relay code ─────────
-                SetStatus("Room found! Joining...");
+                SetStatus("Opponent found! Joining match...");
                 var lobby    = await LobbyService.Instance
                     .JoinLobbyByIdAsync(results.Results[0].Id);
                 string code  = lobby.Data[RelayCodeKey].Value;
 
                 // ── Step 3: Join relay ────────────────────────────────────────
-                SetStatus("Connecting to relay...");
+                SetStatus("Connecting...");
                 var joinAlloc = await RelayService.Instance.JoinAllocationAsync(code);
 
                 var transport = NetworkManager.Singleton.GetComponent<UnityTransport>();
                 transport.SetRelayServerData(BuildClientRelayData(joinAlloc));
                 NetworkManager.Singleton.StartClient();
 
-                SetStatus("Connecting...");
+                SetStatus("Almost there...");
                 Debug.Log($"[Relay] Client joined. RelayCode={code}");
             }
             catch (Exception e)

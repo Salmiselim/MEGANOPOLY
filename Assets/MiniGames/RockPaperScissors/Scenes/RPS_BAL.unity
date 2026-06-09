@@ -3985,7 +3985,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: START GAME
+  m_text: Begin!
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 4e136b4eab3ec5249bd2f5922f769ebf, type: 2}
   m_sharedMaterial: {fileID: 7405147192700541376, guid: 4e136b4eab3ec5249bd2f5922f769ebf,
@@ -10667,7 +10667,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: Start Host
+  m_text: Create Match
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 4e136b4eab3ec5249bd2f5922f769ebf, type: 2}
   m_sharedMaterial: {fileID: 7405147192700541376, guid: 4e136b4eab3ec5249bd2f5922f769ebf,
@@ -11130,7 +11130,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: Start Client
+  m_text: Find Match
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 4e136b4eab3ec5249bd2f5922f769ebf, type: 2}
   m_sharedMaterial: {fileID: 7405147192700541376, guid: 4e136b4eab3ec5249bd2f5922f769ebf,
