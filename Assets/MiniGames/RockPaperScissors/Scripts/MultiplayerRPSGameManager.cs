@@ -27,6 +27,14 @@ namespace RockPaperScissors
         [SerializeField] private Button startGameButton;
         [SerializeField] private TextMeshProUGUI startGameStatusText; // optional — shows "Waiting for player..." etc.
 
+        [Header("Game UI (hidden until game starts)")]
+        [Tooltip("Root GameObject of the RPS overlay canvas. Disabled at start, spawns in front of the player when the game begins.")]
+        [SerializeField] private GameObject gameUIRoot;
+        [Tooltip("Root GameObject of the Soundboard UI. Same behaviour as gameUIRoot.")]
+        [SerializeField] private GameObject soundboardUIRoot;
+        [Tooltip("How far in front of the camera (in metres) the panels appear.")]
+        [SerializeField] private float uiSpawnDistance = 1.5f;
+
         [Header("Video Setup (Optional)")]
         [SerializeField] private VideoPlayer backgroundVideo;
 
@@ -87,6 +95,11 @@ namespace RockPaperScissors
 
             // RPS buttons are disabled until the game is officially started.
             SetButtonsInteractable(false);
+
+            // Hide both game UIs — they appear in front of the player only when
+            // BeginGameClientRpc fires (i.e. the host pressed Start Game).
+            if (gameUIRoot     != null) gameUIRoot.SetActive(false);
+            if (soundboardUIRoot != null) soundboardUIRoot.SetActive(false);
 
             ResetUI();
             UpdateRoundAndScoreUI(0, 0, 0, totalRounds);
@@ -169,9 +182,42 @@ namespace RockPaperScissors
             if (backgroundVideo != null)
                 backgroundVideo.Play();
 
+            // Spawn both UIs in front of this player's camera.
+            SpawnUIInFrontOfCamera(gameUIRoot);
+            SpawnUIInFrontOfCamera(soundboardUIRoot);
+
             SetButtonsInteractable(true);
             SetStatusText(string.Empty);
             ResetUI();
+        }
+
+        /// <summary>
+        /// Enables a world-space canvas root and positions it directly in front of
+        /// the local player's camera, upright and level.
+        /// </summary>
+        private void SpawnUIInFrontOfCamera(GameObject uiRoot)
+        {
+            if (uiRoot == null) return;
+
+            Camera cam = Camera.main;
+            if (cam == null)
+            {
+                // No camera found — just show it wherever it already is.
+                uiRoot.SetActive(true);
+                return;
+            }
+
+            // Project the camera's forward direction onto the horizontal plane so
+            // the panel is always upright (never tilted with the player's head).
+            Vector3 flatForward = Vector3.ProjectOnPlane(cam.transform.forward, Vector3.up).normalized;
+
+            // Fallback if the player is looking straight up or down.
+            if (flatForward.sqrMagnitude < 0.001f)
+                flatForward = Vector3.forward;
+
+            uiRoot.transform.position = cam.transform.position + flatForward * uiSpawnDistance;
+            uiRoot.transform.rotation = Quaternion.LookRotation(flatForward, Vector3.up);
+            uiRoot.SetActive(true);
         }
 
         // ── Helpers ──────────────────────────────────────────────────────────

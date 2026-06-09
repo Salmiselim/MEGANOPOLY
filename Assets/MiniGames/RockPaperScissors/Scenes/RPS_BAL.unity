@@ -603,6 +603,9 @@ MonoBehaviour:
   scoreText: {fileID: 1208788659}
   startGameButton: {fileID: 1796126}
   startGameStatusText: {fileID: 673501097}
+  gameUIRoot: {fileID: 1494172234}
+  soundboardUIRoot: {fileID: 1300213518}
+  uiSpawnDistance: 1.5
   backgroundVideo: {fileID: 1141935035}
   totalRounds: 3
   handGestureBridge: {fileID: 157180297}
@@ -3196,7 +3199,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: -555, y: -47}
+  m_AnchoredPosition: {x: -555, y: -303}
   m_SizeDelta: {x: 200, y: 50}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &673501097
@@ -11217,7 +11220,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!114 &1300213521
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -11559,7 +11562,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!114 &1494172235
 MonoBehaviour:
   m_ObjectHideFlags: 0
