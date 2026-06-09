@@ -88,18 +88,16 @@ namespace RockPaperScissors
         {
             try
             {
-                SetStatus("Getting ready...");
+                SetStatus("Creating match...");
                 await EnsureUGSAsync();
 
                 // ── Step 1: Relay allocation ──────────────────────────────────
-                SetStatus("Setting up your match...");
                 var allocation = await RelayService.Instance
                     .CreateAllocationAsync(maxConnections, region);
                 var joinCode   = await RelayService.Instance
                     .GetJoinCodeAsync(allocation.AllocationId);
 
                 // ── Step 2: Unity Lobby (join code hidden inside) ─────────────
-                SetStatus("Creating match room...");
                 var options = new CreateLobbyOptions
                 {
                     IsPrivate = false,
@@ -129,12 +127,12 @@ namespace RockPaperScissors
                 transport.SetRelayServerData(BuildHostRelayData(allocation));
                 NetworkManager.Singleton.StartHost();
 
-                SetStatus("Match room ready!\nWaiting for your opponent to join...");
+                SetStatus("Waiting for your opponent...");
                 Debug.Log($"[Relay] Host up. LobbyId={_currentLobby.Id}  Code={joinCode}");
             }
             catch (Exception e)
             {
-                SetStatus($"Host failed: {e.Message}");
+                SetStatus("Couldn't create match. Please try again.");
                 Debug.LogError($"[Relay] StartRelayHost: {e}");
             }
         }
@@ -143,7 +141,6 @@ namespace RockPaperScissors
         {
             try
             {
-                SetStatus("Getting ready...");
                 await EnsureUGSAsync();
 
                 // ── Step 1: Find the lobby ────────────────────────────────────
@@ -164,18 +161,18 @@ namespace RockPaperScissors
                 QueryResponse results = null;
                 int attempts = clientRetries;
 
+                SetStatus("Looking for a match...");
                 while (attempts > 0)
                 {
-                    SetStatus(attempts == clientRetries
-                        ? "Looking for a match..."
-                        : $"Still searching... ({attempts} attempts left)");
-
                     results = await LobbyService.Instance.QueryLobbiesAsync(queryOptions);
                     if (results.Results.Count > 0) break;
 
                     attempts--;
                     if (attempts > 0)
+                    {
+                        SetStatus("Still looking...");
                         await Task.Delay(2000);
+                    }
                 }
 
                 if (results == null || results.Results.Count == 0)
@@ -185,25 +182,23 @@ namespace RockPaperScissors
                 }
 
                 // ── Step 2: Join lobby and read the hidden relay code ─────────
-                SetStatus("Opponent found! Joining match...");
+                SetStatus("Joining...");
                 var lobby    = await LobbyService.Instance
                     .JoinLobbyByIdAsync(results.Results[0].Id);
                 string code  = lobby.Data[RelayCodeKey].Value;
 
                 // ── Step 3: Join relay ────────────────────────────────────────
-                SetStatus("Connecting...");
                 var joinAlloc = await RelayService.Instance.JoinAllocationAsync(code);
 
                 var transport = NetworkManager.Singleton.GetComponent<UnityTransport>();
                 transport.SetRelayServerData(BuildClientRelayData(joinAlloc));
                 NetworkManager.Singleton.StartClient();
 
-                SetStatus("Almost there...");
                 Debug.Log($"[Relay] Client joined. RelayCode={code}");
             }
             catch (Exception e)
             {
-                SetStatus($"Join failed: {e.Message}");
+                SetStatus("Couldn't join. Please try again.");
                 Debug.LogError($"[Relay] StartRelayClient: {e}");
             }
         }
@@ -239,7 +234,10 @@ namespace RockPaperScissors
 
         // ── Status text ───────────────────────────────────────────────────────
 
-        private void SetStatus(string msg)
+        /// Exposed so MultiplayerRPSGameManager can share this single text reference.
+        public TextMeshProUGUI StatusText => statusText;
+
+        public void SetStatus(string msg)
         {
             Debug.Log($"[Relay] {msg}");
             if (statusText != null) statusText.text = msg;

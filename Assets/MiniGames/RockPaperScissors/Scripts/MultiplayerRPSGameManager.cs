@@ -58,6 +58,20 @@ namespace RockPaperScissors
             Scissors = 2
         }
 
+        // ── Lifecycle ─────────────────────────────────────────────────────────
+
+        private void Awake()
+        {
+            // If the status text wasn't manually wired in the Inspector, auto-find
+            // it from RPSRelayNetworkStarter so both scripts share the same text object.
+            if (startGameStatusText == null)
+            {
+                var relay = FindFirstObjectByType<RPSRelayNetworkStarter>();
+                if (relay != null)
+                    startGameStatusText = relay.StatusText;
+            }
+        }
+
         // Server-side tracking
         private Dictionary<ulong, Choice> currentChoices = new Dictionary<ulong, Choice>();
         private bool isRoundActive = false;
@@ -117,7 +131,7 @@ namespace RockPaperScissors
                 _winsByClientId.Clear();
                 NetworkManager.Singleton.OnClientConnectedCallback += OnClientConnected;
                 SetStartGameButtonState(false);
-                SetStatusText("Waiting for your opponent to join...");
+                SetStatusText("Waiting for your opponent...");
             }
             else
             {
