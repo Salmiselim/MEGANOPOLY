@@ -1,9 +1,34 @@
 fileFormatVersion: 2
-guid: febdd023b11c5d94c88e281e96446a70
+guid: 2395d85de58b67a44a883cb9cf3deb0b
 ModelImporter:
   serializedVersion: 24200
   internalIDToNameTable: []
-  externalObjects: {}
+  externalObjects:
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: m1
+    second: {fileID: 2100000, guid: 56d4d51c48920364aa3cbc5df5bb0cd6, type: 2}
+  - first:
+      type: UnityEngine:Texture2D
+      assembly: UnityEngine.CoreModule
+      name: haging light_hanging light_AlbedoTransparency
+    second: {fileID: 2800000, guid: 01e4d3cfdbbf0ab4496101ff17996439, type: 3}
+  - first:
+      type: UnityEngine:Texture2D
+      assembly: UnityEngine.CoreModule
+      name: haging light_hanging light_Emission
+    second: {fileID: 2800000, guid: 0bf9b45dbc55478419e16de5b3ee37cb, type: 3}
+  - first:
+      type: UnityEngine:Texture2D
+      assembly: UnityEngine.CoreModule
+      name: haging light_hanging light_MetallicSmoothness
+    second: {fileID: 2800000, guid: 1f63c90c32e2208458e61f9c585f0d9b, type: 3}
+  - first:
+      type: UnityEngine:Texture2D
+      assembly: UnityEngine.CoreModule
+      name: haging light_hanging light_Normal
+    second: {fileID: 2800000, guid: 2ab0bdd6582ea1a41b4bb54b3ed6e129, type: 3}
   materials:
     materialImportMode: 2
     materialName: 0

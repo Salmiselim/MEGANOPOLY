@@ -66,6 +66,12 @@ EditorBuildSettings:
   - enabled: 1
     path: Assets/core/Bal/MinigameShowcase.unity
     guid: 205f4803cdc2a1249b2edfe122f93895
+  - enabled: 1
+    path: Assets/MiniGames/Ghomidha/Scenes/GhomidhaLobbyBAL.unity
+    guid: 48f54211a0c78df40a2f7bbb3f1247a8
+  - enabled: 1
+    path: Assets/MiniGames/Ghomidha/Scenes/PoliceStationMultiplayerBAL.unity
+    guid: 710ed6e4cf7edc141a6bf222334b7959
   m_configObjects:
     com.unity.input.settings: {fileID: 11400000, guid: dcd322a7b2e365140b98f70bf2c68411,
       type: 2}
